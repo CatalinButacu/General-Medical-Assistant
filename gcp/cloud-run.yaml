@@ -1,0 +1,170 @@
+# Google Cloud Run service configuration
+# Deploy with: gcloud run services replace cloud-run.yaml
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: rag-medical-assistant
+  labels:
+    app: rag-medical-assistant
+    version: v1
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/execution-environment: gen2
+spec:
+  template:
+    metadata:
+      labels:
+        app: rag-medical-assistant
+        version: v1
+      annotations:
+        # Auto-scaling configuration
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "100"
+        autoscaling.knative.dev/target: "80"
+        
+        # Resource allocation
+        run.googleapis.com/cpu: "2"
+        run.googleapis.com/memory: "4Gi"
+        run.googleapis.com/execution-environment: gen2
+        
+        # Networking
+        run.googleapis.com/vpc-access-connector: projects/PROJECT_ID/locations/REGION/connectors/rag-connector
+        run.googleapis.com/vpc-access-egress: private-ranges-only
+        
+        # Security
+        run.googleapis.com/service-account: rag-medical-sa@PROJECT_ID.iam.gserviceaccount.com
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      serviceAccountName: rag-medical-sa@PROJECT_ID.iam.gserviceaccount.com
+      
+      containers:
+      - name: rag-medical-assistant
+        image: gcr.io/PROJECT_ID/rag-medical-assistant:latest
+        
+        ports:
+        - name: http1
+          containerPort: 8080
+          protocol: TCP
+        
+        env:
+        # Application configuration
+        - name: NODE_ENV
+          value: "production"
+        - name: FLASK_ENV
+          value: "production"
+        - name: PORT
+          value: "8080"
+        
+        # Database configuration
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: rag-secrets
+              key: database-url
+        
+        # Redis configuration
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: rag-secrets
+              key: redis-url
+        
+        # API Keys from Secret Manager
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: rag-secrets
+              key: openai-api-key
+        
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: rag-secrets
+              key: jwt-secret
+        
+        - name: FLASK_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: rag-secrets
+              key: flask-secret-key
+        
+        # Google Cloud configuration
+        - name: GOOGLE_CLOUD_PROJECT
+          value: "PROJECT_ID"
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: "/var/secrets/google/key.json"
+        
+        # ML configuration
+        - name: ML_MODEL_PATH
+          value: "/app/models"
+        - name: STORAGE_BUCKET
+          value: "PROJECT_ID-rag-storage"
+        
+        # Monitoring
+        - name: ENABLE_MONITORING
+          value: "true"
+        - name: LOG_LEVEL
+          value: "info"
+        
+        resources:
+          limits:
+            cpu: "2000m"
+            memory: "4Gi"
+          requests:
+            cpu: "1000m"
+            memory: "2Gi"
+        
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        # Startup probe for slower ML model loading
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 10
+        
+        # Volume mounts for service account key
+        volumeMounts:
+        - name: google-cloud-key
+          mountPath: /var/secrets/google
+          readOnly: true
+      
+      volumes:
+      - name: google-cloud-key
+        secret:
+          secretName: rag-service-account-key
+
+---
+# Traffic configuration for gradual rollouts
+apiVersion: serving.knative.dev/v1
+kind: Configuration
+metadata:
+  name: rag-medical-assistant-config
+spec:
+  template:
+    metadata:
+      name: rag-medical-assistant-v1
+    spec:
+      # Same spec as above service template

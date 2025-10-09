@@ -1,0 +1,42 @@
+[
+  {
+    "text": "Patient presents with acute chest pain and shortness of breath",
+    "label": "symptom",
+    "length": 10
+  },
+  {
+    "text": "Prescribed ibuprofen 400mg twice daily for inflammation",
+    "label": "medication",
+    "length": 7
+  },
+  {
+    "text": "Contraindicated in patients with severe renal impairment",
+    "label": "contraindication",
+    "length": 7
+  },
+  {
+    "text": "Common side effects include nausea, dizziness, and headache",
+    "label": "side_effect",
+    "length": 8
+  },
+  {
+    "text": "Diagnosed with type 2 diabetes mellitus and hypertension",
+    "label": "diagnosis",
+    "length": 8
+  },
+  {
+    "text": "Administer epinephrine 0.3mg intramuscularly for anaphylaxis",
+    "label": "medication",
+    "length": 6
+  },
+  {
+    "text": "Patient allergic to penicillin and sulfonamides",
+    "label": "allergy",
+    "length": 6
+  },
+  {
+    "text": "Symptoms improved after 48 hours of antibiotic therapy",
+    "label": "treatment",
+    "length": 8
+  }
+]
