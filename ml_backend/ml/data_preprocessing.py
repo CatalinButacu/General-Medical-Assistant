@@ -341,9 +341,9 @@ class MedicalDataAugmentor:
         for _ in range(n):
             # Choose a random word that has synonyms
             available_words = [
-                w for w in words if (
-                    w.lower().strip(string.punctuation) in self.synonym_dict
-                )
+                w
+                for w in words
+                if w.lower().strip(string.punctuation) in self.synonym_dict
             ]
             if available_words:
                 word = np.random.choice(available_words)
@@ -556,8 +556,9 @@ class MedicalDatasetBuilder:
                     dataset_copy['train']['labels_encoded'].tolist()
                 )
             if 'test' in dataset_copy:
-                dataset_copy['test']['labels_encoded'] = \
-                    dataset_copy['test']['labels_encoded'].tolist()
+                dataset_copy['test']['labels_encoded'] = dataset_copy['test'][
+                    'labels_encoded
+                '].tolist()
 
             json.dump(dataset_copy, f, indent=2)
 

@@ -258,13 +258,15 @@ class BioBERTFineTuner:
 
         logger.info(f"BioBERT Fine-tuner initialized with device: {self.device}")
 
-    def fine_tune_classifier(self,
-                           train_texts: List[str],
-                           train_labels: List[int],
-                           val_texts: List[str],
-                           val_labels: List[int],
-                           num_classes: int,
-                           config: Dict[str, Any]) -> Dict[str, Any]:
+    def fine_tune_classifier(
+        self,
+        train_texts: List[str],
+        train_labels: List[int],
+        val_texts: List[str],
+        val_labels: List[int],
+        num_classes: int,
+        config: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """
         Fine-tune BioBERT for classification
         """
@@ -384,12 +386,14 @@ class BioBERTFineTuner:
                 'best_val_acc': best_val_acc
             }
 
-    def fine_tune_similarity(self,
-                           text_pairs: List[Tuple[str, str]],
-                           similarities: List[float],
-                           val_pairs: List[Tuple[str, str]],
-                           val_similarities: List[float],
-                           config: Dict[str, Any]) -> Dict[str, Any]:
+    def fine_tune_similarity(
+        self,
+        text_pairs: List[Tuple[str, str]],
+        similarities: List[float],
+        val_pairs: List[Tuple[str, str]],
+        val_similarities: List[float],
+        config: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """
         Fine-tune BioBERT for similarity prediction
         """

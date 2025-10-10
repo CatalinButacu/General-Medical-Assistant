@@ -43,6 +43,7 @@ class TrainingConfig:
     early_stopping_patience: int = 3
     output_dir: str = "./models/fine_tuned"
 
+
 @dataclass
 class MedicalTrainingExample:
     """Medical training example"""
@@ -739,6 +740,7 @@ class MedicalModelTrainer:
             except Exception as e:
                 logger.error(f"BioBERT fine-tuning failed: {str(e)}")
                 raise
+
 
 def create_training_pipeline(config: TrainingConfig = None) -> MedicalModelTrainer:
     """Create and configure training pipeline"""
