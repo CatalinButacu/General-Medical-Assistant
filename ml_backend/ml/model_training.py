@@ -247,7 +247,8 @@ class MedicalDataGenerator:
     def __init__(self):
         self.medicine_categories = {
             'analgesic': ['acetaminophen', 'ibuprofen', 'aspirin', 'naproxen'],
-            'antibiotic': ['amoxicillin', 'azithromycin', 'ciprofloxacin', 'doxycycline'],
+            'antibiotic': ['amoxicillin', 'azithromycin', 'ciprofloxacin',
+                             'doxycycline'],
             'antihypertensive': ['lisinopril', 'amlodipine', 'metoprolol',
                                  'losartan'],
             'antidiabetic': ['metformin', 'insulin', 'glipizide', 'sitagliptin']
@@ -379,12 +380,17 @@ class MedicalModelTrainer:
                 )
 
                 # Create dataset
-                dataset = MedicalTextDataset(training_data, tokenizer, self.config.max_length)
+                dataset = MedicalTextDataset(
+                    training_data, tokenizer, self.config.max_length
+                )
 
                 # Split data
                 train_size = int(0.8 * len(dataset))
                 val_size = len(dataset) - train_size
-                train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
+                train_dataset, val_dataset = \
+                    torch.utils.data.random_split(
+                        dataset, [train_size, val_size]
+                    )
 
                 # Initialize model
                 model = MedicalBERTClassifier(
@@ -421,9 +427,7 @@ class MedicalModelTrainer:
                     args=training_args,
                     train_dataset=train_dataset,
                     eval_dataset=val_dataset,
-                    compute_metrics=lambda p: {
-                        "eval_loss": p.predictions.mean()
-                    },
+                    compute_metrics=self._compute_classification_metrics,
                 )
 
                 # Train model
@@ -562,7 +566,9 @@ class MedicalModelTrainer:
                             outputs = model(**batch)
 
                             val_loss += outputs['loss'].item()
-                            val_predictions.extend(outputs['similarity_score'].cpu().numpy())
+                            val_predictions.extend(
+                                outputs['similarity_score'].cpu().numpy()
+                            )
                             val_targets.extend(batch['similarity_score'].cpu().numpy())
 
                     # Calculate metrics
@@ -686,7 +692,9 @@ class MedicalModelTrainer:
         predictions = np.argmax(predictions, axis=1)
 
         accuracy = accuracy_score(labels, predictions)
-        precision, recall, f1, _ = precision_recall_fscore_support(labels, predictions, average='weighted')
+        precision, recall, f1, _ = precision_recall_fscore_support(
+            labels, predictions, average='weighted'
+        )
 
         return {
             'accuracy': accuracy,
@@ -698,16 +706,23 @@ class MedicalModelTrainer:
     def fine_tune_biobert(self, medical_texts: List[str], save_path: str) -> str:
         """Fine-tune BioBERT on medical domain texts"""
 
-        with mlflow.start_run(run_name=f"biobert_finetune_{datetime.now().strftime('%Y%m%d_%H%M%S')}"):
+        with mlflow.start_run(
+            run_name=f"biobert_finetune_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        ):
             try:
                 logger.info("Starting BioBERT fine-tuning...")
 
                 # Generate training data from medical texts
                 data_generator = MedicalDataGenerator()
-                classification_data = data_generator.generate_classification_data(len(medical_texts))
+                classification_data = \
+                    data_generator.generate_classification_data(
+                        len(medical_texts)
+                    )
 
                 # Train classification model
-                result = self.train_classification_model(classification_data)
+                result = self.train_classification_model(
+                    classification_data
+                )
 
                 # Save fine-tuned model
                 fine_tuned_path = f"{save_path}/biobert_finetuned"

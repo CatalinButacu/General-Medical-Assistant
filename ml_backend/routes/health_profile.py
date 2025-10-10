@@ -309,7 +309,8 @@ def calculate_bmi():
             return jsonify({'error': 'Health profile not found'}), 404
 
         if not health_profile.height or not health_profile.weight:
-            return jsonify({'error': 'Height and weight required for BMI calculation'}), 400
+            error_msg = 'Height and weight required for BMI calculation'
+            return jsonify({'error': error_msg}), 400
 
         # Calculate BMI (weight in kg / height in m^2)
         height_m = health_profile.height / 100  # Convert cm to m
