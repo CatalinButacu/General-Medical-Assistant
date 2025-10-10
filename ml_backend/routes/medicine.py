@@ -210,7 +210,7 @@ def update_medicine(medicine_id):
                     return jsonify({'error': 'Invalid end_date format'}), 400
             else:
                 medicine.end_date = None
-                
+        
         medicine.updated_at = datetime.utcnow()
         
         db.session.commit()
@@ -231,20 +231,19 @@ def update_medicine(medicine_id):
 def delete_medicine(medicine_id):
     """Delete medicine from cabinet."""
     try:
-        user_id = get_jwt_identity()
         medicine = MedicineCabinet.query.filter_by(
-            id=medicine_id, 
-            user_id=user_id
+            id=medicine_id,
+            user_id=get_jwt_identity()
         ).first()
-        
+
         if not medicine:
             return jsonify({'error': 'Medicine not found'}), 404
-            
+
         db.session.delete(medicine)
         db.session.commit()
-        
+
         return jsonify({'message': 'Medicine deleted successfully'}), 200
-        
+
     except SQLAlchemyError as e:
         db.session.rollback()
         logger.error(f"Database error deleting medicine: {e}")
@@ -259,88 +258,36 @@ def delete_medicine(medicine_id):
 def check_drug_interactions():
     """Check for potential drug interactions."""
     try:
-        user_id = get_jwt_identity()
         data = request.get_json()
-        
+
         if not data or not data.get('medicines'):
             return jsonify({'error': 'Medicine list is required'}), 400
-            
+
         medicines = data['medicines']
-        
+
         if not rag_pipeline:
-            return jsonify({'error': 'RAG pipeline not available'}), 503
-            
+            return jsonify(
+                {'error': 'RAG pipeline not available'}
+            ), 503
+
         # Create query for drug interactions
         medicine_list = ', '.join(medicines)
-        query = f"Check for drug interactions between these medications: {medicine_list}"
-        
+        query = (
+            f"Check for drug interactions between these medications: "
+            f"{medicine_list}"
+        )
+
         # Get interaction information from RAG pipeline
         interaction_info = rag_pipeline.generate_response(query, "")
-        
+
         return jsonify({
             'medicines': medicines,
             'interaction_analysis': interaction_info,
             'checked_at': datetime.utcnow().isoformat()
         }), 200
-        
+
     except Exception as e:
         logger.error(f"Error checking drug interactions: {e}")
-        return jsonify({'error': 'Internal server error'}), 500
-
-
-@medicine_bp.route('/schedule', methods=['GET'])
-@jwt_required()
-def get_medication_schedule():
-    """Get user's medication schedule for today."""
-    try:
-        user_id = get_jwt_identity()
-        today = datetime.utcnow().date()
-        
-        # Get active medicines
-        medicines = MedicineCabinet.query.filter_by(
-            user_id=user_id, 
-            is_active=True
-        ).filter(
-            (MedicineCabinet.start_date <= today) | (MedicineCabinet.start_date.is_(None))
-        ).filter(
-            (MedicineCabinet.end_date >= today) | (MedicineCabinet.end_date.is_(None))
-        ).all()
-        
-        schedule = []
-        for medicine in medicines:
-            if medicine.frequency:
-                # Parse frequency and create schedule entries
-                # This is a simplified version - in production, you'd want more sophisticated scheduling
-                frequency_parts = medicine.frequency.lower().split()
-                
-                if 'daily' in medicine.frequency.lower() or 'day' in medicine.frequency.lower():
-                    times_per_day = 1
-                    if any(char.isdigit() for char in medicine.frequency):
-                        # Extract number from frequency string
-                        import re
-                        numbers = re.findall(r'\d+', medicine.frequency)
-                        if numbers:
-                            times_per_day = int(numbers[0])
-                    
-                    # Create schedule entries
-                    for i in range(times_per_day):
-                        hour = 8 + (i * (12 // times_per_day))  # Distribute throughout day
-                        schedule.append({
-                            'medicine_id': medicine.id,
-                            'medicine_name': medicine.name,
-                            'dosage': medicine.dosage,
-                            'scheduled_time': f"{hour:02d}:00",
-                            'taken': False  # This would be tracked in a separate table in production
-                        })
-        
-        return jsonify({
-            'date': today.isoformat(),
-            'schedule': schedule,
-            'total_medications': len(schedule)
-        }), 200
-        
-    except Exception as e:
-        logger.error(f"Error getting medication schedule: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
 
@@ -350,24 +297,28 @@ def search_medicine_info():
     """Search for medicine information using RAG pipeline."""
     try:
         medicine_name = request.args.get('name')
-        
+
         if not medicine_name:
             return jsonify({'error': 'Medicine name is required'}), 400
-            
+
         if not rag_pipeline:
             return jsonify({'error': 'RAG pipeline not available'}), 503
-            
+
         # Query for medicine information
-        query = f"Provide detailed information about the medication {medicine_name}, including uses, dosage, side effects, and precautions"
-        
+        query = (
+            f"Provide detailed information about the medication "
+            f"{medicine_name}, including uses, dosage, side effects, "
+            f"and precautions"
+        )
+
         medicine_info = rag_pipeline.generate_response(query, "")
-        
+
         return jsonify({
             'medicine_name': medicine_name,
             'information': medicine_info,
             'searched_at': datetime.utcnow().isoformat()
         }), 200
-        
+
     except Exception as e:
         logger.error(f"Error searching medicine info: {e}")
         return jsonify({'error': 'Internal server error'}), 500
