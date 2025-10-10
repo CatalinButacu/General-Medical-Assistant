@@ -76,7 +76,7 @@ RUN npm ci --only=production
 # Copy configuration files
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY docker/gunicorn.conf.py ./gunicorn.conf.py
+COPY gunicorn.conf.py ./gunicorn.conf.py
 
 # Create necessary directories
 RUN mkdir -p ./models ./data ./logs /var/log/supervisor
