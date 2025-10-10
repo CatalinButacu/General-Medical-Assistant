@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { 
   User, 
-  Calendar, 
-  Heart, 
   AlertTriangle, 
   Plus, 
   X, 
@@ -72,28 +70,31 @@ export default function HealthProfile() {
   const [newMedication, setNewMedication] = useState('');
 
   useEffect(() => {
-    loadProfile();
+    const loadProfileData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/health-profile/${profile.userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.profile) {
+            setProfile(data.profile);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        toast.error('Failed to load health profile');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadProfileData();
     if (medicineForSafetyCheck) {
       setShowSafetyCheck(true);
     }
-  }, [medicineForSafetyCheck]);
+  }, [medicineForSafetyCheck, profile.userId]);
 
-  const loadProfile = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/health-profile/${profile.userId}`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.profile) {
-          setProfile(data.profile);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading profile:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
 
   const saveProfile = async () => {
     setIsSaving(true);

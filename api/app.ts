@@ -4,8 +4,7 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import multer from 'multer';
-import path from 'path';
-import { fileURLToPath } from 'url';
+
 
 // Load environment variables
 dotenv.config();
@@ -48,7 +47,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Make upload middleware available to routes
-app.use((req: any, res, next) => {
+app.use((req: express.Request & { upload?: multer.Multer }, res, next) => {
   req.upload = upload;
   next();
 });
@@ -68,7 +67,7 @@ io.on('connection', (socket) => {
 });
 
 // Make io available to routes
-app.use((req: any, res, next) => {
+app.use((req: express.Request & { io?: Server }, res, next) => {
   req.io = io;
   next();
 });
@@ -89,7 +88,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Error handling middleware
-app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: Error, req: express.Request, res: express.Response) => {
   console.error('Error:', error);
   
   if (error instanceof multer.MulterError) {

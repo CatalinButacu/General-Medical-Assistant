@@ -345,7 +345,7 @@ export default function MedicineCabinet() {
             ].map(filter => (
               <button
                 key={filter.key}
-                onClick={() => setFilterType(filter.key as any)}
+                onClick={() => setFilterType(filter.key as 'all' | 'expired' | 'expiring')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
                   filterType === filter.key
                     ? 'bg-blue-600 text-white'

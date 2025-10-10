@@ -75,7 +75,7 @@ const MEDICINE_DATABASE = [
 ];
 
 // RAG search function
-function searchMedicineDatabase(query: string, userProfile?: any) {
+function searchMedicineDatabase(query: string, userProfile?: Record<string, unknown>) {
   const searchTerms = query.toLowerCase().split(' ');
   const results = MEDICINE_DATABASE.filter(medicine => {
     const searchableText = `${medicine.name} ${medicine.genericName} ${medicine.uses.join(' ')} ${medicine.contraindications.join(' ')}`.toLowerCase();
@@ -91,9 +91,9 @@ function searchMedicineDatabase(query: string, userProfile?: any) {
       }
       
       // Filter out medicines with contraindications matching user conditions
-      if (userProfile.conditions && userProfile.conditions.length > 0) {
+      if (userProfile.conditions && Array.isArray(userProfile.conditions) && userProfile.conditions.length > 0) {
         const hasContraindication = medicine.contraindications.some(contra =>
-          userProfile.conditions.some((condition: string) =>
+          (userProfile.conditions as string[]).some((condition: string) =>
             contra.toLowerCase().includes(condition.toLowerCase())
           )
         );
@@ -140,7 +140,7 @@ router.post('/start', (req, res) => {
 });
 
 // Send a message in chat
-router.post('/:sessionId/message', async (req: any, res) => {
+router.post('/:sessionId/message', async (req: express.Request & { io?: { to: (room: string) => { emit: (event: string, data: unknown) => void } } }, res) => {
   try {
     const { sessionId } = req.params;
     const { message, userProfile } = req.body;

@@ -214,8 +214,8 @@ router.get('/:userId/safety-summary', (req, res) => {
     const riskLevel = summary.riskFactors.length === 0 ? 'low' : 
                      summary.riskFactors.length <= 2 ? 'medium' : 'high';
     
-    (summary as any).riskLevel = riskLevel;
-    (summary as any).lastUpdated = profile.updatedAt;
+    (summary as Record<string, unknown>).riskLevel = riskLevel;
+    (summary as Record<string, unknown>).lastUpdated = profile.updatedAt;
     
     res.json(summary);
   } catch (error) {

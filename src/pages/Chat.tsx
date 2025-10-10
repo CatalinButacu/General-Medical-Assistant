@@ -6,8 +6,7 @@ import {
   Bot, 
   User, 
   Loader2, 
-  AlertTriangle, 
-  Heart,
+  AlertTriangle,
   MessageCircle,
   Zap
 } from 'lucide-react';
@@ -21,13 +20,7 @@ interface Message {
   isTyping?: boolean;
 }
 
-interface ChatSession {
-  id: string;
-  userId: string;
-  messages: Message[];
-  createdAt: Date;
-  updatedAt: Date;
-}
+
 
 export default function Chat() {
   const navigate = useNavigate();
