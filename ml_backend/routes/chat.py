@@ -1,4 +1,4 @@
-"""
+﻿"""
 Chat routes for RAG-powered medical assistance
 """
 
@@ -333,5 +333,6 @@ def health_check():
         return jsonify({
             'status': 'unhealthy',
             'error': str(e)
-        }), 503 
- 
+        }), 503
+
+

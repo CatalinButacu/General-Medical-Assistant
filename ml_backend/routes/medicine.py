@@ -1,4 +1,4 @@
-"""
+﻿"""
 Medicine Cabinet Management Routes.
 
 This module provides endpoints for managing user medicine cabinets,
@@ -331,5 +331,6 @@ def health_check():
         'status': 'healthy',
         'service': 'medicine',
         'timestamp': datetime.utcnow().isoformat()
-    }), 200 
- 
+    }), 200
+
+

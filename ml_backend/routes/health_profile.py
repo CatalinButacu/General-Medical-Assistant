@@ -1,4 +1,4 @@
-"""
+﻿"""
 Health Profile Management Routes.
 
 This module provides endpoints for managing user health profiles,
@@ -291,5 +291,6 @@ def health_check():
         'status': 'healthy',
         'service': 'health-profile',
         'timestamp': datetime.utcnow().isoformat()
-    }), 200 
- 
+    }), 200
+
+
