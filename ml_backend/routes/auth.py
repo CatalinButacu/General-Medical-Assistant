@@ -247,4 +247,5 @@ def change_password():
 def check_if_token_revoked(jwt_header, jwt_payload):
     """Check if JWT token is blacklisted"""
     jti = jwt_payload['jti']
-    return jti in blacklisted_tokens
+    return jti in blacklisted_tokens 
+ 

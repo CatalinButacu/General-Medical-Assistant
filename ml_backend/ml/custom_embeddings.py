@@ -6,6 +6,7 @@ import os
 import logging
 import numpy as np
 import torch
+from pathlib import Path
 from transformers import AutoTokenizer, AutoModel
 from sklearn.metrics.pairwise import cosine_similarity
 from typing import List, Union, Optional, Dict, Any
@@ -289,4 +290,3 @@ class MedicalEmbeddingManager:
 
         except Exception as e:
             logger.error(f"Failed to save models: {str(e)}")
-            raise

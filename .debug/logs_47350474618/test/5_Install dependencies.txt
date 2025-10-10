@@ -1,0 +1,601 @@
+﻿2025-10-10T12:53:15.6379388Z ##[group]Run npm ci
+2025-10-10T12:53:15.6379710Z [36;1mnpm ci[0m
+2025-10-10T12:53:15.6379974Z [36;1mpip install -r ml_backend/requirements.txt[0m
+2025-10-10T12:53:15.6422595Z shell: /usr/bin/bash -e {0}
+2025-10-10T12:53:15.6422920Z env:
+2025-10-10T12:53:15.6423098Z   REGISTRY: ghcr.io
+2025-10-10T12:53:15.6423345Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:15.6423706Z   pythonLocation: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T12:53:15.6424116Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib/pkgconfig
+2025-10-10T12:53:15.6424578Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T12:53:15.6424981Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T12:53:15.6425503Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T12:53:15.6425865Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib
+2025-10-10T12:53:15.6426159Z ##[endgroup]
+2025-10-10T12:53:20.1081498Z npm warn deprecated multer@1.4.5-lts.2: Multer 1.x is impacted by a number of vulnerabilities, which have been patched in 2.x. You should upgrade to the latest 2.x version.
+2025-10-10T12:53:21.0663036Z npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+2025-10-10T12:53:25.4949585Z 
+2025-10-10T12:53:25.4966736Z added 601 packages, and audited 602 packages in 10s
+2025-10-10T12:53:25.4967361Z 
+2025-10-10T12:53:25.4967818Z 101 packages are looking for funding
+2025-10-10T12:53:25.4968441Z   run `npm fund` for details
+2025-10-10T12:53:25.5098371Z 
+2025-10-10T12:53:25.5107132Z 4 vulnerabilities (2 moderate, 2 high)
+2025-10-10T12:53:25.5108774Z 
+2025-10-10T12:53:25.5109470Z To address all issues (including breaking changes), run:
+2025-10-10T12:53:25.5141197Z   npm audit fix --force
+2025-10-10T12:53:25.5141676Z 
+2025-10-10T12:53:25.5142051Z Run `npm audit` for details.
+2025-10-10T12:53:27.8914862Z Collecting torch>=2.0.0 (from -r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:27.9343469Z   Downloading torch-2.8.0-cp39-cp39-manylinux_2_28_x86_64.whl.metadata (30 kB)
+2025-10-10T12:53:27.9949188Z Collecting transformers>=4.30.0 (from -r ml_backend/requirements.txt (line 3))
+2025-10-10T12:53:28.0095475Z   Downloading transformers-4.57.0-py3-none-any.whl.metadata (41 kB)
+2025-10-10T12:53:28.3143850Z Collecting sentence-transformers>=2.2.0 (from -r ml_backend/requirements.txt (line 4))
+2025-10-10T12:53:28.3289947Z   Downloading sentence_transformers-5.1.1-py3-none-any.whl.metadata (16 kB)
+2025-10-10T12:53:28.4416921Z Collecting scikit-learn>=1.3.0 (from -r ml_backend/requirements.txt (line 5))
+2025-10-10T12:53:28.4565978Z   Downloading scikit_learn-1.6.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (18 kB)
+2025-10-10T12:53:28.6933450Z Collecting numpy>=1.24.0 (from -r ml_backend/requirements.txt (line 6))
+2025-10-10T12:53:28.7084404Z   Downloading numpy-2.0.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (60 kB)
+2025-10-10T12:53:28.8803677Z Collecting pandas>=2.0.0 (from -r ml_backend/requirements.txt (line 7))
+2025-10-10T12:53:28.8963060Z   Downloading pandas-2.3.3-cp39-cp39-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2025-10-10T12:53:28.9760307Z Collecting faiss-cpu>=1.7.4 (from -r ml_backend/requirements.txt (line 10))
+2025-10-10T12:53:28.9912683Z   Downloading faiss_cpu-1.12.0-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (5.1 kB)
+2025-10-10T12:53:29.0060859Z Collecting annoy>=1.17.0 (from -r ml_backend/requirements.txt (line 11))
+2025-10-10T12:53:29.0205019Z   Downloading annoy-1.17.3.tar.gz (647 kB)
+2025-10-10T12:53:29.0501188Z      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 647.5/647.5 kB 26.4 MB/s  0:00:00
+2025-10-10T12:53:29.0707120Z   Installing build dependencies: started
+2025-10-10T12:53:30.4941830Z   Installing build dependencies: finished with status 'done'
+2025-10-10T12:53:30.4953984Z   Getting requirements to build wheel: started
+2025-10-10T12:53:30.8200291Z   Getting requirements to build wheel: finished with status 'done'
+2025-10-10T12:53:30.8222584Z   Installing backend dependencies: started
+2025-10-10T12:53:31.3594702Z   Installing backend dependencies: finished with status 'done'
+2025-10-10T12:53:31.3609605Z   Preparing metadata (pyproject.toml): started
+2025-10-10T12:53:31.5950012Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2025-10-10T12:53:31.6073039Z Collecting hnswlib>=0.7.0 (from -r ml_backend/requirements.txt (line 12))
+2025-10-10T12:53:31.6221385Z   Downloading hnswlib-0.8.0.tar.gz (36 kB)
+2025-10-10T12:53:31.6357843Z   Installing build dependencies: started
+2025-10-10T12:53:33.4750148Z   Installing build dependencies: finished with status 'done'
+2025-10-10T12:53:33.4758776Z   Getting requirements to build wheel: started
+2025-10-10T12:53:34.0864052Z   Getting requirements to build wheel: finished with status 'done'
+2025-10-10T12:53:34.0878283Z   Preparing metadata (pyproject.toml): started
+2025-10-10T12:53:34.3481108Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2025-10-10T12:53:34.3674131Z Collecting nltk>=3.8 (from -r ml_backend/requirements.txt (line 15))
+2025-10-10T12:53:34.3819923Z   Downloading nltk-3.9.2-py3-none-any.whl.metadata (3.2 kB)
+2025-10-10T12:53:34.5233119Z Collecting spacy>=3.6.0 (from -r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:34.5386095Z   Downloading spacy-3.8.7-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (27 kB)
+2025-10-10T12:53:34.6077098Z Collecting gensim>=4.3.0 (from -r ml_backend/requirements.txt (line 17))
+2025-10-10T12:53:34.6227290Z   Downloading gensim-4.3.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (8.3 kB)
+2025-10-10T12:53:34.6496585Z Collecting flask>=2.3.0 (from -r ml_backend/requirements.txt (line 20))
+2025-10-10T12:53:34.6640696Z   Downloading flask-3.1.2-py3-none-any.whl.metadata (3.2 kB)
+2025-10-10T12:53:34.6854527Z Collecting flask-cors>=4.0.0 (from -r ml_backend/requirements.txt (line 21))
+2025-10-10T12:53:34.7006876Z   Downloading flask_cors-6.0.1-py3-none-any.whl.metadata (5.3 kB)
+2025-10-10T12:53:34.7220429Z Collecting gunicorn>=21.0.0 (from -r ml_backend/requirements.txt (line 22))
+2025-10-10T12:53:34.7364373Z   Downloading gunicorn-23.0.0-py3-none-any.whl.metadata (4.4 kB)
+2025-10-10T12:53:34.7842399Z Collecting marshmallow>=3.19.0 (from -r ml_backend/requirements.txt (line 23))
+2025-10-10T12:53:34.7986380Z   Downloading marshmallow-4.0.1-py3-none-any.whl.metadata (7.4 kB)
+2025-10-10T12:53:34.8445944Z Collecting mlflow>=2.5.0 (from -r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:34.8594742Z   Downloading mlflow-3.1.4-py3-none-any.whl.metadata (29 kB)
+2025-10-10T12:53:34.9924223Z Collecting psycopg2-binary>=2.9.0 (from -r ml_backend/requirements.txt (line 29))
+2025-10-10T12:53:35.0071490Z   Downloading psycopg2_binary-2.9.11-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (4.9 kB)
+2025-10-10T12:53:35.0396471Z Collecting redis>=4.6.0 (from -r ml_backend/requirements.txt (line 30))
+2025-10-10T12:53:35.0540746Z   Downloading redis-6.4.0-py3-none-any.whl.metadata (10 kB)
+2025-10-10T12:53:35.3974159Z Collecting sqlalchemy>=2.0.0 (from -r ml_backend/requirements.txt (line 31))
+2025-10-10T12:53:35.4120842Z   Downloading sqlalchemy-2.0.43-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.6 kB)
+2025-10-10T12:53:35.6716061Z Collecting pillow>=10.0.0 (from -r ml_backend/requirements.txt (line 34))
+2025-10-10T12:53:35.6864077Z   Downloading pillow-11.3.0-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.0 kB)
+2025-10-10T12:53:35.7752824Z Collecting opencv-python>=4.8.0 (from -r ml_backend/requirements.txt (line 35))
+2025-10-10T12:53:35.7902685Z   Downloading opencv_python-4.12.0.88-cp37-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (19 kB)
+2025-10-10T12:53:35.8087302Z Collecting python-dotenv>=1.0.0 (from -r ml_backend/requirements.txt (line 38))
+2025-10-10T12:53:35.8230996Z   Downloading python_dotenv-1.1.1-py3-none-any.whl.metadata (24 kB)
+2025-10-10T12:53:35.9719081Z Collecting pydantic>=2.0.0 (from -r ml_backend/requirements.txt (line 39))
+2025-10-10T12:53:35.9870382Z   Downloading pydantic-2.12.0-py3-none-any.whl.metadata (83 kB)
+2025-10-10T12:53:36.0182997Z Collecting requests>=2.31.0 (from -r ml_backend/requirements.txt (line 40))
+2025-10-10T12:53:36.0327858Z   Downloading requests-2.32.5-py3-none-any.whl.metadata (4.9 kB)
+2025-10-10T12:53:36.0694741Z Collecting tqdm>=4.65.0 (from -r ml_backend/requirements.txt (line 41))
+2025-10-10T12:53:36.0841601Z   Downloading tqdm-4.67.1-py3-none-any.whl.metadata (57 kB)
+2025-10-10T12:53:36.1267971Z Collecting pytest>=7.4.0 (from -r ml_backend/requirements.txt (line 44))
+2025-10-10T12:53:36.1415686Z   Downloading pytest-8.4.2-py3-none-any.whl.metadata (7.7 kB)
+2025-10-10T12:53:36.1621867Z Collecting pytest-cov>=4.1.0 (from -r ml_backend/requirements.txt (line 45))
+2025-10-10T12:53:36.1774481Z   Downloading pytest_cov-7.0.0-py3-none-any.whl.metadata (31 kB)
+2025-10-10T12:53:36.2381820Z Collecting black>=23.0.0 (from -r ml_backend/requirements.txt (line 46))
+2025-10-10T12:53:36.2532080Z   Downloading black-25.9.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl.metadata (83 kB)
+2025-10-10T12:53:36.2863663Z Collecting flake8>=6.0.0 (from -r ml_backend/requirements.txt (line 47))
+2025-10-10T12:53:36.3019817Z   Downloading flake8-7.3.0-py2.py3-none-any.whl.metadata (3.8 kB)
+2025-10-10T12:53:36.4901982Z Collecting mypy>=1.5.0 (from -r ml_backend/requirements.txt (line 48))
+2025-10-10T12:53:36.5051316Z   Downloading mypy-1.18.2-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.2 kB)
+2025-10-10T12:53:36.5239439Z Collecting prometheus-client>=0.17.0 (from -r ml_backend/requirements.txt (line 51))
+2025-10-10T12:53:36.5384835Z   Downloading prometheus_client-0.23.1-py3-none-any.whl.metadata (1.9 kB)
+2025-10-10T12:53:36.5555664Z Collecting structlog>=23.1.0 (from -r ml_backend/requirements.txt (line 52))
+2025-10-10T12:53:36.5699524Z   Downloading structlog-25.4.0-py3-none-any.whl.metadata (7.6 kB)
+2025-10-10T12:53:36.5940723Z Collecting filelock (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:36.6082191Z   Downloading filelock-3.19.1-py3-none-any.whl.metadata (2.1 kB)
+2025-10-10T12:53:36.6269576Z Collecting typing-extensions>=4.10.0 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:36.6413962Z   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+2025-10-10T12:53:36.6593111Z Collecting sympy>=1.13.3 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:36.6739036Z   Downloading sympy-1.14.0-py3-none-any.whl.metadata (12 kB)
+2025-10-10T12:53:36.6993285Z Collecting networkx (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:36.7135751Z   Downloading networkx-3.2.1-py3-none-any.whl.metadata (5.2 kB)
+2025-10-10T12:53:36.7348587Z Collecting jinja2 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:36.7495391Z   Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+2025-10-10T12:53:36.7752615Z Collecting fsspec (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:36.7895443Z   Downloading fsspec-2025.9.0-py3-none-any.whl.metadata (10 kB)
+2025-10-10T12:53:36.8420162Z Collecting nvidia-cuda-nvrtc-cu12==12.8.93 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:36.8564468Z   Downloading nvidia_cuda_nvrtc_cu12-12.8.93-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl.metadata (1.7 kB)
+2025-10-10T12:53:36.8720956Z Collecting nvidia-cuda-runtime-cu12==12.8.90 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:36.8864754Z   Downloading nvidia_cuda_runtime_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.7 kB)
+2025-10-10T12:53:36.9022315Z Collecting nvidia-cuda-cupti-cu12==12.8.90 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:36.9187136Z   Downloading nvidia_cuda_cupti_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.7 kB)
+2025-10-10T12:53:36.9351911Z Collecting nvidia-cudnn-cu12==9.10.2.21 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:36.9492783Z   Downloading nvidia_cudnn_cu12-9.10.2.21-py3-none-manylinux_2_27_x86_64.whl.metadata (1.8 kB)
+2025-10-10T12:53:36.9657195Z Collecting nvidia-cublas-cu12==12.8.4.1 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:36.9802572Z   Downloading nvidia_cublas_cu12-12.8.4.1-py3-none-manylinux_2_27_x86_64.whl.metadata (1.7 kB)
+2025-10-10T12:53:36.9968176Z Collecting nvidia-cufft-cu12==11.3.3.83 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:37.0112582Z   Downloading nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.7 kB)
+2025-10-10T12:53:37.0300591Z Collecting nvidia-curand-cu12==10.3.9.90 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:37.0453205Z   Downloading nvidia_curand_cu12-10.3.9.90-py3-none-manylinux_2_27_x86_64.whl.metadata (1.7 kB)
+2025-10-10T12:53:37.0619447Z Collecting nvidia-cusolver-cu12==11.7.3.90 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:37.0765252Z   Downloading nvidia_cusolver_cu12-11.7.3.90-py3-none-manylinux_2_27_x86_64.whl.metadata (1.8 kB)
+2025-10-10T12:53:37.0910238Z Collecting nvidia-cusparse-cu12==12.5.8.93 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:37.1056817Z   Downloading nvidia_cusparse_cu12-12.5.8.93-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.8 kB)
+2025-10-10T12:53:37.1183697Z Collecting nvidia-cusparselt-cu12==0.7.1 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:37.1327723Z   Downloading nvidia_cusparselt_cu12-0.7.1-py3-none-manylinux2014_x86_64.whl.metadata (7.0 kB)
+2025-10-10T12:53:37.1459570Z Collecting nvidia-nccl-cu12==2.27.3 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:37.1603936Z   Downloading nvidia_nccl_cu12-2.27.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.0 kB)
+2025-10-10T12:53:37.1768454Z Collecting nvidia-nvtx-cu12==12.8.90 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:37.1913444Z   Downloading nvidia_nvtx_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.8 kB)
+2025-10-10T12:53:37.2057767Z Collecting nvidia-nvjitlink-cu12==12.8.93 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:37.2211123Z   Downloading nvidia_nvjitlink_cu12-12.8.93-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl.metadata (1.7 kB)
+2025-10-10T12:53:37.2339396Z Collecting nvidia-cufile-cu12==1.13.1.3 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:37.2494043Z   Downloading nvidia_cufile_cu12-1.13.1.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.7 kB)
+2025-10-10T12:53:37.2681403Z Collecting triton==3.4.0 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:37.2824372Z   Downloading triton-3.4.0-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (1.7 kB)
+2025-10-10T12:53:37.3010546Z Requirement already satisfied: setuptools>=40.8.0 in /opt/hostedtoolcache/Python/3.9.23/x64/lib/python3.9/site-packages (from triton==3.4.0->torch>=2.0.0->-r ml_backend/requirements.txt (line 2)) (58.1.0)
+2025-10-10T12:53:37.3362013Z Collecting importlib-metadata (from triton==3.4.0->torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:37.3507551Z   Downloading importlib_metadata-8.7.0-py3-none-any.whl.metadata (4.8 kB)
+2025-10-10T12:53:37.4062926Z Collecting huggingface-hub<1.0,>=0.34.0 (from transformers>=4.30.0->-r ml_backend/requirements.txt (line 3))
+2025-10-10T12:53:37.4210555Z   Downloading huggingface_hub-0.35.3-py3-none-any.whl.metadata (14 kB)
+2025-10-10T12:53:37.4841364Z Collecting packaging>=20.0 (from transformers>=4.30.0->-r ml_backend/requirements.txt (line 3))
+2025-10-10T12:53:37.4985944Z   Downloading packaging-25.0-py3-none-any.whl.metadata (3.3 kB)
+2025-10-10T12:53:37.5451813Z Collecting pyyaml>=5.1 (from transformers>=4.30.0->-r ml_backend/requirements.txt (line 3))
+2025-10-10T12:53:37.5596831Z   Downloading pyyaml-6.0.3-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+2025-10-10T12:53:38.1181997Z Collecting regex!=2019.12.17 (from transformers>=4.30.0->-r ml_backend/requirements.txt (line 3))
+2025-10-10T12:53:38.1341133Z   Downloading regex-2025.9.18-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (40 kB)
+2025-10-10T12:53:38.4225254Z Collecting tokenizers<=0.23.0,>=0.22.0 (from transformers>=4.30.0->-r ml_backend/requirements.txt (line 3))
+2025-10-10T12:53:38.4375993Z   Downloading tokenizers-0.22.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.8 kB)
+2025-10-10T12:53:38.7951449Z Collecting safetensors>=0.4.3 (from transformers>=4.30.0->-r ml_backend/requirements.txt (line 3))
+2025-10-10T12:53:38.8105282Z   Downloading safetensors-0.6.2-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.1 kB)
+2025-10-10T12:53:38.9164066Z Collecting hf-xet<2.0.0,>=1.1.3 (from huggingface-hub<1.0,>=0.34.0->transformers>=4.30.0->-r ml_backend/requirements.txt (line 3))
+2025-10-10T12:53:38.9311530Z   Downloading hf_xet-1.1.10-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.7 kB)
+2025-10-10T12:53:39.2191615Z Collecting scipy (from sentence-transformers>=2.2.0->-r ml_backend/requirements.txt (line 4))
+2025-10-10T12:53:39.2341339Z   Downloading scipy-1.13.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (60 kB)
+2025-10-10T12:53:39.3102614Z Collecting joblib>=1.2.0 (from scikit-learn>=1.3.0->-r ml_backend/requirements.txt (line 5))
+2025-10-10T12:53:39.3250188Z   Downloading joblib-1.5.2-py3-none-any.whl.metadata (5.6 kB)
+2025-10-10T12:53:39.3379502Z Collecting threadpoolctl>=3.1.0 (from scikit-learn>=1.3.0->-r ml_backend/requirements.txt (line 5))
+2025-10-10T12:53:39.3529424Z   Downloading threadpoolctl-3.6.0-py3-none-any.whl.metadata (13 kB)
+2025-10-10T12:53:39.3802542Z Collecting python-dateutil>=2.8.2 (from pandas>=2.0.0->-r ml_backend/requirements.txt (line 7))
+2025-10-10T12:53:39.3945903Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2025-10-10T12:53:39.4363207Z Collecting pytz>=2020.1 (from pandas>=2.0.0->-r ml_backend/requirements.txt (line 7))
+2025-10-10T12:53:39.4507165Z   Downloading pytz-2025.2-py2.py3-none-any.whl.metadata (22 kB)
+2025-10-10T12:53:39.4670422Z Collecting tzdata>=2022.7 (from pandas>=2.0.0->-r ml_backend/requirements.txt (line 7))
+2025-10-10T12:53:39.4813742Z   Downloading tzdata-2025.2-py2.py3-none-any.whl.metadata (1.4 kB)
+2025-10-10T12:53:39.5165959Z Collecting click (from nltk>=3.8->-r ml_backend/requirements.txt (line 15))
+2025-10-10T12:53:39.5311472Z   Downloading click-8.1.8-py3-none-any.whl.metadata (2.3 kB)
+2025-10-10T12:53:39.5786632Z Collecting spacy-legacy<3.1.0,>=3.0.11 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:39.5928975Z   Downloading spacy_legacy-3.0.12-py2.py3-none-any.whl.metadata (2.8 kB)
+2025-10-10T12:53:39.6036780Z Collecting spacy-loggers<2.0.0,>=1.0.0 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:39.6179961Z   Downloading spacy_loggers-1.0.5-py3-none-any.whl.metadata (23 kB)
+2025-10-10T12:53:39.6570572Z Collecting murmurhash<1.1.0,>=0.28.0 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:39.6716681Z   Downloading murmurhash-1.0.13-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.2 kB)
+2025-10-10T12:53:39.7087284Z Collecting cymem<2.1.0,>=2.0.2 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:39.7231545Z   Downloading cymem-2.0.11-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (8.5 kB)
+2025-10-10T12:53:39.7580444Z Collecting preshed<3.1.0,>=3.0.2 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:39.7723222Z   Downloading preshed-3.0.10-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.4 kB)
+2025-10-10T12:53:39.9352219Z Collecting thinc<8.4.0,>=8.3.4 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:39.9504727Z   Downloading thinc-8.3.6-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (15 kB)
+2025-10-10T12:53:39.9843858Z Collecting wasabi<1.2.0,>=0.9.1 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:39.9986350Z   Downloading wasabi-1.1.3-py3-none-any.whl.metadata (28 kB)
+2025-10-10T12:53:40.0520085Z Collecting srsly<3.0.0,>=2.4.3 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:40.0667207Z   Downloading srsly-2.5.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (19 kB)
+2025-10-10T12:53:40.0839194Z Collecting catalogue<2.1.0,>=2.0.6 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:40.0984242Z   Downloading catalogue-2.0.10-py3-none-any.whl.metadata (14 kB)
+2025-10-10T12:53:40.1120349Z Collecting weasel<0.5.0,>=0.1.0 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:40.1264987Z   Downloading weasel-0.4.1-py3-none-any.whl.metadata (4.6 kB)
+2025-10-10T12:53:40.1523962Z Collecting typer<1.0.0,>=0.3.0 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:40.1670353Z   Downloading typer-0.19.2-py3-none-any.whl.metadata (16 kB)
+2025-10-10T12:53:40.2517867Z Collecting langcodes<4.0.0,>=3.2.0 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:40.2664758Z   Downloading langcodes-3.5.0-py3-none-any.whl.metadata (29 kB)
+2025-10-10T12:53:40.2814967Z Collecting annotated-types>=0.6.0 (from pydantic>=2.0.0->-r ml_backend/requirements.txt (line 39))
+2025-10-10T12:53:40.2958876Z   Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+2025-10-10T12:53:41.2549134Z Collecting pydantic-core==2.41.1 (from pydantic>=2.0.0->-r ml_backend/requirements.txt (line 39))
+2025-10-10T12:53:41.2698554Z   Downloading pydantic_core-2.41.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.3 kB)
+2025-10-10T12:53:41.2860330Z Collecting typing-inspection>=0.4.2 (from pydantic>=2.0.0->-r ml_backend/requirements.txt (line 39))
+2025-10-10T12:53:41.3015542Z   Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+2025-10-10T12:53:41.4041503Z Collecting charset_normalizer<4,>=2 (from requests>=2.31.0->-r ml_backend/requirements.txt (line 40))
+2025-10-10T12:53:41.4191319Z   Downloading charset_normalizer-3.4.3-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (36 kB)
+2025-10-10T12:53:41.4374250Z Collecting idna<4,>=2.5 (from requests>=2.31.0->-r ml_backend/requirements.txt (line 40))
+2025-10-10T12:53:41.4519268Z   Downloading idna-3.10-py3-none-any.whl.metadata (10 kB)
+2025-10-10T12:53:41.4857604Z Collecting urllib3<3,>=1.21.1 (from requests>=2.31.0->-r ml_backend/requirements.txt (line 40))
+2025-10-10T12:53:41.5000141Z   Downloading urllib3-2.5.0-py3-none-any.whl.metadata (6.5 kB)
+2025-10-10T12:53:41.5259271Z Collecting certifi>=2017.4.17 (from requests>=2.31.0->-r ml_backend/requirements.txt (line 40))
+2025-10-10T12:53:41.5402514Z   Downloading certifi-2025.10.5-py3-none-any.whl.metadata (2.5 kB)
+2025-10-10T12:53:41.5612106Z Collecting language-data>=1.2 (from langcodes<4.0.0,>=3.2.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:41.5754339Z   Downloading language_data-1.3.0-py3-none-any.whl.metadata (4.3 kB)
+2025-10-10T12:53:41.6460825Z Collecting blis<1.4.0,>=1.3.0 (from thinc<8.4.0,>=8.3.4->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:41.6666292Z   Downloading blis-1.3.0.tar.gz (2.5 MB)
+2025-10-10T12:53:41.6969499Z      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.5/2.5 MB 86.1 MB/s  0:00:00
+2025-10-10T12:53:42.2604700Z   Installing build dependencies: started
+2025-10-10T12:53:44.1461253Z   Installing build dependencies: finished with status 'done'
+2025-10-10T12:53:44.1471085Z   Getting requirements to build wheel: started
+2025-10-10T12:53:47.5491106Z   Getting requirements to build wheel: finished with status 'done'
+2025-10-10T12:53:47.5518812Z   Preparing metadata (pyproject.toml): started
+2025-10-10T12:53:48.1172805Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2025-10-10T12:53:48.1482083Z Collecting confection<1.0.0,>=0.0.1 (from thinc<8.4.0,>=8.3.4->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:48.1627738Z   Downloading confection-0.1.5-py3-none-any.whl.metadata (19 kB)
+2025-10-10T12:53:48.2026462Z Collecting shellingham>=1.3.0 (from typer<1.0.0,>=0.3.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:48.2169601Z   Downloading shellingham-1.5.4-py2.py3-none-any.whl.metadata (3.5 kB)
+2025-10-10T12:53:48.2728073Z Collecting rich>=10.11.0 (from typer<1.0.0,>=0.3.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:48.2875621Z   Downloading rich-14.2.0-py3-none-any.whl.metadata (18 kB)
+2025-10-10T12:53:48.3183228Z Collecting cloudpathlib<1.0.0,>=0.7.0 (from weasel<0.5.0,>=0.1.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:48.3327670Z   Downloading cloudpathlib-0.23.0-py3-none-any.whl.metadata (16 kB)
+2025-10-10T12:53:48.3558332Z Collecting smart-open<8.0.0,>=5.2.1 (from weasel<0.5.0,>=0.1.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:48.3704896Z   Downloading smart_open-7.3.1-py3-none-any.whl.metadata (24 kB)
+2025-10-10T12:53:48.5282391Z Collecting wrapt (from smart-open<8.0.0,>=5.2.1->weasel<0.5.0,>=0.1.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:48.5430276Z   Downloading wrapt-1.17.3-cp39-cp39-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.4 kB)
+2025-10-10T12:53:48.5586728Z INFO: pip is looking at multiple versions of gensim to determine which version is compatible with other requirements. This could take a while.
+2025-10-10T12:53:48.5593348Z Collecting gensim>=4.3.0 (from -r ml_backend/requirements.txt (line 17))
+2025-10-10T12:53:48.5746365Z   Downloading gensim-4.3.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (8.5 kB)
+2025-10-10T12:53:48.6226324Z Collecting blinker>=1.9.0 (from flask>=2.3.0->-r ml_backend/requirements.txt (line 20))
+2025-10-10T12:53:48.6358144Z   Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+2025-10-10T12:53:48.6659547Z Collecting itsdangerous>=2.2.0 (from flask>=2.3.0->-r ml_backend/requirements.txt (line 20))
+2025-10-10T12:53:48.6821060Z   Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+2025-10-10T12:53:48.7522340Z Collecting markupsafe>=2.1.1 (from flask>=2.3.0->-r ml_backend/requirements.txt (line 20))
+2025-10-10T12:53:48.7669266Z   Downloading markupsafe-3.0.3-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+2025-10-10T12:53:48.7959667Z Collecting werkzeug>=3.1.0 (from flask>=2.3.0->-r ml_backend/requirements.txt (line 20))
+2025-10-10T12:53:48.8102138Z   Downloading werkzeug-3.1.3-py3-none-any.whl.metadata (3.7 kB)
+2025-10-10T12:53:48.8472037Z Collecting backports-datetime-fromisoformat (from marshmallow>=3.19.0->-r ml_backend/requirements.txt (line 23))
+2025-10-10T12:53:48.8626810Z   Downloading backports_datetime_fromisoformat-2.0.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.3 kB)
+2025-10-10T12:53:49.0476501Z Collecting mlflow-skinny==3.1.4 (from mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:49.0631359Z   Downloading mlflow_skinny-3.1.4-py3-none-any.whl.metadata (30 kB)
+2025-10-10T12:53:49.1155653Z Collecting alembic!=1.10.0,<2 (from mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:49.1300782Z   Downloading alembic-1.16.5-py3-none-any.whl.metadata (7.3 kB)
+2025-10-10T12:53:49.1549029Z Collecting docker<8,>=4.0.0 (from mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:49.1691702Z   Downloading docker-7.1.0-py3-none-any.whl.metadata (3.8 kB)
+2025-10-10T12:53:49.1930721Z Collecting graphene<4 (from mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:49.2074452Z   Downloading graphene-3.4.3-py2.py3-none-any.whl.metadata (6.9 kB)
+2025-10-10T12:53:49.3906576Z Collecting matplotlib<4 (from mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:49.4059234Z   Downloading matplotlib-3.9.4-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (11 kB)
+2025-10-10T12:53:49.5180112Z Collecting pyarrow<21,>=4.0.0 (from mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:49.5332608Z   Downloading pyarrow-20.0.0-cp39-cp39-manylinux_2_28_x86_64.whl.metadata (3.3 kB)
+2025-10-10T12:53:49.6030186Z Collecting cachetools<7,>=5.0.0 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:49.6174713Z   Downloading cachetools-6.2.0-py3-none-any.whl.metadata (5.4 kB)
+2025-10-10T12:53:49.6413256Z Collecting cloudpickle<4 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:49.6562765Z   Downloading cloudpickle-3.1.1-py3-none-any.whl.metadata (7.1 kB)
+2025-10-10T12:53:49.6890879Z Collecting databricks-sdk<1,>=0.20.0 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:49.7035716Z   Downloading databricks_sdk-0.67.0-py3-none-any.whl.metadata (39 kB)
+2025-10-10T12:53:49.7692423Z Collecting fastapi<1 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:49.7836288Z   Downloading fastapi-0.118.3-py3-none-any.whl.metadata (28 kB)
+2025-10-10T12:53:49.8188242Z Collecting gitpython<4,>=3.1.9 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:49.8334258Z   Downloading gitpython-3.1.45-py3-none-any.whl.metadata (13 kB)
+2025-10-10T12:53:49.8862842Z Collecting opentelemetry-api<3,>=1.9.0 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:49.9007593Z   Downloading opentelemetry_api-1.37.0-py3-none-any.whl.metadata (1.5 kB)
+2025-10-10T12:53:49.9276643Z Collecting opentelemetry-sdk<3,>=1.9.0 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:49.9419261Z   Downloading opentelemetry_sdk-1.37.0-py3-none-any.whl.metadata (1.5 kB)
+2025-10-10T12:53:50.1587428Z Collecting protobuf<7,>=3.12.0 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:50.1736276Z   Downloading protobuf-6.32.1-cp39-abi3-manylinux2014_x86_64.whl.metadata (593 bytes)
+2025-10-10T12:53:50.2360088Z Collecting sqlparse<1,>=0.4.0 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:50.2504343Z   Downloading sqlparse-0.5.3-py3-none-any.whl.metadata (3.9 kB)
+2025-10-10T12:53:50.2918365Z Collecting uvicorn<1 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:50.3064489Z   Downloading uvicorn-0.37.0-py3-none-any.whl.metadata (6.6 kB)
+2025-10-10T12:53:50.4732299Z Collecting greenlet>=1 (from sqlalchemy>=2.0.0->-r ml_backend/requirements.txt (line 31))
+2025-10-10T12:53:50.4881638Z   Downloading greenlet-3.2.4-cp39-cp39-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (4.1 kB)
+2025-10-10T12:53:50.5198226Z Collecting Mako (from alembic!=1.10.0,<2->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:50.5348160Z   Downloading mako-1.3.10-py3-none-any.whl.metadata (2.9 kB)
+2025-10-10T12:53:50.5612715Z Collecting tomli (from alembic!=1.10.0,<2->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:50.5758139Z   Downloading tomli-2.3.0-py3-none-any.whl.metadata (10 kB)
+2025-10-10T12:53:50.6496781Z Collecting google-auth~=2.0 (from databricks-sdk<1,>=0.20.0->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:50.6644407Z   Downloading google_auth-2.41.1-py2.py3-none-any.whl.metadata (6.6 kB)
+2025-10-10T12:53:50.7345870Z Collecting starlette<0.49.0,>=0.40.0 (from fastapi<1->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:50.7492213Z   Downloading starlette-0.48.0-py3-none-any.whl.metadata (6.3 kB)
+2025-10-10T12:53:50.8171863Z Collecting gitdb<5,>=4.0.1 (from gitpython<4,>=3.1.9->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:50.8314013Z   Downloading gitdb-4.0.12-py3-none-any.whl.metadata (1.2 kB)
+2025-10-10T12:53:50.8538632Z Collecting smmap<6,>=3.0.1 (from gitdb<5,>=4.0.1->gitpython<4,>=3.1.9->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:50.8683782Z   Downloading smmap-5.0.2-py3-none-any.whl.metadata (4.3 kB)
+2025-10-10T12:53:50.8983008Z Collecting pyasn1-modules>=0.2.1 (from google-auth~=2.0->databricks-sdk<1,>=0.20.0->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:50.9128738Z   Downloading pyasn1_modules-0.4.2-py3-none-any.whl.metadata (3.5 kB)
+2025-10-10T12:53:50.9308048Z Collecting rsa<5,>=3.1.4 (from google-auth~=2.0->databricks-sdk<1,>=0.20.0->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:50.9449694Z   Downloading rsa-4.9.1-py3-none-any.whl.metadata (5.6 kB)
+2025-10-10T12:53:50.9704420Z Collecting graphql-core<3.3,>=3.1 (from graphene<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:50.9859817Z   Downloading graphql_core-3.2.6-py3-none-any.whl.metadata (11 kB)
+2025-10-10T12:53:51.0025602Z Collecting graphql-relay<3.3,>=3.1 (from graphene<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:51.0169378Z   Downloading graphql_relay-3.2.0-py3-none-any.whl.metadata (12 kB)
+2025-10-10T12:53:51.0620746Z Collecting zipp>=3.20 (from importlib-metadata->triton==3.4.0->torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:51.0765005Z   Downloading zipp-3.23.0-py3-none-any.whl.metadata (3.6 kB)
+2025-10-10T12:53:51.1681851Z Collecting contourpy>=1.0.1 (from matplotlib<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:51.1830445Z   Downloading contourpy-1.3.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.4 kB)
+2025-10-10T12:53:51.2006841Z Collecting cycler>=0.10 (from matplotlib<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:51.2150315Z   Downloading cycler-0.12.1-py3-none-any.whl.metadata (3.8 kB)
+2025-10-10T12:53:51.4071640Z Collecting fonttools>=4.22.0 (from matplotlib<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:51.4224364Z   Downloading fonttools-4.60.1-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (112 kB)
+2025-10-10T12:53:51.6900391Z Collecting kiwisolver>=1.3.1 (from matplotlib<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:51.7049068Z   Downloading kiwisolver-1.4.7-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl.metadata (6.3 kB)
+2025-10-10T12:53:51.7534683Z Collecting pyparsing>=2.3.1 (from matplotlib<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:51.7682960Z   Downloading pyparsing-3.2.5-py3-none-any.whl.metadata (5.0 kB)
+2025-10-10T12:53:51.7981847Z Collecting importlib-resources>=3.2.0 (from matplotlib<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:51.8129652Z   Downloading importlib_resources-6.5.2-py3-none-any.whl.metadata (3.9 kB)
+2025-10-10T12:53:51.8710980Z Collecting opentelemetry-semantic-conventions==0.58b0 (from opentelemetry-sdk<3,>=1.9.0->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:51.8857839Z   Downloading opentelemetry_semantic_conventions-0.58b0-py3-none-any.whl.metadata (2.4 kB)
+2025-10-10T12:53:51.9182353Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas>=2.0.0->-r ml_backend/requirements.txt (line 7))
+2025-10-10T12:53:51.9329326Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2025-10-10T12:53:51.9684181Z Collecting pyasn1>=0.1.3 (from rsa<5,>=3.1.4->google-auth~=2.0->databricks-sdk<1,>=0.20.0->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:51.9829525Z   Downloading pyasn1-0.6.1-py3-none-any.whl.metadata (8.4 kB)
+2025-10-10T12:53:52.0301874Z Collecting anyio<5,>=3.6.2 (from starlette<0.49.0,>=0.40.0->fastapi<1->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:52.0450999Z   Downloading anyio-4.11.0-py3-none-any.whl.metadata (4.1 kB)
+2025-10-10T12:53:52.0654715Z Collecting exceptiongroup>=1.0.2 (from anyio<5,>=3.6.2->starlette<0.49.0,>=0.40.0->fastapi<1->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:52.0834874Z   Downloading exceptiongroup-1.3.0-py3-none-any.whl.metadata (6.7 kB)
+2025-10-10T12:53:52.0992323Z Collecting sniffio>=1.1 (from anyio<5,>=3.6.2->starlette<0.49.0,>=0.40.0->fastapi<1->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:52.1137393Z   Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+2025-10-10T12:53:52.1359316Z Collecting h11>=0.8 (from uvicorn<1->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T12:53:52.1503425Z   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+2025-10-10T12:53:52.1724134Z Collecting async-timeout>=4.0.3 (from redis>=4.6.0->-r ml_backend/requirements.txt (line 30))
+2025-10-10T12:53:52.1871379Z   Downloading async_timeout-5.0.1-py3-none-any.whl.metadata (5.1 kB)
+2025-10-10T12:53:52.2159771Z Collecting iniconfig>=1 (from pytest>=7.4.0->-r ml_backend/requirements.txt (line 44))
+2025-10-10T12:53:52.2304220Z   Downloading iniconfig-2.1.0-py3-none-any.whl.metadata (2.7 kB)
+2025-10-10T12:53:52.2455458Z Collecting pluggy<2,>=1.5 (from pytest>=7.4.0->-r ml_backend/requirements.txt (line 44))
+2025-10-10T12:53:52.2607818Z   Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+2025-10-10T12:53:52.2855386Z Collecting pygments>=2.7.2 (from pytest>=7.4.0->-r ml_backend/requirements.txt (line 44))
+2025-10-10T12:53:52.3004441Z   Downloading pygments-2.19.2-py3-none-any.whl.metadata (2.5 kB)
+2025-10-10T12:53:52.7286564Z Collecting coverage>=7.10.6 (from coverage[toml]>=7.10.6->pytest-cov>=4.1.0->-r ml_backend/requirements.txt (line 45))
+2025-10-10T12:53:52.7453295Z   Downloading coverage-7.10.7-cp39-cp39-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (8.9 kB)
+2025-10-10T12:53:52.7758709Z Collecting mypy-extensions>=0.4.3 (from black>=23.0.0->-r ml_backend/requirements.txt (line 46))
+2025-10-10T12:53:52.7925966Z   Downloading mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+2025-10-10T12:53:52.8119627Z Collecting pathspec>=0.9.0 (from black>=23.0.0->-r ml_backend/requirements.txt (line 46))
+2025-10-10T12:53:52.8267086Z   Downloading pathspec-0.12.1-py3-none-any.whl.metadata (21 kB)
+2025-10-10T12:53:52.8501226Z Collecting platformdirs>=2 (from black>=23.0.0->-r ml_backend/requirements.txt (line 46))
+2025-10-10T12:53:52.8649249Z   Downloading platformdirs-4.4.0-py3-none-any.whl.metadata (12 kB)
+2025-10-10T12:53:52.8794960Z Collecting pytokens>=0.1.10 (from black>=23.0.0->-r ml_backend/requirements.txt (line 46))
+2025-10-10T12:53:52.8947301Z   Downloading pytokens-0.1.10-py3-none-any.whl.metadata (2.0 kB)
+2025-10-10T12:53:52.9237614Z Collecting mccabe<0.8.0,>=0.7.0 (from flake8>=6.0.0->-r ml_backend/requirements.txt (line 47))
+2025-10-10T12:53:52.9384763Z   Downloading mccabe-0.7.0-py2.py3-none-any.whl.metadata (5.0 kB)
+2025-10-10T12:53:52.9522970Z Collecting pycodestyle<2.15.0,>=2.14.0 (from flake8>=6.0.0->-r ml_backend/requirements.txt (line 47))
+2025-10-10T12:53:52.9669242Z   Downloading pycodestyle-2.14.0-py2.py3-none-any.whl.metadata (4.5 kB)
+2025-10-10T12:53:52.9824368Z Collecting pyflakes<3.5.0,>=3.4.0 (from flake8>=6.0.0->-r ml_backend/requirements.txt (line 47))
+2025-10-10T12:53:52.9975923Z   Downloading pyflakes-3.4.0-py2.py3-none-any.whl.metadata (3.5 kB)
+2025-10-10T12:53:53.1663840Z Collecting marisa-trie>=1.1.0 (from language-data>=1.2->langcodes<4.0.0,>=3.2.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:53.1821865Z   Downloading marisa_trie-1.3.1-cp39-cp39-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (10 kB)
+2025-10-10T12:53:53.2518546Z Collecting markdown-it-py>=2.2.0 (from rich>=10.11.0->typer<1.0.0,>=0.3.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:53.2664426Z   Downloading markdown_it_py-3.0.0-py3-none-any.whl.metadata (6.9 kB)
+2025-10-10T12:53:53.2938919Z Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich>=10.11.0->typer<1.0.0,>=0.3.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T12:53:53.3082846Z   Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+2025-10-10T12:53:53.3541133Z Collecting mpmath<1.4,>=1.1.0 (from sympy>=1.13.3->torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T12:53:53.3690971Z   Downloading mpmath-1.3.0-py3-none-any.whl.metadata (8.6 kB)
+2025-10-10T12:53:53.4508890Z Downloading torch-2.8.0-cp39-cp39-manylinux_2_28_x86_64.whl (888.0 MB)
+2025-10-10T12:54:07.8284714Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 888.0/888.0 MB 21.7 MB/s  0:00:14
+2025-10-10T12:54:07.8444081Z Downloading nvidia_cublas_cu12-12.8.4.1-py3-none-manylinux_2_27_x86_64.whl (594.3 MB)
+2025-10-10T12:54:21.4176802Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 594.3/594.3 MB 26.8 MB/s  0:00:13
+2025-10-10T12:54:21.4331006Z Downloading nvidia_cuda_cupti_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (10.2 MB)
+2025-10-10T12:54:21.6272940Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.2/10.2 MB 52.7 MB/s  0:00:00
+2025-10-10T12:54:21.6427998Z Downloading nvidia_cuda_nvrtc_cu12-12.8.93-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl (88.0 MB)
+2025-10-10T12:54:23.3266614Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 88.0/88.0 MB 52.3 MB/s  0:00:01
+2025-10-10T12:54:23.3442472Z Downloading nvidia_cuda_runtime_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (954 kB)
+2025-10-10T12:54:23.3609980Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 954.8/954.8 kB 49.3 MB/s  0:00:00
+2025-10-10T12:54:23.3757623Z Downloading nvidia_cudnn_cu12-9.10.2.21-py3-none-manylinux_2_27_x86_64.whl (706.8 MB)
+2025-10-10T12:54:40.6362969Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 706.8/706.8 MB 23.0 MB/s  0:00:17
+2025-10-10T12:54:40.6511256Z Downloading nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (193.1 MB)
+2025-10-10T12:54:48.6517135Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 193.1/193.1 MB 24.1 MB/s  0:00:07
+2025-10-10T12:54:48.6668597Z Downloading nvidia_cufile_cu12-1.13.1.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (1.2 MB)
+2025-10-10T12:54:48.7058509Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 28.7 MB/s  0:00:00
+2025-10-10T12:54:48.7207622Z Downloading nvidia_curand_cu12-10.3.9.90-py3-none-manylinux_2_27_x86_64.whl (63.6 MB)
+2025-10-10T12:54:50.5138592Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 63.6/63.6 MB 35.5 MB/s  0:00:01
+2025-10-10T12:54:50.5290119Z Downloading nvidia_cusolver_cu12-11.7.3.90-py3-none-manylinux_2_27_x86_64.whl (267.5 MB)
+2025-10-10T12:54:59.2062156Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 267.5/267.5 MB 30.8 MB/s  0:00:08
+2025-10-10T12:54:59.2219513Z Downloading nvidia_cusparse_cu12-12.5.8.93-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (288.2 MB)
+2025-10-10T12:55:09.8426702Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 288.2/288.2 MB 26.0 MB/s  0:00:10
+2025-10-10T12:55:09.8580326Z Downloading nvidia_cusparselt_cu12-0.7.1-py3-none-manylinux2014_x86_64.whl (287.2 MB)
+2025-10-10T12:55:19.1576350Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 287.2/287.2 MB 30.0 MB/s  0:00:09
+2025-10-10T12:55:19.1731182Z Downloading nvidia_nccl_cu12-2.27.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (322.4 MB)
+2025-10-10T12:55:33.8716959Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 322.4/322.4 MB 19.8 MB/s  0:00:14
+2025-10-10T12:55:33.8871316Z Downloading nvidia_nvjitlink_cu12-12.8.93-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl (39.3 MB)
+2025-10-10T12:55:35.3535920Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 39.3/39.3 MB 26.7 MB/s  0:00:01
+2025-10-10T12:55:35.3686477Z Downloading nvidia_nvtx_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (89 kB)
+2025-10-10T12:55:35.3866294Z Downloading triton-3.4.0-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (155.4 MB)
+2025-10-10T12:55:39.8302190Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 155.4/155.4 MB 35.0 MB/s  0:00:04
+2025-10-10T12:55:39.8453342Z Downloading transformers-4.57.0-py3-none-any.whl (12.0 MB)
+2025-10-10T12:55:40.1070219Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.0/12.0 MB 45.8 MB/s  0:00:00
+2025-10-10T12:55:40.1223052Z Downloading huggingface_hub-0.35.3-py3-none-any.whl (564 kB)
+2025-10-10T12:55:40.1346229Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 564.3/564.3 kB 40.5 MB/s  0:00:00
+2025-10-10T12:55:40.1497071Z Downloading hf_xet-1.1.10-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.2 MB)
+2025-10-10T12:55:40.2206794Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.2/3.2 MB 45.1 MB/s  0:00:00
+2025-10-10T12:55:40.2359066Z Downloading tokenizers-0.22.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.3 MB)
+2025-10-10T12:55:40.3203112Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 37.7 MB/s  0:00:00
+2025-10-10T12:55:40.3356389Z Downloading sentence_transformers-5.1.1-py3-none-any.whl (486 kB)
+2025-10-10T12:55:40.3659124Z Downloading scikit_learn-1.6.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (13.5 MB)
+2025-10-10T12:55:40.7556646Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.5/13.5 MB 34.6 MB/s  0:00:00
+2025-10-10T12:55:40.7581940Z Using cached numpy-2.0.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (19.5 MB)
+2025-10-10T12:55:40.8007655Z Downloading pandas-2.3.3-cp39-cp39-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.8 MB)
+2025-10-10T12:55:41.1972668Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.8/12.8 MB 32.1 MB/s  0:00:00
+2025-10-10T12:55:41.2127519Z Downloading faiss_cpu-1.12.0-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (31.4 MB)
+2025-10-10T12:55:42.7781300Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 31.4/31.4 MB 20.0 MB/s  0:00:01
+2025-10-10T12:55:42.7937207Z Downloading nltk-3.9.2-py3-none-any.whl (1.5 MB)
+2025-10-10T12:55:42.8769363Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.5/1.5 MB 18.4 MB/s  0:00:00
+2025-10-10T12:55:42.8918791Z Downloading spacy-3.8.7-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (31.4 MB)
+2025-10-10T12:55:44.3137260Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 31.4/31.4 MB 22.1 MB/s  0:00:01
+2025-10-10T12:55:44.3292206Z Downloading pydantic-2.12.0-py3-none-any.whl (459 kB)
+2025-10-10T12:55:44.3622151Z Downloading pydantic_core-2.41.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+2025-10-10T12:55:44.4464386Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 24.5 MB/s  0:00:00
+2025-10-10T12:55:44.4627459Z Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+2025-10-10T12:55:44.4793424Z Downloading tqdm-4.67.1-py3-none-any.whl (78 kB)
+2025-10-10T12:55:44.4972360Z Downloading catalogue-2.0.10-py3-none-any.whl (17 kB)
+2025-10-10T12:55:44.5140307Z Downloading charset_normalizer-3.4.3-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (152 kB)
+2025-10-10T12:55:44.5338558Z Downloading cymem-2.0.11-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (208 kB)
+2025-10-10T12:55:44.5554029Z Downloading idna-3.10-py3-none-any.whl (70 kB)
+2025-10-10T12:55:44.5727445Z Downloading langcodes-3.5.0-py3-none-any.whl (182 kB)
+2025-10-10T12:55:44.5936695Z Downloading murmurhash-1.0.13-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (116 kB)
+2025-10-10T12:55:44.6127277Z Downloading preshed-3.0.10-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (794 kB)
+2025-10-10T12:55:44.6461417Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 794.1/794.1 kB 21.6 MB/s  0:00:00
+2025-10-10T12:55:44.6606818Z Downloading spacy_legacy-3.0.12-py2.py3-none-any.whl (29 kB)
+2025-10-10T12:55:44.6773831Z Downloading spacy_loggers-1.0.5-py3-none-any.whl (22 kB)
+2025-10-10T12:55:44.6937241Z Downloading srsly-2.5.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.1 MB)
+2025-10-10T12:55:44.7385934Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 23.2 MB/s  0:00:00
+2025-10-10T12:55:44.7536214Z Downloading thinc-8.3.6-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (4.1 MB)
+2025-10-10T12:55:44.9151291Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.1/4.1 MB 25.3 MB/s  0:00:00
+2025-10-10T12:55:44.9298993Z Downloading confection-0.1.5-py3-none-any.whl (35 kB)
+2025-10-10T12:55:44.9465589Z Downloading typer-0.19.2-py3-none-any.whl (46 kB)
+2025-10-10T12:55:44.9631118Z Downloading urllib3-2.5.0-py3-none-any.whl (129 kB)
+2025-10-10T12:55:44.9823721Z Downloading wasabi-1.1.3-py3-none-any.whl (27 kB)
+2025-10-10T12:55:44.9985818Z Downloading weasel-0.4.1-py3-none-any.whl (50 kB)
+2025-10-10T12:55:45.0152472Z Downloading cloudpathlib-0.23.0-py3-none-any.whl (62 kB)
+2025-10-10T12:55:45.0317241Z Downloading smart_open-7.3.1-py3-none-any.whl (61 kB)
+2025-10-10T12:55:45.0696351Z Downloading gensim-4.3.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (26.6 MB)
+2025-10-10T12:55:45.9959436Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 26.6/26.6 MB 28.7 MB/s  0:00:00
+2025-10-10T12:55:46.0110312Z Downloading flask-3.1.2-py3-none-any.whl (103 kB)
+2025-10-10T12:55:46.0291744Z Downloading flask_cors-6.0.1-py3-none-any.whl (13 kB)
+2025-10-10T12:55:46.0459462Z Downloading gunicorn-23.0.0-py3-none-any.whl (85 kB)
+2025-10-10T12:55:46.0637746Z Downloading marshmallow-4.0.1-py3-none-any.whl (48 kB)
+2025-10-10T12:55:46.0813691Z Downloading mlflow-3.1.4-py3-none-any.whl (24.7 MB)
+2025-10-10T12:55:46.8479834Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 24.7/24.7 MB 32.1 MB/s  0:00:00
+2025-10-10T12:55:46.8646113Z Downloading mlflow_skinny-3.1.4-py3-none-any.whl (1.9 MB)
+2025-10-10T12:55:46.9240669Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.9/1.9 MB 31.9 MB/s  0:00:00
+2025-10-10T12:55:46.9392162Z Downloading sqlalchemy-2.0.43-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.2 MB)
+2025-10-10T12:55:47.0335256Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.2/3.2 MB 33.5 MB/s  0:00:00
+2025-10-10T12:55:47.0482756Z Downloading alembic-1.16.5-py3-none-any.whl (247 kB)
+2025-10-10T12:55:47.0695536Z Downloading cachetools-6.2.0-py3-none-any.whl (11 kB)
+2025-10-10T12:55:47.0860959Z Downloading click-8.1.8-py3-none-any.whl (98 kB)
+2025-10-10T12:55:47.1063040Z Downloading cloudpickle-3.1.1-py3-none-any.whl (20 kB)
+2025-10-10T12:55:47.1231830Z Downloading databricks_sdk-0.67.0-py3-none-any.whl (718 kB)
+2025-10-10T12:55:47.1464963Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 718.4/718.4 kB 28.0 MB/s  0:00:00
+2025-10-10T12:55:47.1617948Z Downloading docker-7.1.0-py3-none-any.whl (147 kB)
+2025-10-10T12:55:47.1798990Z Downloading fastapi-0.118.3-py3-none-any.whl (97 kB)
+2025-10-10T12:55:47.1978365Z Downloading gitpython-3.1.45-py3-none-any.whl (208 kB)
+2025-10-10T12:55:47.2176798Z Downloading gitdb-4.0.12-py3-none-any.whl (62 kB)
+2025-10-10T12:55:47.2360443Z Downloading google_auth-2.41.1-py2.py3-none-any.whl (221 kB)
+2025-10-10T12:55:47.2552353Z Downloading graphene-3.4.3-py2.py3-none-any.whl (114 kB)
+2025-10-10T12:55:47.2737169Z Downloading graphql_core-3.2.6-py3-none-any.whl (203 kB)
+2025-10-10T12:55:47.2930758Z Downloading graphql_relay-3.2.0-py3-none-any.whl (16 kB)
+2025-10-10T12:55:47.3094931Z Downloading importlib_metadata-8.7.0-py3-none-any.whl (27 kB)
+2025-10-10T12:55:47.3285934Z Downloading matplotlib-3.9.4-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (8.3 MB)
+2025-10-10T12:55:47.5693509Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.3/8.3 MB 34.3 MB/s  0:00:00
+2025-10-10T12:55:47.5841310Z Downloading opentelemetry_api-1.37.0-py3-none-any.whl (65 kB)
+2025-10-10T12:55:47.6011661Z Downloading opentelemetry_sdk-1.37.0-py3-none-any.whl (131 kB)
+2025-10-10T12:55:47.6190831Z Downloading opentelemetry_semantic_conventions-0.58b0-py3-none-any.whl (207 kB)
+2025-10-10T12:55:47.6391596Z Downloading packaging-25.0-py3-none-any.whl (66 kB)
+2025-10-10T12:55:47.6563334Z Downloading protobuf-6.32.1-cp39-abi3-manylinux2014_x86_64.whl (322 kB)
+2025-10-10T12:55:47.6794362Z Downloading pyarrow-20.0.0-cp39-cp39-manylinux_2_28_x86_64.whl (42.3 MB)
+2025-10-10T12:55:48.7871779Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 42.3/42.3 MB 38.2 MB/s  0:00:01
+2025-10-10T12:55:48.8022529Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2025-10-10T12:55:48.8225240Z Downloading pyyaml-6.0.3-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (750 kB)
+2025-10-10T12:55:48.8451632Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 750.8/750.8 kB 32.1 MB/s  0:00:00
+2025-10-10T12:55:48.8603798Z Downloading rsa-4.9.1-py3-none-any.whl (34 kB)
+2025-10-10T12:55:48.8782630Z Downloading scipy-1.13.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (38.6 MB)
+2025-10-10T12:55:49.8022404Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 38.6/38.6 MB 41.8 MB/s  0:00:00
+2025-10-10T12:55:49.8175843Z Downloading smmap-5.0.2-py3-none-any.whl (24 kB)
+2025-10-10T12:55:49.8345332Z Downloading sqlparse-0.5.3-py3-none-any.whl (44 kB)
+2025-10-10T12:55:49.8517330Z Downloading starlette-0.48.0-py3-none-any.whl (73 kB)
+2025-10-10T12:55:49.8692457Z Downloading anyio-4.11.0-py3-none-any.whl (109 kB)
+2025-10-10T12:55:49.8868014Z Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+2025-10-10T12:55:49.9039995Z Downloading uvicorn-0.37.0-py3-none-any.whl (67 kB)
+2025-10-10T12:55:49.9215340Z Downloading psycopg2_binary-2.9.11-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.2 MB)
+2025-10-10T12:55:50.0190683Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.2/4.2 MB 42.2 MB/s  0:00:00
+2025-10-10T12:55:50.0341111Z Downloading redis-6.4.0-py3-none-any.whl (279 kB)
+2025-10-10T12:55:50.0549168Z Downloading pillow-11.3.0-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (6.6 MB)
+2025-10-10T12:55:50.2058439Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.6/6.6 MB 43.7 MB/s  0:00:00
+2025-10-10T12:55:50.2209636Z Downloading opencv_python-4.12.0.88-cp37-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (67.0 MB)
+2025-10-10T12:55:51.9681029Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 67.0/67.0 MB 38.3 MB/s  0:00:01
+2025-10-10T12:55:51.9829738Z Downloading python_dotenv-1.1.1-py3-none-any.whl (20 kB)
+2025-10-10T12:55:51.9997362Z Downloading pytest-8.4.2-py3-none-any.whl (365 kB)
+2025-10-10T12:55:52.0204958Z Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+2025-10-10T12:55:52.0372916Z Downloading pytest_cov-7.0.0-py3-none-any.whl (22 kB)
+2025-10-10T12:55:52.0574389Z Downloading black-25.9.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl (1.6 MB)
+2025-10-10T12:55:52.0929392Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.6/1.6 MB 44.7 MB/s  0:00:00
+2025-10-10T12:55:52.1075382Z Downloading flake8-7.3.0-py2.py3-none-any.whl (57 kB)
+2025-10-10T12:55:52.1240604Z Downloading mccabe-0.7.0-py2.py3-none-any.whl (7.3 kB)
+2025-10-10T12:55:52.1403073Z Downloading pycodestyle-2.14.0-py2.py3-none-any.whl (31 kB)
+2025-10-10T12:55:52.1565935Z Downloading pyflakes-3.4.0-py2.py3-none-any.whl (63 kB)
+2025-10-10T12:55:52.1732773Z Downloading mypy-1.18.2-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (13.2 MB)
+2025-10-10T12:55:52.4433119Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.2/13.2 MB 49.1 MB/s  0:00:00
+2025-10-10T12:55:52.4584801Z Downloading prometheus_client-0.23.1-py3-none-any.whl (61 kB)
+2025-10-10T12:55:52.4764640Z Downloading structlog-25.4.0-py3-none-any.whl (68 kB)
+2025-10-10T12:55:52.4950416Z Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+2025-10-10T12:55:52.5115767Z Downloading async_timeout-5.0.1-py3-none-any.whl (6.2 kB)
+2025-10-10T12:55:52.5280454Z Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+2025-10-10T12:55:52.5447458Z Downloading certifi-2025.10.5-py3-none-any.whl (163 kB)
+2025-10-10T12:55:52.5762876Z Downloading contourpy-1.3.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (321 kB)
+2025-10-10T12:55:52.5946571Z Downloading coverage-7.10.7-cp39-cp39-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (246 kB)
+2025-10-10T12:55:52.6152562Z Downloading cycler-0.12.1-py3-none-any.whl (8.3 kB)
+2025-10-10T12:55:52.6318133Z Downloading exceptiongroup-1.3.0-py3-none-any.whl (16 kB)
+2025-10-10T12:55:52.6489434Z Downloading fonttools-4.60.1-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.8 MB)
+2025-10-10T12:55:52.7788483Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.8/4.8 MB 36.4 MB/s  0:00:00
+2025-10-10T12:55:52.7935306Z Downloading fsspec-2025.9.0-py3-none-any.whl (199 kB)
+2025-10-10T12:55:52.8135491Z Downloading greenlet-3.2.4-cp39-cp39-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (582 kB)
+2025-10-10T12:55:52.8321831Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 582.8/582.8 kB 26.3 MB/s  0:00:00
+2025-10-10T12:55:52.8465892Z Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+2025-10-10T12:55:52.8643192Z Downloading importlib_resources-6.5.2-py3-none-any.whl (37 kB)
+2025-10-10T12:55:52.8810506Z Downloading iniconfig-2.1.0-py3-none-any.whl (6.0 kB)
+2025-10-10T12:55:52.8981095Z Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+2025-10-10T12:55:52.9147189Z Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+2025-10-10T12:55:52.9342108Z Downloading joblib-1.5.2-py3-none-any.whl (308 kB)
+2025-10-10T12:55:52.9561605Z Downloading kiwisolver-1.4.7-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (1.6 MB)
+2025-10-10T12:55:53.0002532Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.6/1.6 MB 35.3 MB/s  0:00:00
+2025-10-10T12:55:53.0150624Z Downloading language_data-1.3.0-py3-none-any.whl (5.4 MB)
+2025-10-10T12:55:53.1561993Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.4/5.4 MB 37.9 MB/s  0:00:00
+2025-10-10T12:55:53.1712750Z Downloading marisa_trie-1.3.1-cp39-cp39-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (1.2 MB)
+2025-10-10T12:55:53.2049797Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 35.1 MB/s  0:00:00
+2025-10-10T12:55:53.2197948Z Downloading markupsafe-3.0.3-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (20 kB)
+2025-10-10T12:55:53.2360282Z Downloading mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+2025-10-10T12:55:53.2523779Z Downloading pathspec-0.12.1-py3-none-any.whl (31 kB)
+2025-10-10T12:55:53.2688878Z Downloading platformdirs-4.4.0-py3-none-any.whl (18 kB)
+2025-10-10T12:55:53.2856586Z Downloading pyasn1-0.6.1-py3-none-any.whl (83 kB)
+2025-10-10T12:55:53.3027239Z Downloading pyasn1_modules-0.4.2-py3-none-any.whl (181 kB)
+2025-10-10T12:55:53.3219944Z Downloading pygments-2.19.2-py3-none-any.whl (1.2 MB)
+2025-10-10T12:55:53.3551957Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 35.1 MB/s  0:00:00
+2025-10-10T12:55:53.3708892Z Downloading pyparsing-3.2.5-py3-none-any.whl (113 kB)
+2025-10-10T12:55:53.3888331Z Downloading pytokens-0.1.10-py3-none-any.whl (12 kB)
+2025-10-10T12:55:53.4050957Z Downloading pytz-2025.2-py2.py3-none-any.whl (509 kB)
+2025-10-10T12:55:53.4351173Z Downloading regex-2025.9.18-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (789 kB)
+2025-10-10T12:55:53.4594672Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 789.5/789.5 kB 31.3 MB/s  0:00:00
+2025-10-10T12:55:53.4724062Z Downloading rich-14.2.0-py3-none-any.whl (243 kB)
+2025-10-10T12:55:53.4934088Z Downloading markdown_it_py-3.0.0-py3-none-any.whl (87 kB)
+2025-10-10T12:55:53.5102363Z Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+2025-10-10T12:55:53.5268351Z Downloading safetensors-0.6.2-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (485 kB)
+2025-10-10T12:55:53.5525310Z Downloading shellingham-1.5.4-py2.py3-none-any.whl (9.8 kB)
+2025-10-10T12:55:53.5689086Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2025-10-10T12:55:53.5854525Z Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+2025-10-10T12:55:53.6017496Z Downloading sympy-1.14.0-py3-none-any.whl (6.3 MB)
+2025-10-10T12:55:53.7607080Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.3/6.3 MB 39.5 MB/s  0:00:00
+2025-10-10T12:55:53.7753760Z Downloading mpmath-1.3.0-py3-none-any.whl (536 kB)
+2025-10-10T12:55:53.7919535Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 536.2/536.2 kB 23.6 MB/s  0:00:00
+2025-10-10T12:55:53.8089203Z Downloading threadpoolctl-3.6.0-py3-none-any.whl (18 kB)
+2025-10-10T12:55:53.8250855Z Downloading tomli-2.3.0-py3-none-any.whl (14 kB)
+2025-10-10T12:55:53.8414681Z Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+2025-10-10T12:55:53.8580366Z Downloading tzdata-2025.2-py2.py3-none-any.whl (347 kB)
+2025-10-10T12:55:53.8803404Z Downloading werkzeug-3.1.3-py3-none-any.whl (224 kB)
+2025-10-10T12:55:53.9004797Z Downloading zipp-3.23.0-py3-none-any.whl (10 kB)
+2025-10-10T12:55:53.9205556Z Downloading backports_datetime_fromisoformat-2.0.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (52 kB)
+2025-10-10T12:55:53.9373251Z Downloading filelock-3.19.1-py3-none-any.whl (15 kB)
+2025-10-10T12:55:53.9540787Z Downloading mako-1.3.10-py3-none-any.whl (78 kB)
+2025-10-10T12:55:53.9713571Z Downloading networkx-3.2.1-py3-none-any.whl (1.6 MB)
+2025-10-10T12:55:54.0185928Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.6/1.6 MB 33.9 MB/s  0:00:00
+2025-10-10T12:55:54.0334253Z Downloading wrapt-1.17.3-cp39-cp39-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (81 kB)
+2025-10-10T12:56:08.9499993Z Building wheels for collected packages: annoy, hnswlib, blis
+2025-10-10T12:56:08.9510516Z   Building wheel for annoy (pyproject.toml): started
+2025-10-10T12:56:18.5292858Z   Building wheel for annoy (pyproject.toml): finished with status 'done'
+2025-10-10T12:56:18.5309751Z   Created wheel for annoy: filename=annoy-1.17.3-cp39-cp39-linux_x86_64.whl size=523057 sha256=62c45825e80e75975ea5a7e0da20513fc9ac8f13ed64d92cc1647b968f7a970b
+2025-10-10T12:56:18.5311990Z   Stored in directory: /home/runner/.cache/pip/wheels/09/a9/54/37478e65995fe712f7da465749da9ddb21db6b1a599d591ac7
+2025-10-10T12:56:18.5348747Z   Building wheel for hnswlib (pyproject.toml): started
+2025-10-10T12:56:38.4980261Z   Building wheel for hnswlib (pyproject.toml): finished with status 'done'
+2025-10-10T12:56:38.5016669Z   Created wheel for hnswlib: filename=hnswlib-0.8.0-cp39-cp39-linux_x86_64.whl size=2357392 sha256=3181a919bb826350369e68c23f3f235c72558a5b314555dbf1adcf900e314121
+2025-10-10T12:56:38.5018910Z   Stored in directory: /home/runner/.cache/pip/wheels/81/b3/1d/920a1ed1f9ede20be60d1108445e5789eef54c5144c9d746f6
+2025-10-10T12:56:38.5050280Z   Building wheel for blis (pyproject.toml): started
+2025-10-10T12:57:40.3814255Z   Building wheel for blis (pyproject.toml): still running...
+2025-10-10T12:58:42.2826151Z   Building wheel for blis (pyproject.toml): still running...
+2025-10-10T12:59:54.4270294Z   Building wheel for blis (pyproject.toml): still running...
+2025-10-10T13:00:58.6587077Z   Building wheel for blis (pyproject.toml): still running...
+2025-10-10T13:01:59.1637184Z   Building wheel for blis (pyproject.toml): still running...
+2025-10-10T13:03:02.6694641Z   Building wheel for blis (pyproject.toml): still running...
+2025-10-10T13:04:04.4399761Z   Building wheel for blis (pyproject.toml): still running...
+2025-10-10T13:04:57.9451548Z   Building wheel for blis (pyproject.toml): finished with status 'done'
+2025-10-10T13:04:57.9569163Z   Created wheel for blis: filename=blis-1.3.0-cp39-cp39-linux_x86_64.whl size=14635559 sha256=4fe59fd6b4463fd7bf81730e5ed089f142b5b3f267b50c86ef3a1248c219cf0b
+2025-10-10T13:04:57.9571317Z   Stored in directory: /home/runner/.cache/pip/wheels/2b/75/f4/e540f5b1ef1d2610200886c45092f5be21cfe8309ccc48c577
+2025-10-10T13:04:57.9593555Z Successfully built annoy hnswlib blis
+2025-10-10T13:04:58.8781497Z Installing collected packages: pytz, nvidia-cusparselt-cu12, mpmath, cymem, annoy, zipp, wrapt, wasabi, urllib3, tzdata, typing-extensions, tqdm, tomli, threadpoolctl, sympy, sqlparse, spacy-loggers, spacy-legacy, sniffio, smmap, six, shellingham, safetensors, regex, pyyaml, pytokens, python-dotenv, pyparsing, pygments, pyflakes, pycodestyle, pyasn1, pyarrow, psycopg2-binary, protobuf, prometheus-client, pluggy, platformdirs, pillow, pathspec, packaging, nvidia-nvtx-cu12, nvidia-nvjitlink-cu12, nvidia-nccl-cu12, nvidia-curand-cu12, nvidia-cufile-cu12, nvidia-cuda-runtime-cu12, nvidia-cuda-nvrtc-cu12, nvidia-cuda-cupti-cu12, nvidia-cublas-cu12, numpy, networkx, mypy-extensions, murmurhash, mdurl, mccabe, markupsafe, marisa-trie, kiwisolver, joblib, itsdangerous, iniconfig, idna, hf-xet, h11, greenlet, fsspec, fonttools, filelock, cycler, coverage, cloudpickle, click, charset_normalizer, certifi, catalogue, cachetools, blinker, backports-datetime-fromisoformat, async-timeout, annotated-types, werkzeug, uvicorn, typing-inspection, structlog, srsly, sqlalchemy, smart-open, scipy, rsa, requests, redis, python-dateutil, pydantic-core, pyasn1-modules, preshed, opencv-python, nvidia-cusparse-cu12, nvidia-cufft-cu12, nvidia-cudnn-cu12, nltk, mypy, marshmallow, markdown-it-py, Mako, language-data, jinja2, importlib-resources, importlib-metadata, hnswlib, gunicorn, graphql-core, gitdb, flake8, faiss-cpu, exceptiongroup, contourpy, cloudpathlib, blis, black, triton, scikit-learn, rich, pytest, pydantic, pandas, opentelemetry-api, nvidia-cusolver-cu12, matplotlib, langcodes, huggingface-hub, graphql-relay, google-auth, gitpython, gensim, flask, docker, anyio, alembic, typer, torch, tokenizers, starlette, pytest-cov, opentelemetry-semantic-conventions, graphene, flask-cors, databricks-sdk, confection, weasel, transformers, thinc, opentelemetry-sdk, fastapi, spacy, sentence-transformers, mlflow-skinny, mlflow
+2025-10-10T13:06:38.4193582Z 
+2025-10-10T13:06:38.4468304Z Successfully installed Mako-1.3.10 alembic-1.16.5 annotated-types-0.7.0 annoy-1.17.3 anyio-4.11.0 async-timeout-5.0.1 backports-datetime-fromisoformat-2.0.3 black-25.9.0 blinker-1.9.0 blis-1.3.0 cachetools-6.2.0 catalogue-2.0.10 certifi-2025.10.5 charset_normalizer-3.4.3 click-8.1.8 cloudpathlib-0.23.0 cloudpickle-3.1.1 confection-0.1.5 contourpy-1.3.0 coverage-7.10.7 cycler-0.12.1 cymem-2.0.11 databricks-sdk-0.67.0 docker-7.1.0 exceptiongroup-1.3.0 faiss-cpu-1.12.0 fastapi-0.118.3 filelock-3.19.1 flake8-7.3.0 flask-3.1.2 flask-cors-6.0.1 fonttools-4.60.1 fsspec-2025.9.0 gensim-4.3.2 gitdb-4.0.12 gitpython-3.1.45 google-auth-2.41.1 graphene-3.4.3 graphql-core-3.2.6 graphql-relay-3.2.0 greenlet-3.2.4 gunicorn-23.0.0 h11-0.16.0 hf-xet-1.1.10 hnswlib-0.8.0 huggingface-hub-0.35.3 idna-3.10 importlib-metadata-8.7.0 importlib-resources-6.5.2 iniconfig-2.1.0 itsdangerous-2.2.0 jinja2-3.1.6 joblib-1.5.2 kiwisolver-1.4.7 langcodes-3.5.0 language-data-1.3.0 marisa-trie-1.3.1 markdown-it-py-3.0.0 markupsafe-3.0.3 marshmallow-4.0.1 matplotlib-3.9.4 mccabe-0.7.0 mdurl-0.1.2 mlflow-3.1.4 mlflow-skinny-3.1.4 mpmath-1.3.0 murmurhash-1.0.13 mypy-1.18.2 mypy-extensions-1.1.0 networkx-3.2.1 nltk-3.9.2 numpy-2.0.2 nvidia-cublas-cu12-12.8.4.1 nvidia-cuda-cupti-cu12-12.8.90 nvidia-cuda-nvrtc-cu12-12.8.93 nvidia-cuda-runtime-cu12-12.8.90 nvidia-cudnn-cu12-9.10.2.21 nvidia-cufft-cu12-11.3.3.83 nvidia-cufile-cu12-1.13.1.3 nvidia-curand-cu12-10.3.9.90 nvidia-cusolver-cu12-11.7.3.90 nvidia-cusparse-cu12-12.5.8.93 nvidia-cusparselt-cu12-0.7.1 nvidia-nccl-cu12-2.27.3 nvidia-nvjitlink-cu12-12.8.93 nvidia-nvtx-cu12-12.8.90 opencv-python-4.12.0.88 opentelemetry-api-1.37.0 opentelemetry-sdk-1.37.0 opentelemetry-semantic-conventions-0.58b0 packaging-25.0 pandas-2.3.3 pathspec-0.12.1 pillow-11.3.0 platformdirs-4.4.0 pluggy-1.6.0 preshed-3.0.10 prometheus-client-0.23.1 protobuf-6.32.1 psycopg2-binary-2.9.11 pyarrow-20.0.0 pyasn1-0.6.1 pyasn1-modules-0.4.2 pycodestyle-2.14.0 pydantic-2.12.0 pydantic-core-2.41.1 pyflakes-3.4.0 pygments-2.19.2 pyparsing-3.2.5 pytest-8.4.2 pytest-cov-7.0.0 python-dateutil-2.9.0.post0 python-dotenv-1.1.1 pytokens-0.1.10 pytz-2025.2 pyyaml-6.0.3 redis-6.4.0 regex-2025.9.18 requests-2.32.5 rich-14.2.0 rsa-4.9.1 safetensors-0.6.2 scikit-learn-1.6.1 scipy-1.13.1 sentence-transformers-5.1.1 shellingham-1.5.4 six-1.17.0 smart-open-7.3.1 smmap-5.0.2 sniffio-1.3.1 spacy-3.8.7 spacy-legacy-3.0.12 spacy-loggers-1.0.5 sqlalchemy-2.0.43 sqlparse-0.5.3 srsly-2.5.1 starlette-0.48.0 structlog-25.4.0 sympy-1.14.0 thinc-8.3.6 threadpoolctl-3.6.0 tokenizers-0.22.1 tomli-2.3.0 torch-2.8.0 tqdm-4.67.1 transformers-4.57.0 triton-3.4.0 typer-0.19.2 typing-extensions-4.15.0 typing-inspection-0.4.2 tzdata-2025.2 urllib3-2.5.0 uvicorn-0.37.0 wasabi-1.1.3 weasel-0.4.1 werkzeug-3.1.3 wrapt-1.17.3 zipp-3.23.0

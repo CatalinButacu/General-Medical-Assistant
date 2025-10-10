@@ -1,0 +1,5 @@
+2025-10-10T12:53:06.3950000Z Job is about to start running on the hosted runner: GitHub Actions 1000000029
+2025-10-10T12:53:06.3950000Z Job is waiting for a hosted runner to come online.
+2025-10-10T12:53:06.3690000Z Requested labels: ubuntu-latest
+2025-10-10T12:53:06.3690000Z Job defined at: CatalinButacu/RAG-Medical-Assistant/.github/workflows/deploy.yml@refs/heads/main
+2025-10-10T12:53:06.3690000Z Waiting for a runner to pick up this job...

@@ -291,4 +291,5 @@ def health_check():
         'status': 'healthy',
         'service': 'health-profile',
         'timestamp': datetime.utcnow().isoformat()
-    }), 200
+    }), 200 
+ 

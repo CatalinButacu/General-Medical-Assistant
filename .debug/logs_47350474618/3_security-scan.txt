@@ -1,0 +1,403 @@
+﻿2025-10-10T12:53:09.7847259Z Current runner version: '2.328.0'
+2025-10-10T12:53:09.7882277Z ##[group]Runner Image Provisioner
+2025-10-10T12:53:09.7883556Z Hosted Compute Agent
+2025-10-10T12:53:09.7884434Z Version: 20250912.392
+2025-10-10T12:53:09.7885673Z Commit: d921fda672a98b64f4f82364647e2f10b2267d0b
+2025-10-10T12:53:09.7886864Z Build Date: 2025-09-12T15:23:14Z
+2025-10-10T12:53:09.7887793Z ##[endgroup]
+2025-10-10T12:53:09.7888755Z ##[group]Operating System
+2025-10-10T12:53:09.7889684Z Ubuntu
+2025-10-10T12:53:09.7890495Z 24.04.3
+2025-10-10T12:53:09.7891627Z LTS
+2025-10-10T12:53:09.7892448Z ##[endgroup]
+2025-10-10T12:53:09.7893220Z ##[group]Runner Image
+2025-10-10T12:53:09.7894268Z Image: ubuntu-24.04
+2025-10-10T12:53:09.7895122Z Version: 20250929.60.1
+2025-10-10T12:53:09.7896992Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20250929.60/images/ubuntu/Ubuntu2404-Readme.md
+2025-10-10T12:53:09.7899739Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20250929.60
+2025-10-10T12:53:09.7901887Z ##[endgroup]
+2025-10-10T12:53:09.7904101Z ##[group]GITHUB_TOKEN Permissions
+2025-10-10T12:53:09.7906870Z Actions: read
+2025-10-10T12:53:09.7907792Z Contents: read
+2025-10-10T12:53:09.7908642Z Metadata: read
+2025-10-10T12:53:09.7909439Z SecurityEvents: write
+2025-10-10T12:53:09.7910388Z ##[endgroup]
+2025-10-10T12:53:09.7913649Z Secret source: Actions
+2025-10-10T12:53:09.7915120Z Prepare workflow directory
+2025-10-10T12:53:09.9467817Z Prepare all required actions
+2025-10-10T12:53:09.9586057Z Getting action download info
+2025-10-10T12:53:10.2758470Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+2025-10-10T12:53:10.4545669Z Download action repository 'aquasecurity/trivy-action@master' (SHA:b6643a29fecd7f34b3597bc6acb0a98b03d33ff8)
+2025-10-10T12:53:10.8094903Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2025-10-10T12:53:11.0126437Z Getting action download info
+2025-10-10T12:53:11.1398015Z Download action repository 'aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1' (SHA:e6c2c5e321ed9123bda567646e2f96565e34abe1)
+2025-10-10T12:53:11.4118878Z Download action repository 'actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809' (SHA:0400d5f644dc74513175e3cd8d07132dd4860809)
+2025-10-10T12:53:11.6064938Z Getting action download info
+2025-10-10T12:53:11.7749391Z Download action repository 'actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8' (SHA:08c6903cd8c0fde910a37f88322edcfb5dd907a8)
+2025-10-10T12:53:11.9029278Z Complete job name: security-scan
+2025-10-10T12:53:11.9709155Z ##[group]Run actions/checkout@v4
+2025-10-10T12:53:11.9710434Z with:
+2025-10-10T12:53:11.9711659Z   token: ***
+2025-10-10T12:53:11.9712490Z   repository: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:11.9713530Z   ssh-strict: true
+2025-10-10T12:53:11.9714234Z   ssh-user: git
+2025-10-10T12:53:11.9714958Z   persist-credentials: true
+2025-10-10T12:53:11.9715769Z   clean: true
+2025-10-10T12:53:11.9716501Z   sparse-checkout-cone-mode: true
+2025-10-10T12:53:11.9717418Z   fetch-depth: 1
+2025-10-10T12:53:11.9718130Z   fetch-tags: false
+2025-10-10T12:53:11.9718863Z   show-progress: true
+2025-10-10T12:53:11.9719588Z   lfs: false
+2025-10-10T12:53:11.9720261Z   submodules: false
+2025-10-10T12:53:11.9720998Z   set-safe-directory: true
+2025-10-10T12:53:11.9722216Z env:
+2025-10-10T12:53:11.9722855Z   REGISTRY: ghcr.io
+2025-10-10T12:53:11.9723696Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:11.9724693Z ##[endgroup]
+2025-10-10T12:53:12.0904484Z Syncing repository: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:12.0908795Z ##[group]Getting Git version info
+2025-10-10T12:53:12.0911519Z Working directory is '/home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant'
+2025-10-10T12:53:12.0915249Z [command]/usr/bin/git version
+2025-10-10T12:53:12.0986532Z git version 2.51.0
+2025-10-10T12:53:12.1017879Z ##[endgroup]
+2025-10-10T12:53:12.1034890Z Temporarily overriding HOME='/home/runner/work/_temp/cc7c5073-4bd2-466c-ab51-1c44dc6fade6' before making global git config changes
+2025-10-10T12:53:12.1041938Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-10T12:53:12.1057318Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant
+2025-10-10T12:53:12.1099223Z Deleting the contents of '/home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant'
+2025-10-10T12:53:12.1103782Z ##[group]Initializing the repository
+2025-10-10T12:53:12.1110049Z [command]/usr/bin/git init /home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant
+2025-10-10T12:53:12.1244197Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-10-10T12:53:12.1265665Z hint: is subject to change. To configure the initial branch name to use in all
+2025-10-10T12:53:12.1267670Z hint: of your new repositories, which will suppress this warning, call:
+2025-10-10T12:53:12.1268882Z hint:
+2025-10-10T12:53:12.1269714Z hint: 	git config --global init.defaultBranch <name>
+2025-10-10T12:53:12.1270775Z hint:
+2025-10-10T12:53:12.1272481Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-10-10T12:53:12.1275159Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-10-10T12:53:12.1277321Z hint:
+2025-10-10T12:53:12.1278422Z hint: 	git branch -m <name>
+2025-10-10T12:53:12.1279836Z hint:
+2025-10-10T12:53:12.1281891Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2025-10-10T12:53:12.1285435Z Initialized empty Git repository in /home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant/.git/
+2025-10-10T12:53:12.1291056Z [command]/usr/bin/git remote add origin https://github.com/CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:12.1314900Z ##[endgroup]
+2025-10-10T12:53:12.1316406Z ##[group]Disabling automatic garbage collection
+2025-10-10T12:53:12.1319665Z [command]/usr/bin/git config --local gc.auto 0
+2025-10-10T12:53:12.1357405Z ##[endgroup]
+2025-10-10T12:53:12.1359518Z ##[group]Setting up auth
+2025-10-10T12:53:12.1364936Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-10T12:53:12.1399956Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-10T12:53:12.1759685Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-10T12:53:12.1795785Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-10T12:53:12.2036645Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-10-10T12:53:12.2075404Z ##[endgroup]
+2025-10-10T12:53:12.2078715Z ##[group]Fetching the repository
+2025-10-10T12:53:12.2100324Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +fd2604ff67f347fed22a9a92058b6ad6c7ee4530:refs/remotes/origin/main
+2025-10-10T12:53:12.6905801Z From https://github.com/CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:12.6908933Z  * [new ref]         fd2604ff67f347fed22a9a92058b6ad6c7ee4530 -> origin/main
+2025-10-10T12:53:12.6946788Z ##[endgroup]
+2025-10-10T12:53:12.6948623Z ##[group]Determining the checkout info
+2025-10-10T12:53:12.6953210Z ##[endgroup]
+2025-10-10T12:53:12.6959912Z [command]/usr/bin/git sparse-checkout disable
+2025-10-10T12:53:12.7005168Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2025-10-10T12:53:12.7139558Z ##[group]Checking out the ref
+2025-10-10T12:53:12.7140787Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2025-10-10T12:53:12.7171481Z Switched to a new branch 'main'
+2025-10-10T12:53:12.7188936Z branch 'main' set up to track 'origin/main'.
+2025-10-10T12:53:12.7231739Z ##[endgroup]
+2025-10-10T12:53:12.7273152Z [command]/usr/bin/git log -1 --format=%H
+2025-10-10T12:53:12.7312354Z fd2604ff67f347fed22a9a92058b6ad6c7ee4530
+2025-10-10T12:53:12.7789986Z ##[group]Run aquasecurity/trivy-action@master
+2025-10-10T12:53:12.7790751Z with:
+2025-10-10T12:53:12.7791495Z   scan-type: fs
+2025-10-10T12:53:12.7792019Z   scan-ref: .
+2025-10-10T12:53:12.7792540Z   format: table
+2025-10-10T12:53:12.7793098Z   output: trivy-results.txt
+2025-10-10T12:53:12.7793727Z   ignore-unfixed: false
+2025-10-10T12:53:12.7794309Z   vuln-type: os,library
+2025-10-10T12:53:12.7794974Z   severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+2025-10-10T12:53:12.7797653Z   cache-dir: /home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant/.cache/trivy
+2025-10-10T12:53:12.7798742Z   list-all-pkgs: false
+2025-10-10T12:53:12.7799354Z   version: v0.65.0
+2025-10-10T12:53:12.7799909Z   cache: true
+2025-10-10T12:53:12.7800453Z   skip-setup-trivy: false
+2025-10-10T12:53:12.7801608Z   token-setup-trivy: ***
+2025-10-10T12:53:12.7802263Z env:
+2025-10-10T12:53:12.7802771Z   REGISTRY: ghcr.io
+2025-10-10T12:53:12.7803445Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:12.7804240Z ##[endgroup]
+2025-10-10T12:53:12.8076262Z ##[group]Run aquasecurity/setup-trivy@e6c2c5e321ed9123bda567646e2f96565e34abe1
+2025-10-10T12:53:12.8077215Z with:
+2025-10-10T12:53:12.8077727Z   version: v0.65.0
+2025-10-10T12:53:12.8078299Z   cache: true
+2025-10-10T12:53:12.8079124Z   token: ***
+2025-10-10T12:53:12.8079692Z   path: $HOME/.local/bin
+2025-10-10T12:53:12.8080337Z   github-server-url: https://github.com
+2025-10-10T12:53:12.8081013Z env:
+2025-10-10T12:53:12.8081737Z   REGISTRY: ghcr.io
+2025-10-10T12:53:12.8082397Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:12.8083149Z ##[endgroup]
+2025-10-10T12:53:12.8140945Z ##[group]Run echo "dir=$HOME/.local/bin/trivy-bin" >> $GITHUB_OUTPUT
+2025-10-10T12:53:12.8142332Z [36;1mecho "dir=$HOME/.local/bin/trivy-bin" >> $GITHUB_OUTPUT[0m
+2025-10-10T12:53:12.8199662Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2025-10-10T12:53:12.8200593Z env:
+2025-10-10T12:53:12.8201354Z   REGISTRY: ghcr.io
+2025-10-10T12:53:12.8202085Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:12.8202847Z ##[endgroup]
+2025-10-10T12:53:12.8450318Z ##[group]Run actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809
+2025-10-10T12:53:12.8450815Z with:
+2025-10-10T12:53:12.8451409Z   path: /home/runner/.local/bin/trivy-bin
+2025-10-10T12:53:12.8451855Z   key: trivy-binary-v0.65.0-Linux-X64
+2025-10-10T12:53:12.8452278Z   enableCrossOsArchive: false
+2025-10-10T12:53:12.8452668Z   fail-on-cache-miss: false
+2025-10-10T12:53:12.8453029Z   lookup-only: false
+2025-10-10T12:53:12.8453373Z   save-always: false
+2025-10-10T12:53:12.8453696Z env:
+2025-10-10T12:53:12.8453997Z   REGISTRY: ghcr.io
+2025-10-10T12:53:12.8454383Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:12.8454808Z ##[endgroup]
+2025-10-10T12:53:13.1412759Z Cache hit for: trivy-binary-v0.65.0-Linux-X64
+2025-10-10T12:53:13.9513710Z Received 42139166 of 42139166 (100.0%), 59.9 MBs/sec
+2025-10-10T12:53:13.9514319Z Cache Size: ~40 MB (42139166 B)
+2025-10-10T12:53:13.9552565Z [command]/usr/bin/tar -xf /home/runner/work/_temp/6df97731-4f3e-4a2e-882c-1a9813b11e86/cache.tzst -P -C /home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant --use-compress-program unzstd
+2025-10-10T12:53:14.3561566Z Cache restored successfully
+2025-10-10T12:53:14.3793704Z Cache restored from key: trivy-binary-v0.65.0-Linux-X64
+2025-10-10T12:53:14.3906758Z ##[group]Run echo /home/runner/.local/bin/trivy-bin >> $GITHUB_PATH
+2025-10-10T12:53:14.3907198Z [36;1mecho /home/runner/.local/bin/trivy-bin >> $GITHUB_PATH[0m
+2025-10-10T12:53:14.3940060Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2025-10-10T12:53:14.3940396Z env:
+2025-10-10T12:53:14.3940564Z   REGISTRY: ghcr.io
+2025-10-10T12:53:14.3940817Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:14.3941314Z ##[endgroup]
+2025-10-10T12:53:14.4030131Z ##[group]Run echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+2025-10-10T12:53:14.4030716Z [36;1mecho "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT[0m
+2025-10-10T12:53:14.4065646Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2025-10-10T12:53:14.4066014Z env:
+2025-10-10T12:53:14.4066199Z   REGISTRY: ghcr.io
+2025-10-10T12:53:14.4066445Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:14.4066716Z ##[endgroup]
+2025-10-10T12:53:14.4179265Z ##[group]Run actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809
+2025-10-10T12:53:14.4179599Z with:
+2025-10-10T12:53:14.4179924Z   path: /home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant/.cache/trivy
+2025-10-10T12:53:14.4180304Z   key: cache-trivy-2025-10-10
+2025-10-10T12:53:14.4180541Z   restore-keys: cache-trivy-
+2025-10-10T12:53:14.4180781Z   enableCrossOsArchive: false
+2025-10-10T12:53:14.4181014Z   fail-on-cache-miss: false
+2025-10-10T12:53:14.4181638Z   lookup-only: false
+2025-10-10T12:53:14.4181857Z   save-always: false
+2025-10-10T12:53:14.4182058Z env:
+2025-10-10T12:53:14.4182242Z   REGISTRY: ghcr.io
+2025-10-10T12:53:14.4182512Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:14.4182793Z ##[endgroup]
+2025-10-10T12:53:14.6679027Z Cache hit for: cache-trivy-2025-10-10
+2025-10-10T12:53:15.7927343Z Received 52636886 of 52636886 (100.0%), 51.4 MBs/sec
+2025-10-10T12:53:15.7928807Z Cache Size: ~50 MB (52636886 B)
+2025-10-10T12:53:15.8011388Z [command]/usr/bin/tar -xf /home/runner/work/_temp/12a1cc78-5f18-4775-b49b-032453f15aed/cache.tzst -P -C /home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant --use-compress-program unzstd
+2025-10-10T12:53:17.2746278Z Cache restored successfully
+2025-10-10T12:53:17.2923802Z Cache restored from key: cache-trivy-2025-10-10
+2025-10-10T12:53:17.3072591Z ##[group]Run echo "$GITHUB_ACTION_PATH" >> $GITHUB_PATH
+2025-10-10T12:53:17.3072957Z [36;1mecho "$GITHUB_ACTION_PATH" >> $GITHUB_PATH[0m
+2025-10-10T12:53:17.3105183Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2025-10-10T12:53:17.3105514Z env:
+2025-10-10T12:53:17.3105693Z   REGISTRY: ghcr.io
+2025-10-10T12:53:17.3105928Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:17.3106351Z   GITHUB_ACTION_PATH: /home/runner/work/_actions/aquasecurity/trivy-action/master
+2025-10-10T12:53:17.3106717Z ##[endgroup]
+2025-10-10T12:53:17.8489013Z ##[group]Run rm -f trivy_envs.txt
+2025-10-10T12:53:17.8489475Z [36;1mrm -f trivy_envs.txt[0m
+2025-10-10T12:53:17.8489847Z [36;1mtouch trivy_envs.txt[0m
+2025-10-10T12:53:17.8532106Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2025-10-10T12:53:17.8532582Z env:
+2025-10-10T12:53:17.8532834Z   REGISTRY: ghcr.io
+2025-10-10T12:53:17.8533192Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:17.8533614Z ##[endgroup]
+2025-10-10T12:53:18.3073450Z ##[group]Run # Note: There is currently no way to distinguish between undefined variables and empty strings in GitHub Actions.
+2025-10-10T12:53:18.3074283Z [36;1m# Note: There is currently no way to distinguish between undefined variables and empty strings in GitHub Actions.[0m
+2025-10-10T12:53:18.3074903Z [36;1m# This limitation affects how we handle default values and empty inputs.[0m
+2025-10-10T12:53:18.3075430Z [36;1m# For more information, see: https://github.com/actions/runner/issues/924[0m
+2025-10-10T12:53:18.3075785Z [36;1m[0m
+2025-10-10T12:53:18.3076114Z [36;1m# The following logic implements the configuration priority described in the README:[0m
+2025-10-10T12:53:18.3076493Z [36;1m#[0m
+2025-10-10T12:53:18.3076662Z [36;1m# Inputs[0m
+2025-10-10T12:53:18.3076855Z [36;1m# Environment Variables[0m
+2025-10-10T12:53:18.3077086Z [36;1m# Config File[0m
+2025-10-10T12:53:18.3077289Z [36;1m# Defaults[0m
+2025-10-10T12:53:18.3077469Z [36;1m#[0m
+2025-10-10T12:53:18.3077830Z [36;1m# As noted above defaults are awkward to handle as GitHub Actions will inject those values as the input[0m
+2025-10-10T12:53:18.3078413Z [36;1m# if the caller doesn't provide them, thus if the input matches the default we don't set it as we[0m
+2025-10-10T12:53:18.3079327Z [36;1m# can't tell the difference.  Plus if we did set it when it was the default value then it could potentially [0m
+2025-10-10T12:53:18.3080011Z [36;1m# override an external environment variable, or something in the callers configuration file, which then wouldn't [0m
+2025-10-10T12:53:18.3080547Z [36;1m# match the configuration priority that is documented.[0m
+2025-10-10T12:53:18.3080854Z [36;1mset_env_var_if_provided() {[0m
+2025-10-10T12:53:18.3081231Z [36;1m  local var_name="$1"[0m
+2025-10-10T12:53:18.3081471Z [36;1m  local input_value="$2"[0m
+2025-10-10T12:53:18.3081710Z [36;1m  local default_value="$3"[0m
+2025-10-10T12:53:18.3081934Z [36;1m[0m
+2025-10-10T12:53:18.3082194Z [36;1m  if [ ! -z "$input_value" ] && [ "$input_value" != "$default_value" ]; then[0m
+2025-10-10T12:53:18.3082607Z [36;1m    # If action was provided with explicit input by the caller set that[0m
+2025-10-10T12:53:18.3083004Z [36;1m    echo "export $var_name=$input_value" >> trivy_envs.txt[0m
+2025-10-10T12:53:18.3083298Z [36;1m  fi[0m
+2025-10-10T12:53:18.3083471Z [36;1m}[0m
+2025-10-10T12:53:18.3083641Z [36;1m[0m
+2025-10-10T12:53:18.3083899Z [36;1m# Set environment variables, handling those with default values[0m
+2025-10-10T12:53:18.3084422Z [36;1m# cf. https://aquasecurity.github.io/trivy/latest/docs/configuration/#environment-variables[0m
+2025-10-10T12:53:18.3084887Z [36;1mset_env_var_if_provided "TRIVY_INPUT" "" ""[0m
+2025-10-10T12:53:18.3085206Z [36;1mset_env_var_if_provided "TRIVY_EXIT_CODE" "" ""[0m
+2025-10-10T12:53:18.3085565Z [36;1mset_env_var_if_provided "TRIVY_IGNORE_UNFIXED" "false" "false"[0m
+2025-10-10T12:53:18.3085977Z [36;1mset_env_var_if_provided "TRIVY_PKG_TYPES" "os,library" "os,library"[0m
+2025-10-10T12:53:18.3086540Z [36;1mset_env_var_if_provided "TRIVY_SEVERITY" "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL" "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"[0m
+2025-10-10T12:53:18.3087071Z [36;1mset_env_var_if_provided "TRIVY_FORMAT" "table" "table"[0m
+2025-10-10T12:53:18.3087412Z [36;1mset_env_var_if_provided "TRIVY_TEMPLATE" "" ""[0m
+2025-10-10T12:53:18.3087778Z [36;1mset_env_var_if_provided "TRIVY_OUTPUT" "trivy-results.txt" ""[0m
+2025-10-10T12:53:18.3088138Z [36;1mset_env_var_if_provided "TRIVY_SKIP_DIRS" "" ""[0m
+2025-10-10T12:53:18.3088466Z [36;1mset_env_var_if_provided "TRIVY_SKIP_FILES" "" ""[0m
+2025-10-10T12:53:18.3088792Z [36;1mset_env_var_if_provided "TRIVY_TIMEOUT" "" ""[0m
+2025-10-10T12:53:18.3089130Z [36;1mset_env_var_if_provided "TRIVY_IGNORE_POLICY" "" ""[0m
+2025-10-10T12:53:18.3089455Z [36;1mset_env_var_if_provided "TRIVY_QUIET" "" ""[0m
+2025-10-10T12:53:18.3089799Z [36;1mset_env_var_if_provided "TRIVY_LIST_ALL_PKGS" "false" "false"[0m
+2025-10-10T12:53:18.3090150Z [36;1mset_env_var_if_provided "TRIVY_SCANNERS" "" ""[0m
+2025-10-10T12:53:18.3090453Z [36;1mset_env_var_if_provided "TRIVY_CONFIG" "" ""[0m
+2025-10-10T12:53:18.3090763Z [36;1mset_env_var_if_provided "TRIVY_TF_VARS" "" ""[0m
+2025-10-10T12:53:18.3091180Z [36;1mset_env_var_if_provided "TRIVY_DOCKER_HOST" "" ""[0m
+2025-10-10T12:53:18.3123209Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2025-10-10T12:53:18.3123526Z env:
+2025-10-10T12:53:18.3123697Z   REGISTRY: ghcr.io
+2025-10-10T12:53:18.3123926Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:18.3124196Z ##[endgroup]
+2025-10-10T12:53:18.3200210Z ##[group]Run entrypoint.sh
+2025-10-10T12:53:18.3200448Z [36;1mentrypoint.sh[0m
+2025-10-10T12:53:18.3229018Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2025-10-10T12:53:18.3229319Z env:
+2025-10-10T12:53:18.3229491Z   REGISTRY: ghcr.io
+2025-10-10T12:53:18.3229735Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:18.3230014Z   INPUT_SCAN_TYPE: fs
+2025-10-10T12:53:18.3230214Z   INPUT_IMAGE_REF: 
+2025-10-10T12:53:18.3230390Z   INPUT_SCAN_REF: .
+2025-10-10T12:53:18.3230575Z   INPUT_TRIVYIGNORES: 
+2025-10-10T12:53:18.3230769Z   INPUT_GITHUB_PAT: 
+2025-10-10T12:53:18.3230970Z   INPUT_LIMIT_SEVERITIES_FOR_SARIF: 
+2025-10-10T12:53:18.3232104Z   TRIVY_CACHE_DIR: /home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant/.cache/trivy
+2025-10-10T12:53:18.3232683Z ##[endgroup]
+2025-10-10T12:53:18.3294936Z Running Trivy with options: trivy fs .
+2025-10-10T12:53:18.4172323Z 2025-10-10T12:53:18Z	INFO	[vuln] Vulnerability scanning is enabled
+2025-10-10T12:53:18.4185849Z 2025-10-10T12:53:18Z	INFO	[secret] Secret scanning is enabled
+2025-10-10T12:53:18.4208358Z 2025-10-10T12:53:18Z	INFO	[secret] If your scanning is slow, please try '--scanners vuln' to disable secret scanning
+2025-10-10T12:53:18.4209785Z 2025-10-10T12:53:18Z	INFO	[secret] Please see also https://trivy.dev/v0.65/docs/scanner/secret#recommendation for faster secret detection
+2025-10-10T12:53:18.5897954Z 2025-10-10T12:53:18Z	INFO	[npm] To collect the license information of packages, "npm install" needs to be performed beforehand	dir="node_modules"
+2025-10-10T12:53:18.5989969Z 2025-10-10T12:53:18Z	WARN	[pip] Unable to find python `site-packages` directory. License detection is skipped.	err="site-packages directory not found"
+2025-10-10T12:53:18.6128571Z 2025-10-10T12:53:18Z	INFO	Suppressing dependencies for development and testing. To display them, try the '--include-dev-deps' flag.
+2025-10-10T12:53:18.6131355Z 2025-10-10T12:53:18Z	INFO	Number of language-specific files	num=1
+2025-10-10T12:53:18.6141916Z 2025-10-10T12:53:18Z	INFO	[npm] Detecting vulnerabilities...
+2025-10-10T12:53:18.6207761Z 
+2025-10-10T12:53:18.6210422Z 📣 [34mNotices:[0m
+2025-10-10T12:53:18.6216545Z   - Version 0.67.0 of Trivy is now available, current version is 0.65.0
+2025-10-10T12:53:18.6219538Z 
+2025-10-10T12:53:18.6220178Z To suppress version checks, run Trivy scans with the --skip-version-check flag
+2025-10-10T12:53:18.6220882Z 
+2025-10-10T12:53:18.6294071Z ##[group]Run rm -f trivy_envs.txt
+2025-10-10T12:53:18.6294374Z [36;1mrm -f trivy_envs.txt[0m
+2025-10-10T12:53:18.6326945Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2025-10-10T12:53:18.6327267Z env:
+2025-10-10T12:53:18.6327458Z   REGISTRY: ghcr.io
+2025-10-10T12:53:18.6327698Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:18.6327972Z ##[endgroup]
+2025-10-10T12:53:18.6416093Z ##[group]Run echo "Security scan completed. Results:"
+2025-10-10T12:53:18.6416468Z [36;1mecho "Security scan completed. Results:"[0m
+2025-10-10T12:53:18.6416771Z [36;1mif [ -f trivy-results.txt ]; then[0m
+2025-10-10T12:53:18.6417037Z [36;1m  cat trivy-results.txt[0m
+2025-10-10T12:53:18.6417263Z [36;1melse[0m
+2025-10-10T12:53:18.6417548Z [36;1m  echo "No security issues found or scan results file not generated."[0m
+2025-10-10T12:53:18.6417884Z [36;1mfi[0m
+2025-10-10T12:53:18.6447615Z shell: /usr/bin/bash -e {0}
+2025-10-10T12:53:18.6447844Z env:
+2025-10-10T12:53:18.6448018Z   REGISTRY: ghcr.io
+2025-10-10T12:53:18.6448264Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:18.6448546Z ##[endgroup]
+2025-10-10T12:53:18.6497972Z Security scan completed. Results:
+2025-10-10T12:53:18.6507841Z 
+2025-10-10T12:53:18.6509354Z Report Summary
+2025-10-10T12:53:18.6511690Z 
+2025-10-10T12:53:18.6512282Z ┌───────────────────┬──────┬─────────────────┬─────────┐
+2025-10-10T12:53:18.6513000Z │      Target       │ Type │ Vulnerabilities │ Secrets │
+2025-10-10T12:53:18.6513699Z ├───────────────────┼──────┼─────────────────┼─────────┤
+2025-10-10T12:53:18.6514576Z │ package-lock.json │ npm  │        4        │    -    │
+2025-10-10T12:53:18.6515254Z └───────────────────┴──────┴─────────────────┴─────────┘
+2025-10-10T12:53:18.6515697Z Legend:
+2025-10-10T12:53:18.6515968Z - '-': Not scanned
+2025-10-10T12:53:18.6516288Z - '0': Clean (no security findings detected)
+2025-10-10T12:53:18.6516493Z 
+2025-10-10T12:53:18.6516498Z 
+2025-10-10T12:53:18.6516598Z For OSS Maintainers: VEX Notice
+2025-10-10T12:53:18.6516836Z --------------------------------
+2025-10-10T12:53:18.6517567Z If you're an OSS maintainer and Trivy has detected vulnerabilities in your project that you believe are not actually exploitable, consider issuing a VEX (Vulnerability Exploitability eXchange) statement.
+2025-10-10T12:53:18.6518872Z VEX allows you to communicate the actual status of vulnerabilities in your project, improving security transparency and reducing false positives for your users.
+2025-10-10T12:53:18.6519702Z Learn more and start using VEX: https://trivy.dev/v0.65/docs/supply-chain/vex/repo#publishing-vex-documents
+2025-10-10T12:53:18.6520087Z 
+2025-10-10T12:53:18.6520293Z To disable this notice, set the TRIVY_DISABLE_VEX_NOTICE environment variable.
+2025-10-10T12:53:18.6520578Z 
+2025-10-10T12:53:18.6520582Z 
+2025-10-10T12:53:18.6520670Z package-lock.json (npm)
+2025-10-10T12:53:18.6520879Z =======================
+2025-10-10T12:53:18.6521435Z Total: 4 (UNKNOWN: 0, LOW: 0, MEDIUM: 0, HIGH: 4, CRITICAL: 0)
+2025-10-10T12:53:18.6521678Z 
+2025-10-10T12:53:18.6522087Z ┌─────────┬────────────────┬──────────┬────────┬───────────────────┬───────────────┬──────────────────────────────────────────────────────────────┐
+2025-10-10T12:53:18.6522825Z │ Library │ Vulnerability  │ Severity │ Status │ Installed Version │ Fixed Version │                            Title                             │
+2025-10-10T12:53:18.6523640Z ├─────────┼────────────────┼──────────┼────────┼───────────────────┼───────────────┼──────────────────────────────────────────────────────────────┤
+2025-10-10T12:53:18.6524335Z │ multer  │ CVE-2025-47935 │ HIGH     │ fixed  │ 1.4.5-lts.2       │ 2.0.0         │ Multer vulnerable to Denial of Service via memory leaks from │
+2025-10-10T12:53:18.6524959Z │         │                │          │        │                   │               │ unclosed streams...                                          │
+2025-10-10T12:53:18.6525478Z │         │                │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2025-47935                   │
+2025-10-10T12:53:18.6526026Z │         ├────────────────┤          │        │                   │               ├──────────────────────────────────────────────────────────────┤
+2025-10-10T12:53:18.6526785Z │         │ CVE-2025-47944 │          │        │                   │               │ Multer vulnerable to Denial of Service from maliciously      │
+2025-10-10T12:53:18.6527344Z │         │                │          │        │                   │               │ crafted requests                                             │
+2025-10-10T12:53:18.6527847Z │         │                │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2025-47944                   │
+2025-10-10T12:53:18.6528400Z │         ├────────────────┤          │        │                   ├───────────────┼──────────────────────────────────────────────────────────────┤
+2025-10-10T12:53:18.6528968Z │         │ CVE-2025-48997 │          │        │                   │ 2.0.1         │ multer: Multer vulnerable to Denial of Service via unhandled │
+2025-10-10T12:53:18.6529507Z │         │                │          │        │                   │               │ exception                                                    │
+2025-10-10T12:53:18.6530140Z │         │                │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2025-48997                   │
+2025-10-10T12:53:18.6530693Z │         ├────────────────┤          │        │                   ├───────────────┼──────────────────────────────────────────────────────────────┤
+2025-10-10T12:53:18.6531486Z │         │ CVE-2025-7338  │          │        │                   │ 2.0.2         │ multer: Multer Denial of Service                             │
+2025-10-10T12:53:18.6532101Z │         │                │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2025-7338                    │
+2025-10-10T12:53:18.6532800Z └─────────┴────────────────┴──────────┴────────┴───────────────────┴───────────────┴──────────────────────────────────────────────────────────────┘
+2025-10-10T12:53:18.6566774Z ##[group]Run actions/upload-artifact@v4
+2025-10-10T12:53:18.6567050Z with:
+2025-10-10T12:53:18.6567271Z   name: security-scan-results
+2025-10-10T12:53:18.6567510Z   path: trivy-results.txt
+2025-10-10T12:53:18.6567726Z   retention-days: 30
+2025-10-10T12:53:18.6567948Z   if-no-files-found: warn
+2025-10-10T12:53:18.6568157Z   compression-level: 6
+2025-10-10T12:53:18.6568351Z   overwrite: false
+2025-10-10T12:53:18.6568548Z   include-hidden-files: false
+2025-10-10T12:53:18.6568758Z env:
+2025-10-10T12:53:18.6568920Z   REGISTRY: ghcr.io
+2025-10-10T12:53:18.6569157Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T12:53:18.6569428Z ##[endgroup]
+2025-10-10T12:53:18.9036325Z With the provided path, there will be 1 file uploaded
+2025-10-10T12:53:18.9056491Z Artifact name is valid!
+2025-10-10T12:53:18.9056935Z Root directory input is valid!
+2025-10-10T12:53:19.0830348Z Beginning upload of artifact content to blob storage
+2025-10-10T12:53:19.2742859Z Uploaded bytes 1194
+2025-10-10T12:53:19.3260325Z Finished uploading artifact content to blob storage!
+2025-10-10T12:53:19.3267263Z SHA256 digest of uploaded artifact zip is 6313bb86c435fb8c5f695be5db5b101dadcfaeed5f12b82052097a61ea5a6e3a
+2025-10-10T12:53:19.3269621Z Finalizing artifact upload
+2025-10-10T12:53:19.4351806Z Artifact security-scan-results.zip successfully finalized. Artifact ID 4237185458
+2025-10-10T12:53:19.4353007Z Artifact security-scan-results has been successfully uploaded! Final size is 1194 bytes. Artifact ID is 4237185458
+2025-10-10T12:53:19.4361338Z Artifact download URL: https://github.com/CatalinButacu/RAG-Medical-Assistant/actions/runs/18407093192/artifacts/4237185458
+2025-10-10T12:53:19.4550036Z Post job cleanup.
+2025-10-10T12:53:19.4577827Z Post job cleanup.
+2025-10-10T12:53:19.6046707Z Cache hit occurred on the primary key cache-trivy-2025-10-10, not saving cache.
+2025-10-10T12:53:19.6176044Z Post job cleanup.
+2025-10-10T12:53:19.6202620Z Post job cleanup.
+2025-10-10T12:53:19.7770844Z Cache hit occurred on the primary key trivy-binary-v0.65.0-Linux-X64, not saving cache.
+2025-10-10T12:53:19.7919474Z Post job cleanup.
+2025-10-10T12:53:19.8880563Z [command]/usr/bin/git version
+2025-10-10T12:53:19.8921700Z git version 2.51.0
+2025-10-10T12:53:19.8970396Z Temporarily overriding HOME='/home/runner/work/_temp/3fdbf3e8-4bd6-4d55-951d-7c625db304a5' before making global git config changes
+2025-10-10T12:53:19.8975136Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-10T12:53:19.8978588Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant
+2025-10-10T12:53:19.9025535Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-10T12:53:19.9064048Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-10T12:53:19.9313815Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-10T12:53:19.9356417Z http.https://github.com/.extraheader
+2025-10-10T12:53:19.9357997Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2025-10-10T12:53:19.9393874Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-10T12:53:19.9891744Z Cleaning up orphan processes

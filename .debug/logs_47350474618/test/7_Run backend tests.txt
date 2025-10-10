@@ -1,0 +1,15 @@
+﻿2025-10-10T13:06:47.9841339Z ##[group]Run cd ml_backend
+2025-10-10T13:06:47.9841621Z [36;1mcd ml_backend[0m
+2025-10-10T13:06:47.9841973Z [36;1mpython -c "print('Backend tests placeholder - no tests directory found')"[0m
+2025-10-10T13:06:47.9875588Z shell: /usr/bin/bash -e {0}
+2025-10-10T13:06:47.9875915Z env:
+2025-10-10T13:06:47.9876086Z   REGISTRY: ghcr.io
+2025-10-10T13:06:47.9876319Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T13:06:47.9876677Z   pythonLocation: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T13:06:47.9877073Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib/pkgconfig
+2025-10-10T13:06:47.9877442Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T13:06:47.9877774Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T13:06:47.9878304Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T13:06:47.9878641Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib
+2025-10-10T13:06:47.9878920Z ##[endgroup]
+2025-10-10T13:06:48.0043323Z Backend tests placeholder - no tests directory found

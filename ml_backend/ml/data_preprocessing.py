@@ -26,20 +26,21 @@ try:
     nltk.download('punkt', quiet=True)
     nltk.download('stopwords', quiet=True)
     nltk.download('wordnet', quiet=True)
-except:
+except Exception:
     pass
+
 
 class MedicalTextPreprocessor:
     """
     Comprehensive medical text preprocessing pipeline
     """
-    
+
     def __init__(self, language_model: str = "en_core_web_sm"):
         self.language_model = language_model
         self.nlp = None
         self.medical_abbreviations = self._load_medical_abbreviations()
         self.drug_name_patterns = self._compile_drug_patterns()
-        
+
         # Initialize spaCy model
         try:
             self.nlp = spacy.load(language_model)
@@ -558,6 +559,6 @@ class MedicalDatasetBuilder:
         if label_encoder_path.exists():
             import joblib
             dataset['label_encoder'] = joblib.load(label_encoder_path)
-        
+
         logger.info(f"Dataset loaded from {load_path}")
         return dataset
