@@ -731,9 +731,13 @@ class MedicalModelTrainer:
 
                 # Copy model files
                 import shutil
-                shutil.copytree(result["model_path"], fine_tuned_path, dirs_exist_ok=True)
+                shutil.copytree(
+                    result["model_path"], fine_tuned_path, dirs_exist_ok=True
+                )
 
-                logger.info(f"BioBERT fine-tuning completed. Model saved to: {fine_tuned_path}")
+                logger.info(
+                    f"BioBERT fine-tuning completed. Model saved to: {fine_tuned_path}"
+                )
 
                 return fine_tuned_path
 

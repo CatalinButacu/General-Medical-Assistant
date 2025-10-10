@@ -558,7 +558,9 @@ class MedicalDatasetBuilder:
                     dataset_copy['train']['labels_encoded'].tolist()
                 )
             if 'test' in dataset_copy:
-                dataset_copy['test']['labels_encoded'] = dataset_copy['test']['labels_encoded'].tolist()
+                dataset_copy['test']['labels_encoded'] = (
+                    dataset_copy['test']['labels_encoded'].tolist()
+                )
 
             json.dump(dataset_copy, f, indent=2)
 
