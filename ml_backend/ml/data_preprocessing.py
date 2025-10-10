@@ -169,12 +169,15 @@ class MedicalTextPreprocessor:
 
         # Remove duplicates and clean
         for key in entities:
-            entities[key] = list(set([item.strip() for item in entities[key] if item.strip()]))
+            items = [item.strip() for item in entities[key] if item.strip()]
+            entities[key] = list(set(items))
 
         return entities
 
-    def tokenize_medical_text(self, text: str,
-                              tokenizer_name: str = "dmis-lab/biobert-base-cased-v1.1") -> Dict[str, Any]:
+    def tokenize_medical_text(
+        self, text: str,
+        tokenizer_name: str = "dmis-lab/biobert-base-cased-v1.1"
+    ) -> Dict[str, Any]:
         """Tokenize medical text using BioBERT tokenizer"""
         try:
             tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
@@ -227,11 +230,14 @@ class MedicalTextPreprocessor:
             processed_data['entities'].append(entities)
 
         # Calculate statistics
-        processed_data['statistics'] = self._calculate_dataset_statistics(processed_data)
+        stats = self._calculate_dataset_statistics(processed_data)
+        processed_data['statistics'] = stats
 
         return processed_data
 
-    def _calculate_dataset_statistics(self, processed_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _calculate_dataset_statistics(
+        self, processed_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Calculate dataset statistics"""
         texts = processed_data['cleaned_texts']
         entities_list = processed_data['entities']
@@ -289,7 +295,8 @@ class MedicalDataAugmentor:
             'pain': ['ache', 'discomfort', 'soreness', 'hurt'],
             'medication': ['medicine', 'drug', 'pharmaceutical', 'remedy'],
             'treatment': ['therapy', 'intervention', 'care', 'management'],
-            'doctor': ['physician', 'clinician', 'healthcare provider', 'medical professional'],
+            'doctor': ['physician', 'clinician', 'healthcare provider',
+                       'medical professional'],
             'patient': ['individual', 'person', 'client', 'case'],
             'symptom': ['sign', 'indication', 'manifestation', 'feature'],
             'condition': ['disorder', 'disease', 'illness', 'ailment'],
@@ -333,7 +340,9 @@ class MedicalDataAugmentor:
 
         for _ in range(n):
             # Choose a random word that has synonyms
-            available_words = [w for w in words if w.lower().strip(string.punctuation) in self.synonym_dict]
+            available_words = [
+                w for w in words if w.lower().strip(string.punctuation) in self.synonym_dict
+            ]
             if available_words:
                 word = np.random.choice(available_words)
                 word_clean = word.lower().strip(string.punctuation)
@@ -376,7 +385,10 @@ class MedicalDataAugmentor:
 
         return ' '.join(new_words)
 
-    def augment_text(self, text: str, num_augmentations: int = 1, techniques: Optional[List[str]] = None) -> List[str]:
+    def augment_text(
+        self, text: str, num_augmentations: int = 1,
+        techniques: Optional[List[str]] = None
+    ) -> List[str]:
         """Generate augmented versions of text"""
         if techniques is None:
             techniques = self.augmentation_techniques
@@ -394,7 +406,8 @@ class MedicalDataAugmentor:
             elif technique == 'random_swap':
                 augmented = self.random_swap(text, n=np.random.randint(1, 3))
             elif technique == 'random_deletion':
-                augmented = self.random_deletion(text, p=np.random.uniform(0.05, 0.15))
+                p = np.random.uniform(0.05, 0.15)
+                augmented = self.random_deletion(text, p=p)
             else:
                 augmented = text
 
@@ -402,7 +415,9 @@ class MedicalDataAugmentor:
 
         return augmented_texts
 
-    def augment_dataset(self, texts: List[str], labels: List[str], augmentation_factor: int = 2) -> Tuple[List[str], List[str]]:
+    def augment_dataset(
+        self, texts: List[str], labels: List[str], augmentation_factor: int = 2
+    ) -> Tuple[List[str], List[str]]:
         """Augment entire dataset"""
         augmented_texts = []
         augmented_labels = []
@@ -482,10 +497,12 @@ class MedicalDatasetBuilder:
             'class_names': label_encoder.classes_.tolist()
         }
 
-    def create_similarity_dataset(self,
-                                  texts: List[str],
-                                  similarity_threshold: float = 0.7,
-                                  num_pairs: int = 1000) -> List[Tuple[str, str, float]]:
+    def create_similarity_dataset(
+        self,
+        texts: List[str],
+        similarity_threshold: float = 0.7,
+        num_pairs: int = 1000
+    ) -> List[Tuple[str, str, float]]:
         """Create similarity dataset from texts"""
 
         # Preprocess texts
@@ -502,7 +519,8 @@ class MedicalDatasetBuilder:
             text1 = clean_texts[idx]
 
             # Create augmented version (should be similar)
-            augmented = self.augmentor.augment_text(text1, num_augmentations=1)[0]
+            augmented_list = self.augmentor.augment_text(text1, num_augmentations=1)
+            augmented = augmented_list[0]
             similarity = np.random.uniform(similarity_threshold, 1.0)
 
             pairs.append((text1, augmented, similarity))
@@ -511,7 +529,9 @@ class MedicalDatasetBuilder:
         num_negative = num_pairs - num_positive
         for _ in range(num_negative):
             # Choose two random different texts
-            idx1, idx2 = np.random.choice(len(clean_texts), size=2, replace=False)
+            idx1, idx2 = np.random.choice(
+                len(clean_texts), size=2, replace=False
+            )
             text1 = clean_texts[idx1]
             text2 = clean_texts[idx2]
 
@@ -530,7 +550,9 @@ class MedicalDatasetBuilder:
             # Convert numpy arrays to lists for JSON serialization
             dataset_copy = dataset.copy()
             if 'train' in dataset_copy:
-                dataset_copy['train']['labels_encoded'] = (dataset_copy['train']['labels_encoded'].tolist())
+                dataset_copy['train']['labels_encoded'] = (
+                    dataset_copy['train']['labels_encoded'].tolist()
+                )
             if 'test' in dataset_copy:
                 dataset_copy['test']['labels_encoded'] = (dataset_copy['test']['labels_encoded'].tolist())
 

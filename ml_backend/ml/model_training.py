@@ -56,7 +56,8 @@ class MedicalTextDataset(Dataset):
     Custom dataset for medical text classification and similarity learning
     """
 
-    def __init__(self, examples: List[MedicalTrainingExample], tokenizer, max_length: int = 512):
+    def __init__(self, examples: List[MedicalTrainingExample], tokenizer,
+                 max_length: int = 512):
         self.examples = examples
         self.tokenizer = tokenizer
         self.max_length = max_length
@@ -247,7 +248,8 @@ class MedicalDataGenerator:
         self.medicine_categories = {
             'analgesic': ['acetaminophen', 'ibuprofen', 'aspirin', 'naproxen'],
             'antibiotic': ['amoxicillin', 'azithromycin', 'ciprofloxacin', 'doxycycline'],
-            'antihypertensive': ['lisinopril', 'amlodipine', 'metoprolol', 'losartan'],
+            'antihypertensive': ['lisinopril', 'amlodipine', 'metoprolol',
+                                 'losartan'],
             'antidiabetic': ['metformin', 'insulin', 'glipizide', 'sitagliptin']
         }
 
@@ -261,7 +263,9 @@ class MedicalDataGenerator:
             "This medication works by"
         ]
 
-    def generate_classification_data(self, num_samples: int = 1000) -> List[MedicalTrainingExample]:
+    def generate_classification_data(
+        self, num_samples: int = 1000
+    ) -> List[MedicalTrainingExample]:
         """Generate medical text classification data"""
         examples = []
 
@@ -295,7 +299,9 @@ class MedicalDataGenerator:
 
         return examples
 
-    def generate_similarity_data(self, num_pairs: int = 1000) -> List[Tuple[str, str, float]]:
+    def generate_similarity_data(
+        self, num_pairs: int = 1000
+    ) -> List[Tuple[str, str, float]]:
         """Generate medical text similarity pairs"""
         pairs = []
 
@@ -361,15 +367,16 @@ class MedicalModelTrainer:
     ) -> Dict[str, Any]:
         """Train medical text classification model"""
 
-        with mlflow.start_run(
-            run_name=f"classification_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        ):
+        run_name = f"classification_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        with mlflow.start_run(run_name=run_name):
             # Log configuration
             mlflow.log_params(self.config.__dict__)
 
             try:
                 # Initialize tokenizer
-                tokenizer = AutoTokenizer.from_pretrained(self.config.model_name)
+                tokenizer = AutoTokenizer.from_pretrained(
+                    self.config.model_name
+                )
 
                 # Create dataset
                 dataset = MedicalTextDataset(training_data, tokenizer, self.config.max_length)
@@ -465,25 +472,36 @@ class MedicalModelTrainer:
     ) -> Dict[str, Any]:
         """Train medical text similarity model"""
 
-        with mlflow.start_run(run_name=f"similarity_{datetime.now().strftime('%Y%m%d_%H%M%S')}"):
+        run_name = f"similarity_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        with mlflow.start_run(run_name=run_name):
             # Log configuration
             mlflow.log_params(self.config.__dict__)
 
             try:
                 # Initialize tokenizer
-                tokenizer = AutoTokenizer.from_pretrained(self.config.model_name)
+                tokenizer = AutoTokenizer.from_pretrained(
+                    self.config.model_name
+                )
 
                 # Create dataset
-                dataset = MedicalSimilarityDataset(similarity_data, tokenizer, self.config.max_length)
+                dataset = MedicalSimilarityDataset(
+                    similarity_data, tokenizer, self.config.max_length
+                )
 
                 # Split data
                 train_size = int(0.8 * len(dataset))
                 val_size = len(dataset) - train_size
-                train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
+                train_dataset, val_dataset = torch.utils.data.random_split(
+                    dataset, [train_size, val_size]
+                )
 
                 # Create data loaders
-                train_loader = DataLoader(train_dataset, batch_size=self.config.batch_size, shuffle=True)
-                val_loader = DataLoader(val_dataset, batch_size=self.config.batch_size, shuffle=False)
+                train_loader = DataLoader(
+                    train_dataset, batch_size=self.config.batch_size, shuffle=True
+                )
+                val_loader = DataLoader(
+                    val_dataset, batch_size=self.config.batch_size, shuffle=False
+                )
 
                 # Initialize model
                 model = MedicalSimilarityModel(self.config.model_name).to(self.device)
@@ -526,7 +544,8 @@ class MedicalModelTrainer:
                         if batch_idx % self.config.logging_steps == 0:
                             logger.info(
                                 f"Epoch {epoch + 1}/{self.config.num_epochs}, "
-                                f"Batch {batch_idx}, Loss: {loss.item():.4f}"
+                                f"Batch {batch_idx}, "
+                                f"Loss: {loss.item():.4f}"
                             )
 
                     # Validation phase
@@ -594,10 +613,13 @@ class MedicalModelTrainer:
                     model, "similarity_model"
                 )
 
-                logger.info("Similarity model training completed successfully")
+                logger.info(
+                    "Similarity model training completed successfully"
+                )
 
                 return {
-                    "model_path": f"{self.config.output_dir}/similarity_model",
+                    "model_path":
+                        f"{self.config.output_dir}/similarity_model",
                     "best_val_loss": best_val_loss,
                     "final_mse": mse,
                     "final_mae": mae,
@@ -607,6 +629,56 @@ class MedicalModelTrainer:
                 logger.error(f"Similarity training failed: {str(e)}")
                 mlflow.log_param("error", str(e))
                 raise
+
+    def evaluate_classification_model(
+        self, model_path: str, test_data: List[MedicalTrainingExample]
+    ) -> Dict[str, Any]:
+        """Evaluate a trained classification model"""
+        from sklearn.metrics import classification_report
+        from transformers import AutoModelForSequenceClassification
+
+        try:
+            # Load model and tokenizer
+            model = AutoModelForSequenceClassification.from_pretrained(model_path)
+            tokenizer = AutoTokenizer.from_pretrained(model_path)
+
+            # Create dataset
+            dataset = MedicalTextDataset(
+                test_data, tokenizer, self.config.max_length
+            )
+
+            # Trainer
+            trainer = Trainer(model=model)
+
+            # Predictions
+            predictions = trainer.predict(dataset)
+            predicted_labels = np.argmax(predictions.predictions, axis=1)
+
+            # True labels
+            true_labels = [example.label for example in test_data]
+            true_labels_encoded = [
+                dataset.label_to_id[label] for label in true_labels
+            ]
+
+            # Metrics
+            accuracy = accuracy_score(true_labels_encoded, predicted_labels)
+            report = classification_report(
+                true_labels_encoded, predicted_labels,
+                target_names=list(dataset.id_to_label.values())
+            )
+
+            logger.info(f"Classification evaluation report:\n{report}")
+
+            return {
+                "accuracy": accuracy,
+                "classification_report": report,
+            }
+
+        except Exception as e:
+            logger.error(
+                f"Classification evaluation failed: {str(e)}"
+            )
+            raise
 
     def _compute_classification_metrics(self, eval_pred):
         """Compute classification metrics"""

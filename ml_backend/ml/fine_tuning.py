@@ -191,8 +191,8 @@ class MedicalBERTSimilarity(nn.Module):
         # Similarity head
         self.dropout = nn.Dropout(dropout_rate)
         self.similarity_head = nn.Sequential(
-            # The input is a concatenation of the two embeddings, their absolute difference,
-            # and their element-wise product.
+            # The input is a concatenation of the two embeddings,
+            # their absolute difference, and their element-wise product.
             nn.Linear(self.config.hidden_size * 4, 256),
             nn.ReLU(),
             nn.Dropout(dropout_rate),
@@ -571,7 +571,9 @@ class BioBERTFineTuner:
 
         return avg_loss, accuracy
 
-    def _train_similarity_epoch(self, model, train_loader, optimizer, scheduler, criterion):
+    def _train_similarity_epoch(
+        self, model, train_loader, optimizer, scheduler, criterion
+    ):
         """Train similarity model for one epoch"""
         model.train()
         total_loss = 0

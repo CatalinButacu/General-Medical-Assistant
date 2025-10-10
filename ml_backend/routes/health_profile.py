@@ -113,8 +113,12 @@ def create_health_profile():
             existing_profile.current_medications = data.get(
                 'current_medications', existing_profile.current_medications
             )
-            existing_profile.emergency_contact = data.get('emergency_contact', existing_profile.emergency_contact)
-            existing_profile.medical_history = data.get('medical_history', existing_profile.medical_history)
+            existing_profile.emergency_contact = data.get(
+                'emergency_contact', existing_profile.emergency_contact
+            )
+            existing_profile.medical_history = data.get(
+                'medical_history', existing_profile.medical_history
+            )
             existing_profile.updated_at = datetime.utcnow()
 
             db.session.commit()
@@ -134,7 +138,9 @@ def create_health_profile():
                 blood_type=data.get('blood_type'),
                 allergies=data.get('allergies', []),
                 chronic_conditions=data.get('chronic_conditions', []),
-                current_medications=data.get('current_medications', []),
+                current_medications=data.get(
+                    'current_medications', []
+                ),
                 emergency_contact=data.get('emergency_contact'),
                 medical_history=data.get('medical_history', [])
             )
@@ -149,7 +155,9 @@ def create_health_profile():
 
     except SQLAlchemyError as e:
         db.session.rollback()
-        logger.error(f"Database error creating/updating health profile: {e}")
+        logger.error(
+            f"Database error creating/updating health profile: {e}"
+        )
         return jsonify({'error': 'Database error'}), 500
     except Exception as e:
         logger.error(f"Error creating/updating health profile: {e}")
@@ -177,8 +185,12 @@ def update_health_profile():
         health_profile.gender = data.get('gender', health_profile.gender)
         health_profile.height = data.get('height', health_profile.height)
         health_profile.weight = data.get('weight', health_profile.weight)
-        health_profile.blood_type = data.get('blood_type', health_profile.blood_type)
-        health_profile.allergies = data.get('allergies', health_profile.allergies)
+        health_profile.blood_type = data.get(
+            'blood_type', health_profile.blood_type
+        )
+        health_profile.allergies = data.get(
+            'allergies', health_profile.allergies
+        )
         health_profile.chronic_conditions = data.get(
             'chronic_conditions', health_profile.chronic_conditions
         )
@@ -253,9 +265,18 @@ def get_health_recommendations():
         context = f"""
         Age: {health_profile.age}
         Gender: {health_profile.gender}
-        Chronic conditions: {', '.join(health_profile.chronic_conditions) if health_profile.chronic_conditions else 'None'}
-        Current medications: {', '.join(health_profile.current_medications) if health_profile.current_medications else 'None'}
-        Allergies: {', '.join(health_profile.allergies) if health_profile.allergies else 'None'}
+        Chronic conditions: {
+            ', '.join(health_profile.chronic_conditions)
+            if health_profile.chronic_conditions else 'None'
+        }
+        Current medications: {
+            ', '.join(health_profile.current_medications)
+            if health_profile.current_medications else 'None'
+        }
+        Allergies: {
+            ', '.join(health_profile.allergies)
+            if health_profile.allergies else 'None'
+        }
         """
 
         # Generate recommendations

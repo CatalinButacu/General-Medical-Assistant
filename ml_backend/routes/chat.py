@@ -71,7 +71,8 @@ def create_chat_session():
         db.session.commit()
 
         logger.info(
-            f"New chat session created: {session.id} for user {current_user_id}"
+            f"New chat session created: {session.id} "
+            f"for user {current_user_id}"
         )
 
         return jsonify({
@@ -178,8 +179,10 @@ def send_message(session_id):
                 'age': user.health_profile.age,
                 'gender': user.health_profile.gender,
                 'allergies': user.health_profile.allergies,
-                'chronic_conditions': user.health_profile.chronic_conditions,
-                'current_medications': user.health_profile.current_medications
+                'chronic_conditions':
+                    user.health_profile.chronic_conditions,
+                'current_medications':
+                    user.health_profile.current_medications
             }
 
         # Get RAG response
@@ -191,7 +194,8 @@ def send_message(session_id):
 
             assistant_content = rag_response.get(
                 'response',
-                'I apologize, but I encountered an error processing your request.'
+                'I apologize, but I encountered an error ' 
+                'processing your request.'
             )
             metadata = {
                 'sources': rag_response.get('sources', []),
@@ -201,7 +205,10 @@ def send_message(session_id):
 
         except Exception as e:
             logger.error(f"RAG pipeline error: {str(e)}")
-            assistant_content = "I apologize, but I'm currently experiencing technical difficulties. Please try again later."
+            assistant_content = (
+                "I apologize, but I'm currently experiencing "
+                "technical difficulties. Please try again later."
+            )
             metadata = {'error': 'RAG pipeline unavailable'}
 
         # Save assistant message
@@ -231,7 +238,10 @@ def send_message(session_id):
         return jsonify({'error': 'Failed to process message'}), 500
 
 
-@chat_bp.route('/sessions/<int:session_id>/messages/<int:message_id>', methods=['DELETE'])
+@chat_bp.route(
+    '/sessions/<int:session_id>/messages/<int:message_id>',
+    methods=['DELETE']
+)
 @jwt_required()
 def delete_message(session_id, message_id):
     """Delete a specific message"""
@@ -258,7 +268,9 @@ def delete_message(session_id, message_id):
         db.session.delete(message)
         db.session.commit()
 
-        logger.info(f"Message deleted: {message_id} from session {session_id}")
+        logger.info(
+            f"Message deleted: {message_id} from session {session_id}"
+        )
 
         return jsonify({'message': 'Message deleted successfully'}), 200
 
@@ -287,8 +299,10 @@ def quick_query():
                 'age': user.health_profile.age,
                 'gender': user.health_profile.gender,
                 'allergies': user.health_profile.allergies,
-                'chronic_conditions': user.health_profile.chronic_conditions,
-                'current_medications': user.health_profile.current_medications
+                'chronic_conditions':
+                    user.health_profile.chronic_conditions,
+                'current_medications':
+                    user.health_profile.current_medications
             }
 
         # Get RAG response
@@ -311,7 +325,8 @@ def quick_query():
         except Exception as e:
             logger.error(f"RAG pipeline error in quick query: {str(e)}")
             return jsonify({
-                'response': "I apologize, but I'm currently experiencing technical difficulties. Please try again later.",
+                'response': "I apologize, but I'm currently experiencing "
+                            "technical difficulties. Please try again later.",
                 'error': 'RAG pipeline unavailable'
             }), 503
 
