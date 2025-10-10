@@ -446,13 +446,15 @@ class MedicalDatasetBuilder:
         self.preprocessor = MedicalTextPreprocessor()
         self.augmentor = MedicalDataAugmentor()
 
-    def create_classification_dataset(self,
-                                     raw_data: List[Dict[str, Any]],
-                                     text_column: str = 'text',
-                                     label_column: str = 'label',
-                                     test_size: float = 0.2,
-                                     augment: bool = True,
-                                     augmentation_factor: int = 2) -> Dict[str, Any]:
+    def create_classification_dataset(
+        self,
+        raw_data: List[Dict[str, Any]],
+        text_column: str = 'text',
+        label_column: str = 'label',
+        test_size: float = 0.2,
+        augment: bool = True,
+        augmentation_factor: int = 2
+    ) -> Dict[str, Any]:
         """Create classification dataset"""
 
         # Extract texts and labels
