@@ -1,6 +1,6 @@
 # Gunicorn configuration for Flask ML backend
 import multiprocessing
-import os
+
 
 # Server socket
 bind = "0.0.0.0:5000"

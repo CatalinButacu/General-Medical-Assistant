@@ -248,7 +248,7 @@ class MedicalDataGenerator:
         self.medicine_categories = {
             'analgesic': ['acetaminophen', 'ibuprofen', 'aspirin', 'naproxen'],
             'antibiotic': ['amoxicillin', 'azithromycin', 'ciprofloxacin',
-                             'doxycycline'],
+                           'doxycycline'],
             'antihypertensive': ['lisinopril', 'amlodipine', 'metoprolol',
                                  'losartan'],
             'antidiabetic': ['metformin', 'insulin', 'glipizide', 'sitagliptin']
