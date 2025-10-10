@@ -194,7 +194,7 @@ def send_message(session_id):
 
             assistant_content = rag_response.get(
                 'response',
-                'I apologize, but I encountered an error ' 
+                'I apologize, but I encountered an error '
                 'processing your request.'
             )
             metadata = {
