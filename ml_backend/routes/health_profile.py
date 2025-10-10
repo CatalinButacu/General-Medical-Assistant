@@ -18,7 +18,9 @@ from ..ml.custom_rag_pipeline import CustomRAGPipeline
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-health_profile_bp = Blueprint('health_profile', __name__, url_prefix='/api/health-profile')
+health_profile_bp = Blueprint(
+    'health_profile', __name__, url_prefix='/api/health-profile'
+)
 
 # Initialize RAG pipeline for health recommendations
 rag_pipeline = None
@@ -41,7 +43,9 @@ def get_health_profile():
         if not user:
             return jsonify({'error': 'User not found'}), 404
 
-        health_profile = HealthProfile.query.filter_by(user_id=user_id).first()
+        health_profile = HealthProfile.query.filter_by(
+            user_id=user_id
+        ).first()
 
         if not health_profile:
             return jsonify({'message': 'No health profile found'}), 404
@@ -91,12 +95,24 @@ def create_health_profile():
             # Update existing profile
             existing_profile.age = data.get('age', existing_profile.age)
             existing_profile.gender = data.get('gender', existing_profile.gender)
-            existing_profile.height = data.get('height', existing_profile.height)
-            existing_profile.weight = data.get('weight', existing_profile.weight)
-            existing_profile.blood_type = data.get('blood_type', existing_profile.blood_type)
-            existing_profile.allergies = data.get('allergies', existing_profile.allergies)
-            existing_profile.chronic_conditions = data.get('chronic_conditions', existing_profile.chronic_conditions)
-            existing_profile.current_medications = data.get('current_medications', existing_profile.current_medications)
+            existing_profile.height = data.get(
+                'height', existing_profile.height
+            )
+            existing_profile.weight = data.get(
+                'weight', existing_profile.weight
+            )
+            existing_profile.blood_type = data.get(
+                'blood_type', existing_profile.blood_type
+            )
+            existing_profile.allergies = data.get(
+                'allergies', existing_profile.allergies
+            )
+            existing_profile.chronic_conditions = data.get(
+                'chronic_conditions', existing_profile.chronic_conditions
+            )
+            existing_profile.current_medications = data.get(
+                'current_medications', existing_profile.current_medications
+            )
             existing_profile.emergency_contact = data.get('emergency_contact', existing_profile.emergency_contact)
             existing_profile.medical_history = data.get('medical_history', existing_profile.medical_history)
             existing_profile.updated_at = datetime.utcnow()
@@ -163,10 +179,18 @@ def update_health_profile():
         health_profile.weight = data.get('weight', health_profile.weight)
         health_profile.blood_type = data.get('blood_type', health_profile.blood_type)
         health_profile.allergies = data.get('allergies', health_profile.allergies)
-        health_profile.chronic_conditions = data.get('chronic_conditions', health_profile.chronic_conditions)
-        health_profile.current_medications = data.get('current_medications', health_profile.current_medications)
-        health_profile.emergency_contact = data.get('emergency_contact', health_profile.emergency_contact)
-        health_profile.medical_history = data.get('medical_history', health_profile.medical_history)
+        health_profile.chronic_conditions = data.get(
+            'chronic_conditions', health_profile.chronic_conditions
+        )
+        health_profile.current_medications = data.get(
+            'current_medications', health_profile.current_medications
+        )
+        health_profile.emergency_contact = data.get(
+            'emergency_contact', health_profile.emergency_contact
+        )
+        health_profile.medical_history = data.get(
+            'medical_history', health_profile.medical_history
+        )
         health_profile.updated_at = datetime.utcnow()
 
         db.session.commit()
@@ -200,10 +224,14 @@ def delete_health_profile():
 
     except SQLAlchemyError as e:
         db.session.rollback()
-        logger.error(f"Database error deleting health profile: {e}")
+        logger.error(
+            f"Database error deleting health profile: {e}"
+        )
         return jsonify({'error': 'Database error'}), 500
     except Exception as e:
-        logger.error(f"Error deleting health profile: {e}")
+        logger.error(
+            f"Error deleting health profile: {e}"
+        )
         return jsonify({'error': 'Internal server error'}), 500
 
 
@@ -232,7 +260,9 @@ def get_health_recommendations():
 
         # Generate recommendations
         query = "Provide personalized health recommendations based on my profile"
-        recommendations = rag_pipeline.generate_response(query, context)
+        recommendations = rag_pipeline.generate_response(
+            query, context
+        )
 
         return jsonify({
             'recommendations': recommendations,
@@ -240,7 +270,9 @@ def get_health_recommendations():
         }), 200
 
     except Exception as e:
-        logger.error(f"Error generating health recommendations: {e}")
+        logger.error(
+            f"Error generating health recommendations: {e}"
+        )
         return jsonify({'error': 'Internal server error'}), 500
 
 
@@ -280,7 +312,9 @@ def calculate_bmi():
         }), 200
 
     except Exception as e:
-        logger.error(f"Error calculating BMI: {e}")
+        logger.error(
+            f"Error calculating BMI: {e}"
+        )
         return jsonify({'error': 'Internal server error'}), 500
 
 

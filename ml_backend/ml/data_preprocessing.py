@@ -43,7 +43,8 @@ class MedicalTextPreprocessor:
         try:
             self.nlp = spacy.load(language_model)
         except OSError:
-            logger.warning(f"SpaCy model {language_model} not found. Using basic preprocessing.")
+            logger.warning(f"SpaCy model {language_model} not found. "
+                           f"Using basic preprocessing.")
             self.nlp = None
 
     def _load_medical_abbreviations(self) -> Dict[str, str]:
@@ -172,7 +173,8 @@ class MedicalTextPreprocessor:
 
         return entities
 
-    def tokenize_medical_text(self, text: str, tokenizer_name: str = "dmis-lab/biobert-base-cased-v1.1") -> Dict[str, Any]:
+    def tokenize_medical_text(self, text: str,
+                              tokenizer_name: str = "dmis-lab/biobert-base-cased-v1.1") -> Dict[str, Any]:
         """Tokenize medical text using BioBERT tokenizer"""
         try:
             tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
@@ -202,7 +204,8 @@ class MedicalTextPreprocessor:
                 'token_count': 0
             }
 
-    def preprocess_dataset(self, texts: List[str], labels: Optional[List[str]] = None) -> Dict[str, Any]:
+    def preprocess_dataset(self, texts: List[str],
+                           labels: Optional[List[str]] = None) -> Dict[str, Any]:
         """Preprocess a dataset of medical texts"""
         processed_data = {
             'texts': [],
@@ -264,6 +267,7 @@ class MedicalTextPreprocessor:
             stats['num_classes'] = len(label_counts)
 
         return stats
+
 
 class MedicalDataAugmentor:
     """
@@ -415,6 +419,7 @@ class MedicalDataAugmentor:
 
         return augmented_texts, augmented_labels
 
+
 class MedicalDatasetBuilder:
     """
     Build training datasets for medical ML models
@@ -425,12 +430,12 @@ class MedicalDatasetBuilder:
         self.augmentor = MedicalDataAugmentor()
 
     def create_classification_dataset(self,
-                                   raw_data: List[Dict[str, Any]],
-                                   text_column: str = 'text',
-                                   label_column: str = 'label',
-                                   test_size: float = 0.2,
-                                   augment: bool = True,
-                                   augmentation_factor: int = 2) -> Dict[str, Any]:
+                                     raw_data: List[Dict[str, Any]],
+                                     text_column: str = 'text',
+                                     label_column: str = 'label',
+                                     test_size: float = 0.2,
+                                     augment: bool = True,
+                                     augmentation_factor: int = 2) -> Dict[str, Any]:
         """Create classification dataset"""
 
         # Extract texts and labels
@@ -478,9 +483,9 @@ class MedicalDatasetBuilder:
         }
 
     def create_similarity_dataset(self,
-                                texts: List[str],
-                                similarity_threshold: float = 0.7,
-                                num_pairs: int = 1000) -> List[Tuple[str, str, float]]:
+                                  texts: List[str],
+                                  similarity_threshold: float = 0.7,
+                                  num_pairs: int = 1000) -> List[Tuple[str, str, float]]:
         """Create similarity dataset from texts"""
 
         # Preprocess texts
@@ -525,9 +530,9 @@ class MedicalDatasetBuilder:
             # Convert numpy arrays to lists for JSON serialization
             dataset_copy = dataset.copy()
             if 'train' in dataset_copy:
-                dataset_copy['train']['labels_encoded'] = dataset_copy['train']['labels_encoded'].tolist()
+                dataset_copy['train']['labels_encoded'] = (dataset_copy['train']['labels_encoded'].tolist())
             if 'test' in dataset_copy:
-                dataset_copy['test']['labels_encoded'] = dataset_copy['test']['labels_encoded'].tolist()
+                dataset_copy['test']['labels_encoded'] = (dataset_copy['test']['labels_encoded'].tolist())
 
             json.dump(dataset_copy, f, indent=2)
 
@@ -548,9 +553,13 @@ class MedicalDatasetBuilder:
 
         # Convert lists back to numpy arrays
         if 'train' in dataset:
-            dataset['train']['labels_encoded'] = np.array(dataset['train']['labels_encoded'])
+            dataset['train']['labels_encoded'] = np.array(
+                dataset['train']['labels_encoded']
+            )
         if 'test' in dataset:
-            dataset['test']['labels_encoded'] = np.array(dataset['test']['labels_encoded'])
+            dataset['test']['labels_encoded'] = np.array(
+                dataset['test']['labels_encoded']
+            )
 
         # Load label encoder
         label_encoder_path = load_path / 'label_encoder.pkl'

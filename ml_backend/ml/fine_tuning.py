@@ -64,6 +64,7 @@ class MedicalBERTDataset(Dataset):
             'labels': torch.tensor(label, dtype=torch.long)
         }
 
+
 class MedicalSimilarityDataset(Dataset):
     """
     Dataset for medical text similarity fine-tuning
@@ -110,6 +111,7 @@ class MedicalSimilarityDataset(Dataset):
             'attention_mask_2': encoding2['attention_mask'].flatten(),
             'similarity': torch.tensor(similarity, dtype=torch.float)
         }
+
 
 class MedicalBERTClassifier(nn.Module):
     """
@@ -163,6 +165,7 @@ class MedicalBERTClassifier(nn.Module):
 
         return logits
 
+
 class MedicalBERTSimilarity(nn.Module):
     """
     BioBERT-based model for medical text similarity
@@ -188,7 +191,9 @@ class MedicalBERTSimilarity(nn.Module):
         # Similarity head
         self.dropout = nn.Dropout(dropout_rate)
         self.similarity_head = nn.Sequential(
-            nn.Linear(self.config.hidden_size * 3, 256),  # concat + abs_diff + element_wise
+            # The input is a concatenation of the two embeddings, their absolute difference,
+            # and their element-wise product.
+            nn.Linear(self.config.hidden_size * 4, 256),
             nn.ReLU(),
             nn.Dropout(dropout_rate),
             nn.Linear(256, 64),
@@ -233,6 +238,7 @@ class MedicalBERTSimilarity(nn.Module):
         similarity = self.similarity_head(combined)
 
         return similarity.squeeze()
+
 
 class BioBERTFineTuner:
     """
@@ -479,7 +485,8 @@ class BioBERTFineTuner:
                     mlflow.log_metric('best_val_loss', best_val_loss)
 
                 logger.info(f"Train Loss: {train_loss:.4f}")
-                logger.info(f"Val Loss: {val_loss:.4f}, Val Correlation: {val_correlation:.4f}")
+                logger.info(f"Val Loss: {val_loss:.4f}, "
+                            f"Val Correlation: {val_correlation:.4f}")
 
             # Log model
             mlflow.pytorch.log_model(model, "model")
@@ -704,6 +711,7 @@ class BioBERTFineTuner:
         plt.savefig('training_curves.png', dpi=300, bbox_inches='tight')
         mlflow.log_artifact('training_curves.png')
         plt.close()
+
 
 def create_default_config() -> Dict[str, Any]:
     """Create default training configuration"""

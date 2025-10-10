@@ -58,15 +58,21 @@ def create_chat_session():
         current_user_id = get_jwt_identity()
         data = request.get_json()
 
+        session_name = data.get(
+            'session_name',
+            f'Chat {datetime.now().strftime("%Y-%m-%d %H:%M")}'
+        )
         session = ChatSession(
             user_id=current_user_id,
-            session_name=data.get('session_name', f'Chat {datetime.now().strftime("%Y-%m-%d %H:%M")}')
+            session_name=session_name
         )
 
         db.session.add(session)
         db.session.commit()
 
-        logger.info(f"New chat session created: {session.id} for user {current_user_id}")
+        logger.info(
+            f"New chat session created: {session.id} for user {current_user_id}"
+        )
 
         return jsonify({
             'message': 'Chat session created successfully',
@@ -180,11 +186,13 @@ def send_message(session_id):
         try:
             pipeline = get_rag_pipeline()
             rag_response = pipeline.generate_response(
-                query=user_message,
-                user_context=user_context
+                query=user_message, user_context=user_context
             )
 
-            assistant_content = rag_response.get('response', 'I apologize, but I encountered an error processing your request.')
+            assistant_content = rag_response.get(
+                'response',
+                'I apologize, but I encountered an error processing your request.'
+            )
             metadata = {
                 'sources': rag_response.get('sources', []),
                 'confidence': rag_response.get('confidence', 0.0),
@@ -218,7 +226,7 @@ def send_message(session_id):
         }), 200
 
     except Exception as e:
-        logger.error(f"Error processing message: {str(e)}")
+        logger.error("Error processing message: %s", e)
         db.session.rollback()
         return jsonify({'error': 'Failed to process message'}), 500
 
@@ -292,7 +300,9 @@ def quick_query():
             )
 
             return jsonify({
-                'response': rag_response.get('response', 'No response generated'),
+                'response': rag_response.get(
+                    'response', 'No response generated'
+                ),
                 'sources': rag_response.get('sources', []),
                 'confidence': rag_response.get('confidence', 0.0),
                 'processing_time': rag_response.get('processing_time', 0.0)

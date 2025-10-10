@@ -50,8 +50,16 @@ def get_medicine_cabinet():
                 'name': medicine.name,
                 'dosage': medicine.dosage,
                 'frequency': medicine.frequency,
-                'start_date': medicine.start_date.isoformat() if medicine.start_date else None,
-                'end_date': medicine.end_date.isoformat() if medicine.end_date else None,
+                'start_date': (
+                    medicine.start_date.isoformat()
+                    if medicine.start_date
+                    else None
+                ),
+                'end_date': (
+                    medicine.end_date.isoformat()
+                    if medicine.end_date
+                    else None
+                ),
                 'notes': medicine.notes,
                 'is_active': medicine.is_active,
                 'created_at': medicine.created_at.isoformat(),
@@ -64,7 +72,9 @@ def get_medicine_cabinet():
         }), 200
 
     except Exception as e:
-        logger.error(f"Error retrieving medicine cabinet: {e}")
+        logger.error(
+            f"Error retrieving medicine cabinet for user: {e}"
+        )
         return jsonify({'error': 'Internal server error'}), 500
 
 
@@ -91,13 +101,17 @@ def add_medicine():
 
         if data.get('start_date'):
             try:
-                start_date = datetime.fromisoformat(data['start_date'].replace('Z', '+00:00'))
+                start_date = datetime.fromisoformat(
+                    data['start_date'].replace('Z', '+00:00')
+                )
             except ValueError:
                 return jsonify({'error': 'Invalid start_date format'}), 400
 
         if data.get('end_date'):
             try:
-                end_date = datetime.fromisoformat(data['end_date'].replace('Z', '+00:00'))
+                end_date = datetime.fromisoformat(
+                    data['end_date'].replace('Z', '+00:00')
+                )
             except ValueError:
                 return jsonify({'error': 'Invalid end_date format'}), 400
 
@@ -123,10 +137,14 @@ def add_medicine():
 
     except SQLAlchemyError as e:
         db.session.rollback()
-        logger.error(f"Database error adding medicine: {e}")
+        logger.error(
+            f"Database error adding medicine: {e}"
+        )
         return jsonify({'error': 'Database error'}), 500
     except Exception as e:
-        logger.error(f"Error adding medicine: {e}")
+        logger.error(
+            f"Error adding medicine: {e}"
+        )
         return jsonify({'error': 'Internal server error'}), 500
 
 
@@ -149,8 +167,16 @@ def get_medicine(medicine_id):
             'name': medicine.name,
             'dosage': medicine.dosage,
             'frequency': medicine.frequency,
-            'start_date': medicine.start_date.isoformat() if medicine.start_date else None,
-            'end_date': medicine.end_date.isoformat() if medicine.end_date else None,
+            'start_date': (
+                medicine.start_date.isoformat()
+                if medicine.start_date
+                else None
+            ),
+            'end_date': (
+                medicine.end_date.isoformat()
+                if medicine.end_date
+                else None
+            ),
             'notes': medicine.notes,
             'is_active': medicine.is_active,
             'created_at': medicine.created_at.isoformat(),
@@ -158,7 +184,7 @@ def get_medicine(medicine_id):
         }), 200
 
     except Exception as e:
-        logger.error(f"Error retrieving medicine: {e}")
+        logger.error(f"Error retrieving medicine with id {medicine_id}: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
 
@@ -192,9 +218,8 @@ def update_medicine(medicine_id):
         if 'start_date' in data:
             if data['start_date']:
                 try:
-                    medicine.start_date = datetime.fromisoformat(
-                        data['start_date'].replace('Z', '+00:00')
-                    )
+                    date_str = data['start_date'].replace('Z', '+00:00')
+                    medicine.start_date = datetime.fromisoformat(date_str)
                 except ValueError:
                     return jsonify({'error': 'Invalid start_date format'}), 400
             else:
@@ -203,9 +228,8 @@ def update_medicine(medicine_id):
         if 'end_date' in data:
             if data['end_date']:
                 try:
-                    medicine.end_date = datetime.fromisoformat(
-                        data['end_date'].replace('Z', '+00:00')
-                    )
+                    date_str = data['end_date'].replace('Z', '+00:00')
+                    medicine.end_date = datetime.fromisoformat(date_str)
                 except ValueError:
                     return jsonify({'error': 'Invalid end_date format'}), 400
             else:
@@ -219,10 +243,14 @@ def update_medicine(medicine_id):
 
     except SQLAlchemyError as e:
         db.session.rollback()
-        logger.error(f"Database error updating medicine: {e}")
+        logger.error(
+            f"Database error updating medicine: {e}"
+        )
         return jsonify({'error': 'Database error'}), 500
     except Exception as e:
-        logger.error(f"Error updating medicine: {e}")
+        logger.error(
+            f"Error updating medicine: {e}"
+        )
         return jsonify({'error': 'Internal server error'}), 500
 
 
@@ -246,10 +274,14 @@ def delete_medicine(medicine_id):
 
     except SQLAlchemyError as e:
         db.session.rollback()
-        logger.error(f"Database error deleting medicine: {e}")
+        logger.error(
+            f"Database error deleting medicine: {e}"
+        )
         return jsonify({'error': 'Database error'}), 500
     except Exception as e:
-        logger.error(f"Error deleting medicine: {e}")
+        logger.error(
+            f"Error deleting medicine: {e}"
+        )
         return jsonify({'error': 'Internal server error'}), 500
 
 
@@ -273,8 +305,8 @@ def check_drug_interactions():
         # Create query for drug interactions
         medicine_list = ', '.join(medicines)
         query = (
-            f"Check for drug interactions between these medications: "
-            f"{medicine_list}"
+            "Check for drug interactions between "
+            f"these medications: {medicine_list}"
         )
 
         # Get interaction information from RAG pipeline
@@ -320,7 +352,9 @@ def search_medicine_info():
         }), 200
 
     except Exception as e:
-        logger.error(f"Error searching medicine info: {e}")
+        logger.error(
+            f"Error searching for medicine info: {e}"
+        )
         return jsonify({'error': 'Internal server error'}), 500
 
 

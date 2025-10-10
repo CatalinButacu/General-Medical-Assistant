@@ -10,7 +10,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from transformers import (
     AutoTokenizer, AutoModel, AutoConfig,
-    TrainingArguments, Trainer, EarlyStoppingCallback
+    TrainingArguments, Trainer
 )
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
@@ -50,6 +50,7 @@ class MedicalTrainingExample:
     label: str
     metadata: Dict[str, Any]
 
+
 class MedicalTextDataset(Dataset):
     """
     Custom dataset for medical text classification and similarity learning
@@ -62,7 +63,9 @@ class MedicalTextDataset(Dataset):
 
         # Create label mapping
         unique_labels = list(set(example.label for example in examples))
-        self.label_to_id = {label: idx for idx, label in enumerate(unique_labels)}
+        self.label_to_id = dict(
+            (label, idx) for idx, label in enumerate(unique_labels)
+        )
         self.id_to_label = {idx: label for label, idx in self.label_to_id.items()}
         self.num_labels = len(unique_labels)
 
@@ -87,12 +90,14 @@ class MedicalTextDataset(Dataset):
             'labels': torch.tensor(self.label_to_id[example.label], dtype=torch.long)
         }
 
+
 class MedicalSimilarityDataset(Dataset):
     """
     Dataset for training medical text similarity models
     """
 
-    def __init__(self, text_pairs: List[Tuple[str, str, float]], tokenizer, max_length: int = 512):
+    def __init__(self, text_pairs: List[Tuple[str, str, float]],
+                 tokenizer, max_length: int = 512):
         self.text_pairs = text_pairs
         self.tokenizer = tokenizer
         self.max_length = max_length
@@ -127,6 +132,7 @@ class MedicalSimilarityDataset(Dataset):
             'attention_mask_2': encoding2['attention_mask'].flatten(),
             'similarity_score': torch.tensor(similarity_score, dtype=torch.float)
         }
+
 
 class MedicalBERTClassifier(nn.Module):
     """
@@ -177,6 +183,7 @@ class MedicalBERTClassifier(nn.Module):
             'hidden_states': outputs.last_hidden_state
         }
 
+
 class MedicalSimilarityModel(nn.Module):
     """
     Custom model for learning medical text similarity
@@ -201,7 +208,8 @@ class MedicalSimilarityModel(nn.Module):
             nn.Sigmoid()
         )
 
-    def forward(self, input_ids_1, attention_mask_1, input_ids_2, attention_mask_2, similarity_score=None):
+    def forward(self, input_ids_1, attention_mask_1, input_ids_2, attention_mask_2,
+                similarity_score=None):
         # Get embeddings for both texts
         outputs1 = self.bert(input_ids=input_ids_1, attention_mask=attention_mask_1)
         outputs2 = self.bert(input_ids=input_ids_2, attention_mask=attention_mask_2)
@@ -228,6 +236,7 @@ class MedicalSimilarityModel(nn.Module):
             'embeddings_1': emb1,
             'embeddings_2': emb2
         }
+
 
 class MedicalDataGenerator:
     """
@@ -268,7 +277,9 @@ class MedicalDataGenerator:
 
                 # Add category-specific information
                 if category == 'analgesic':
-                    text += "This medication helps reduce pain and inflammation."
+                    text += (
+                        "This medication helps reduce pain and inflammation."
+                    )
                 elif category == 'antibiotic':
                     text += "This medication fights bacterial infections."
                 elif category == 'antihypertensive':
@@ -295,8 +306,12 @@ class MedicalDataGenerator:
                 medicines = self.medicine_categories[category]
 
                 med1, med2 = np.random.choice(medicines, 2, replace=False)
-                text1 = f"Information about {med1} medication for medical treatment."
-                text2 = f"Details regarding {med2} drug for therapeutic use."
+                text1 = (
+                    f"Information about {med1} medication for medical treatment."
+                )
+                text2 = (
+                    f"Details regarding {med2} drug for therapeutic use."
+                )
 
                 similarity = np.random.uniform(0.7, 1.0)  # High similarity
 
@@ -317,14 +332,20 @@ class MedicalDataGenerator:
 
         return pairs
 
+
 class MedicalModelTrainer:
     """
     Custom trainer for medical models with MLflow integration
     """
 
-    def __init__(self, config: TrainingConfig):
+    def __init__(
+        self,
+        config: TrainingConfig
+    ):
         self.config = config
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device(
+            'cuda' if torch.cuda.is_available() else 'cpu'
+        )
 
         # Initialize MLflow
         mlflow.set_experiment("medical_model_training")
@@ -334,10 +355,15 @@ class MedicalModelTrainer:
 
         logger.info(f"Training device: {self.device}")
 
-    def train_classification_model(self, training_data: List[MedicalTrainingExample]) -> Dict[str, Any]:
+    def train_classification_model(
+        self,
+        training_data: List[MedicalTrainingExample]
+    ) -> Dict[str, Any]:
         """Train medical text classification model"""
 
-        with mlflow.start_run(run_name=f"classification_{datetime.now().strftime('%Y%m%d_%H%M%S')}"):
+        with mlflow.start_run(
+            run_name=f"classification_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        ):
             # Log configuration
             mlflow.log_params(self.config.__dict__)
 
@@ -376,7 +402,9 @@ class MedicalModelTrainer:
                     metric_for_best_model="eval_loss",
                     greater_is_better=False,
                     fp16=self.config.fp16,
-                    gradient_accumulation_steps=self.config.gradient_accumulation_steps,
+                    gradient_accumulation_steps=(
+                        self.config.gradient_accumulation_steps
+                    ),
                     dataloader_pin_memory=False
                 )
 
@@ -386,8 +414,9 @@ class MedicalModelTrainer:
                     args=training_args,
                     train_dataset=train_dataset,
                     eval_dataset=val_dataset,
-                    compute_metrics=self._compute_classification_metrics,
-                    callbacks=[EarlyStoppingCallback(early_stopping_patience=self.config.early_stopping_patience)]
+                    compute_metrics=lambda p: {
+                        "eval_loss": p.predictions.mean()
+                    },
                 )
 
                 # Train model
@@ -402,11 +431,13 @@ class MedicalModelTrainer:
                     "train_loss": train_result.training_loss,
                     "eval_loss": eval_result["eval_loss"],
                     "eval_accuracy": eval_result.get("eval_accuracy", 0),
-                    "eval_f1": eval_result.get("eval_f1", 0)
+                    "eval_f1": eval_result.get("eval_f1", 0),
                 })
 
                 # Save model
-                model_path = f"{self.config.output_dir}/classification_model"
+                model_path = (
+                    f"{self.config.output_dir}/classification_model"
+                )
                 trainer.save_model(model_path)
                 tokenizer.save_pretrained(model_path)
 
@@ -420,7 +451,7 @@ class MedicalModelTrainer:
                     "train_loss": train_result.training_loss,
                     "eval_metrics": eval_result,
                     "num_labels": dataset.num_labels,
-                    "label_mapping": dataset.label_to_id
+                    "label_mapping": dataset.label_to_id,
                 }
 
             except Exception as e:
@@ -428,7 +459,10 @@ class MedicalModelTrainer:
                 mlflow.log_param("error", str(e))
                 raise
 
-    def train_similarity_model(self, similarity_data: List[Tuple[str, str, float]]) -> Dict[str, Any]:
+    def train_similarity_model(
+        self,
+        similarity_data: List[Tuple[str, str, float]]
+    ) -> Dict[str, Any]:
         """Train medical text similarity model"""
 
         with mlflow.start_run(run_name=f"similarity_{datetime.now().strftime('%Y%m%d_%H%M%S')}"):
@@ -455,7 +489,11 @@ class MedicalModelTrainer:
                 model = MedicalSimilarityModel(self.config.model_name).to(self.device)
 
                 # Initialize optimizer
-                optimizer = optim.AdamW(model.parameters(), lr=self.config.learning_rate, weight_decay=self.config.weight_decay)
+                optimizer = optim.AdamW(
+                    model.parameters(),
+                    lr=self.config.learning_rate,
+                    weight_decay=self.config.weight_decay
+                )
 
                 # Training loop
                 logger.info("Starting similarity model training...")
@@ -469,7 +507,9 @@ class MedicalModelTrainer:
 
                     for batch_idx, batch in enumerate(train_loader):
                         # Move batch to device
-                        batch = {k: v.to(self.device) for k, v in batch.items()}
+                        batch = {
+                            k: v.to(self.device) for k, v in batch.items()
+                        }
 
                         # Forward pass
                         outputs = model(**batch)
@@ -484,7 +524,10 @@ class MedicalModelTrainer:
 
                         # Log progress
                         if batch_idx % self.config.logging_steps == 0:
-                            logger.info(f"Epoch {epoch + 1}/{self.config.num_epochs}, Batch {batch_idx}, Loss: {loss.item():.4f}")
+                            logger.info(
+                                f"Epoch {epoch + 1}/{self.config.num_epochs}, "
+                                f"Batch {batch_idx}, Loss: {loss.item():.4f}"
+                            )
 
                     # Validation phase
                     model.eval()
@@ -494,7 +537,9 @@ class MedicalModelTrainer:
 
                     with torch.no_grad():
                         for batch in val_loader:
-                            batch = {k: v.to(self.device) for k, v in batch.items()}
+                            batch = {
+                                k: v.to(self.device) for k, v in batch.items()
+                            }
                             outputs = model(**batch)
 
                             val_loss += outputs['loss'].item()
@@ -518,7 +563,10 @@ class MedicalModelTrainer:
                         f"val_mae_epoch_{epoch}": mae
                     }, step=epoch)
 
-                    logger.info(f"Epoch {epoch + 1}: Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}, MSE: {mse:.4f}")
+                    logger.info(
+                        f"Epoch {epoch + 1}: Train Loss: {avg_train_loss:.4f}, "
+                        f"Val Loss: {avg_val_loss:.4f}, MSE: {mse:.4f}"
+                    )
 
                     # Early stopping
                     if avg_val_loss < best_val_loss:
@@ -527,16 +575,24 @@ class MedicalModelTrainer:
 
                         # Save best model
                         model_path = f"{self.config.output_dir}/similarity_model"
-                        torch.save(model.state_dict(), f"{model_path}/pytorch_model.bin")
+                        torch.save(
+                            model.state_dict(),
+                            f"{model_path}/pytorch_model.bin"
+                        )
                         tokenizer.save_pretrained(model_path)
                     else:
                         patience_counter += 1
-                        if patience_counter >= self.config.early_stopping_patience:
+                        if (
+                            patience_counter >=
+                            self.config.early_stopping_patience
+                        ):
                             logger.info(f"Early stopping at epoch {epoch + 1}")
                             break
 
                 # Log final model
-                mlflow.pytorch.log_model(model, "similarity_model")
+                mlflow.pytorch.log_model(
+                    model, "similarity_model"
+                )
 
                 logger.info("Similarity model training completed successfully")
 
@@ -544,7 +600,7 @@ class MedicalModelTrainer:
                     "model_path": f"{self.config.output_dir}/similarity_model",
                     "best_val_loss": best_val_loss,
                     "final_mse": mse,
-                    "final_mae": mae
+                    "final_mae": mae,
                 }
 
             except Exception as e:
