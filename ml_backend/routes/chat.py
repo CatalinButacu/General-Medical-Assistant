@@ -1,377 +1,336 @@
 """
-Chat Routes - Custom RAG-powered medical chat interface
+Chat routes for RAG-powered medical assistance
 """
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, stream_template
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import logging
-from typing import Dict, Any, List
+import json
 from datetime import datetime
 
-from ml.custom_rag_pipeline import CustomRAGPipeline, RAGQuery
-from models import db, ChatHistory, User
+from ..models import db, User, ChatSession, ChatMessage
+from ..ml.custom_rag_pipeline import MedicalRAGPipeline
 
 logger = logging.getLogger(__name__)
 
-chat_bp = Blueprint('chat', __name__)
+chat_bp = Blueprint('chat', __name__, url_prefix='/api/chat')
 
 # Initialize RAG pipeline (will be loaded on first use)
 rag_pipeline = None
+
 
 def get_rag_pipeline():
     """Get or initialize RAG pipeline"""
     global rag_pipeline
     if rag_pipeline is None:
         try:
-            rag_pipeline = CustomRAGPipeline()
-            rag_pipeline.initialize()
-            logger.info("RAG pipeline initialized for chat")
+            rag_pipeline = MedicalRAGPipeline()
+            logger.info("RAG pipeline initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize RAG pipeline: {str(e)}")
             raise
     return rag_pipeline
 
-@chat_bp.route('/message', methods=['POST'])
+
+@chat_bp.route('/sessions', methods=['GET'])
 @jwt_required()
-def send_message():
-    """
-    Send a message to the custom RAG-powered medical assistant
-    """
+def get_chat_sessions():
+    """Get all chat sessions for the current user"""
     try:
+        current_user_id = get_jwt_identity()
+        sessions = ChatSession.query.filter_by(user_id=current_user_id).order_by(
+            ChatSession.updated_at.desc()
+        ).all()
+        
+        return jsonify({
+            'sessions': [session.to_dict() for session in sessions]
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error fetching chat sessions: {str(e)}")
+        return jsonify({'error': 'Failed to fetch chat sessions'}), 500
+
+
+@chat_bp.route('/sessions', methods=['POST'])
+@jwt_required()
+def create_chat_session():
+    """Create a new chat session"""
+    try:
+        current_user_id = get_jwt_identity()
         data = request.get_json()
-        message = data.get('message', '').strip()
         
-        if not message:
-            return jsonify({'error': 'Message is required'}), 400
+        session = ChatSession(
+            user_id=current_user_id,
+            session_name=data.get('session_name', f'Chat {datetime.now().strftime("%Y-%m-%d %H:%M")}')
+        )
         
-        user_id = get_jwt_identity()
-        user = User.query.get(user_id)
+        db.session.add(session)
+        db.session.commit()
         
-        # Get user context for personalized responses
+        logger.info(f"New chat session created: {session.id} for user {current_user_id}")
+        
+        return jsonify({
+            'message': 'Chat session created successfully',
+            'session': session.to_dict()
+        }), 201
+        
+    except Exception as e:
+        logger.error(f"Error creating chat session: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to create chat session'}), 500
+
+
+@chat_bp.route('/sessions/<int:session_id>', methods=['GET'])
+@jwt_required()
+def get_chat_session(session_id):
+    """Get a specific chat session with messages"""
+    try:
+        current_user_id = get_jwt_identity()
+        session = ChatSession.query.filter_by(
+            id=session_id, 
+            user_id=current_user_id
+        ).first()
+        
+        if not session:
+            return jsonify({'error': 'Chat session not found'}), 404
+        
+        messages = ChatMessage.query.filter_by(session_id=session_id).order_by(
+            ChatMessage.created_at.asc()
+        ).all()
+        
+        return jsonify({
+            'session': session.to_dict(),
+            'messages': [message.to_dict() for message in messages]
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error fetching chat session: {str(e)}")
+        return jsonify({'error': 'Failed to fetch chat session'}), 500
+
+
+@chat_bp.route('/sessions/<int:session_id>', methods=['DELETE'])
+@jwt_required()
+def delete_chat_session(session_id):
+    """Delete a chat session"""
+    try:
+        current_user_id = get_jwt_identity()
+        session = ChatSession.query.filter_by(
+            id=session_id, 
+            user_id=current_user_id
+        ).first()
+        
+        if not session:
+            return jsonify({'error': 'Chat session not found'}), 404
+        
+        db.session.delete(session)
+        db.session.commit()
+        
+        logger.info(f"Chat session deleted: {session_id}")
+        
+        return jsonify({'message': 'Chat session deleted successfully'}), 200
+        
+    except Exception as e:
+        logger.error(f"Error deleting chat session: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to delete chat session'}), 500
+
+
+@chat_bp.route('/sessions/<int:session_id>/messages', methods=['POST'])
+@jwt_required()
+def send_message(session_id):
+    """Send a message and get RAG response"""
+    try:
+        current_user_id = get_jwt_identity()
+        data = request.get_json()
+        
+        # Validate session ownership
+        session = ChatSession.query.filter_by(
+            id=session_id, 
+            user_id=current_user_id
+        ).first()
+        
+        if not session:
+            return jsonify({'error': 'Chat session not found'}), 404
+        
+        if not data.get('message'):
+            return jsonify({'error': 'Message content is required'}), 400
+        
+        user_message = data['message']
+        
+        # Save user message
+        user_msg = ChatMessage(
+            session_id=session_id,
+            message_type='user',
+            content=user_message
+        )
+        db.session.add(user_msg)
+        
+        # Get user profile for context
+        user = User.query.get(current_user_id)
         user_context = {}
-        if user and user.health_profile:
+        if user.health_profile:
             user_context = {
                 'age': user.health_profile.age,
                 'gender': user.health_profile.gender,
-                'is_pregnant': user.health_profile.is_pregnant,
-                'is_breastfeeding': user.health_profile.is_breastfeeding,
-                'allergies': user.health_profile.allergies or [],
-                'current_medications': user.health_profile.current_medications or [],
-                'medical_conditions': user.health_profile.medical_conditions or []
+                'allergies': user.health_profile.allergies,
+                'chronic_conditions': user.health_profile.chronic_conditions,
+                'current_medications': user.health_profile.current_medications
             }
         
-        # Determine query type based on message content
-        message_lower = message.lower()
-        if any(word in message_lower for word in ['safe', 'pregnancy', 'breastfeeding', 'allergy', 'interaction']):
-            query_type = 'safety'
-        elif any(word in message_lower for word in ['medicine', 'drug', 'medication', 'pill', 'tablet']):
-            query_type = 'medicine'
-        else:
-            query_type = 'general'
+        # Get RAG response
+        try:
+            pipeline = get_rag_pipeline()
+            rag_response = pipeline.generate_response(
+                query=user_message,
+                user_context=user_context
+            )
+            
+            assistant_content = rag_response.get('response', 'I apologize, but I encountered an error processing your request.')
+            metadata = {
+                'sources': rag_response.get('sources', []),
+                'confidence': rag_response.get('confidence', 0.0),
+                'processing_time': rag_response.get('processing_time', 0.0)
+            }
+            
+        except Exception as e:
+            logger.error(f"RAG pipeline error: {str(e)}")
+            assistant_content = "I apologize, but I'm currently experiencing technical difficulties. Please try again later."
+            metadata = {'error': 'RAG pipeline unavailable'}
         
-        # Create RAG query
-        rag_query = RAGQuery(
-            text=message,
-            user_context=user_context,
-            query_type=query_type,
-            max_results=5
+        # Save assistant message
+        assistant_msg = ChatMessage(
+            session_id=session_id,
+            message_type='assistant',
+            content=assistant_content,
+            metadata=metadata
         )
+        db.session.add(assistant_msg)
         
-        # Get response from RAG pipeline
-        pipeline = get_rag_pipeline()
-        response = pipeline.query(rag_query)
+        # Update session timestamp
+        session.updated_at = datetime.utcnow()
         
-        # Save chat history
-        chat_record = ChatHistory(
-            user_id=user_id,
-            user_message=message,
-            ai_response=response.answer,
-            confidence_score=response.confidence_score,
-            response_time_ms=response.response_time_ms,
-            model_version=response.model_version,
-            retrieved_documents=[
-                {
-                    'doc_id': doc.doc_id,
-                    'score': doc.score,
-                    'metadata': doc.metadata
-                }
-                for doc in response.retrieved_documents
-            ]
-        )
-        db.session.add(chat_record)
         db.session.commit()
         
+        logger.info(f"Message exchange completed for session {session_id}")
+        
         return jsonify({
-            'success': True,
-            'message_id': chat_record.id,
-            'response': response.answer,
-            'confidence_score': response.confidence_score,
-            'response_time_ms': response.response_time_ms,
-            'model_version': response.model_version,
-            'query_type': query_type,
-            'retrieved_sources': len(response.retrieved_documents)
-        })
+            'user_message': user_msg.to_dict(),
+            'assistant_message': assistant_msg.to_dict()
+        }), 200
         
     except Exception as e:
-        logger.error(f"Chat message processing failed: {str(e)}")
+        logger.error(f"Error processing message: {str(e)}")
+        db.session.rollback()
         return jsonify({'error': 'Failed to process message'}), 500
 
-@chat_bp.route('/history', methods=['GET'])
+
+@chat_bp.route('/sessions/<int:session_id>/messages/<int:message_id>', methods=['DELETE'])
 @jwt_required()
-def get_chat_history():
-    """
-    Get user's chat history with the medical assistant
-    """
+def delete_message(session_id, message_id):
+    """Delete a specific message"""
     try:
-        user_id = get_jwt_identity()
+        current_user_id = get_jwt_identity()
         
-        # Get pagination parameters
-        page = request.args.get('page', 1, type=int)
-        per_page = min(request.args.get('per_page', 50, type=int), 100)
+        # Validate session ownership
+        session = ChatSession.query.filter_by(
+            id=session_id, 
+            user_id=current_user_id
+        ).first()
         
-        # Query chat history
-        chats = ChatHistory.query.filter_by(user_id=user_id)\
-            .order_by(ChatHistory.created_at.desc())\
-            .paginate(page=page, per_page=per_page, error_out=False)
+        if not session:
+            return jsonify({'error': 'Chat session not found'}), 404
         
-        return jsonify({
-            'success': True,
-            'chats': [
-                {
-                    'id': chat.id,
-                    'user_message': chat.user_message,
-                    'ai_response': chat.ai_response,
-                    'confidence_score': chat.confidence_score,
-                    'response_time_ms': chat.response_time_ms,
-                    'model_version': chat.model_version,
-                    'created_at': chat.created_at.isoformat(),
-                    'sources_count': len(chat.retrieved_documents) if chat.retrieved_documents else 0
-                }
-                for chat in chats.items
-            ],
-            'pagination': {
-                'page': chats.page,
-                'pages': chats.pages,
-                'per_page': chats.per_page,
-                'total': chats.total,
-                'has_next': chats.has_next,
-                'has_prev': chats.has_prev
-            }
-        })
+        message = ChatMessage.query.filter_by(
+            id=message_id, 
+            session_id=session_id
+        ).first()
+        
+        if not message:
+            return jsonify({'error': 'Message not found'}), 404
+        
+        db.session.delete(message)
+        db.session.commit()
+        
+        logger.info(f"Message deleted: {message_id} from session {session_id}")
+        
+        return jsonify({'message': 'Message deleted successfully'}), 200
         
     except Exception as e:
-        logger.error(f"Failed to get chat history: {str(e)}")
-        return jsonify({'error': 'Failed to retrieve chat history'}), 500
+        logger.error(f"Error deleting message: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to delete message'}), 500
 
-@chat_bp.route('/conversation/<int:chat_id>', methods=['GET'])
-@jwt_required()
-def get_conversation_details():
-    """
-    Get detailed information about a specific conversation
-    """
-    try:
-        user_id = get_jwt_identity()
-        chat_id = request.view_args['chat_id']
-        
-        # Get chat record
-        chat = ChatHistory.query.filter_by(id=chat_id, user_id=user_id).first()
-        
-        if not chat:
-            return jsonify({'error': 'Chat not found'}), 404
-        
-        return jsonify({
-            'success': True,
-            'chat': {
-                'id': chat.id,
-                'user_message': chat.user_message,
-                'ai_response': chat.ai_response,
-                'confidence_score': chat.confidence_score,
-                'response_time_ms': chat.response_time_ms,
-                'model_version': chat.model_version,
-                'created_at': chat.created_at.isoformat(),
-                'retrieved_documents': chat.retrieved_documents or []
-            }
-        })
-        
-    except Exception as e:
-        logger.error(f"Failed to get conversation details: {str(e)}")
-        return jsonify({'error': 'Failed to retrieve conversation details'}), 500
 
-@chat_bp.route('/feedback', methods=['POST'])
+@chat_bp.route('/quick-query', methods=['POST'])
 @jwt_required()
-def submit_feedback():
-    """
-    Submit feedback for a chat response to improve the model
-    """
+def quick_query():
+    """Quick medical query without saving to session"""
     try:
+        current_user_id = get_jwt_identity()
         data = request.get_json()
-        chat_id = data.get('chat_id')
-        rating = data.get('rating')  # 1-5 scale
-        feedback_text = data.get('feedback', '').strip()
         
-        if not chat_id or not rating:
-            return jsonify({'error': 'Chat ID and rating are required'}), 400
+        if not data.get('query'):
+            return jsonify({'error': 'Query is required'}), 400
         
-        if not (1 <= rating <= 5):
-            return jsonify({'error': 'Rating must be between 1 and 5'}), 400
+        # Get user context
+        user = User.query.get(current_user_id)
+        user_context = {}
+        if user.health_profile:
+            user_context = {
+                'age': user.health_profile.age,
+                'gender': user.health_profile.gender,
+                'allergies': user.health_profile.allergies,
+                'chronic_conditions': user.health_profile.chronic_conditions,
+                'current_medications': user.health_profile.current_medications
+            }
         
-        user_id = get_jwt_identity()
-        
-        # Verify chat belongs to user
-        chat = ChatHistory.query.filter_by(id=chat_id, user_id=user_id).first()
-        if not chat:
-            return jsonify({'error': 'Chat not found'}), 404
-        
-        # Update chat with feedback
-        chat.user_feedback = {
-            'rating': rating,
-            'feedback_text': feedback_text,
-            'submitted_at': datetime.utcnow().isoformat()
-        }
-        db.session.commit()
-        
-        logger.info(f"Feedback submitted for chat {chat_id}: rating={rating}")
-        
-        return jsonify({
-            'success': True,
-            'message': 'Feedback submitted successfully'
-        })
+        # Get RAG response
+        try:
+            pipeline = get_rag_pipeline()
+            rag_response = pipeline.generate_response(
+                query=data['query'],
+                user_context=user_context
+            )
+            
+            return jsonify({
+                'response': rag_response.get('response', 'No response generated'),
+                'sources': rag_response.get('sources', []),
+                'confidence': rag_response.get('confidence', 0.0),
+                'processing_time': rag_response.get('processing_time', 0.0)
+            }), 200
+            
+        except Exception as e:
+            logger.error(f"RAG pipeline error in quick query: {str(e)}")
+            return jsonify({
+                'response': "I apologize, but I'm currently experiencing technical difficulties. Please try again later.",
+                'error': 'RAG pipeline unavailable'
+            }), 503
         
     except Exception as e:
-        logger.error(f"Failed to submit feedback: {str(e)}")
-        return jsonify({'error': 'Failed to submit feedback'}), 500
+        logger.error(f"Error processing quick query: {str(e)}")
+        return jsonify({'error': 'Failed to process query'}), 500
 
-@chat_bp.route('/suggestions', methods=['GET'])
-@jwt_required()
-def get_chat_suggestions():
-    """
-    Get suggested questions/topics for the medical assistant
-    """
-    try:
-        user_id = get_jwt_identity()
-        user = User.query.get(user_id)
-        
-        # Base suggestions
-        suggestions = [
-            "What are the side effects of acetaminophen?",
-            "Is ibuprofen safe during pregnancy?",
-            "How do I know if I'm allergic to a medication?",
-            "What should I do if I miss a dose?",
-            "Can I take multiple pain relievers together?",
-            "What are the signs of medication overdose?",
-            "How should I store my medications?",
-            "What information should I tell my doctor about my medications?"
-        ]
-        
-        # Personalized suggestions based on user profile
-        if user and user.health_profile:
-            profile = user.health_profile
-            
-            if profile.is_pregnant:
-                suggestions.extend([
-                    "Which medications are safe during pregnancy?",
-                    "What pain relievers can I take while pregnant?",
-                    "Are there any medications I should avoid during pregnancy?"
-                ])
-            
-            if profile.is_breastfeeding:
-                suggestions.extend([
-                    "Which medications are safe while breastfeeding?",
-                    "Can medications affect breast milk?",
-                    "What should I avoid while nursing?"
-                ])
-            
-            if profile.allergies:
-                suggestions.extend([
-                    f"Are there alternatives to medications I'm allergic to?",
-                    "How can I identify medications that might cause allergic reactions?",
-                    "What should I do if I have an allergic reaction to a medication?"
-                ])
-            
-            if profile.current_medications:
-                suggestions.extend([
-                    "Can my current medications interact with new ones?",
-                    "What should I monitor while taking multiple medications?",
-                    "How can I manage my medication schedule?"
-                ])
-        
-        # Shuffle and limit suggestions
-        import random
-        random.shuffle(suggestions)
-        suggestions = suggestions[:8]  # Return up to 8 suggestions
-        
-        return jsonify({
-            'success': True,
-            'suggestions': suggestions
-        })
-        
-    except Exception as e:
-        logger.error(f"Failed to get chat suggestions: {str(e)}")
-        return jsonify({'error': 'Failed to get suggestions'}), 500
 
-@chat_bp.route('/clear-history', methods=['DELETE'])
-@jwt_required()
-def clear_chat_history():
-    """
-    Clear user's chat history
-    """
+@chat_bp.route('/health', methods=['GET'])
+def health_check():
+    """Health check for chat service"""
     try:
-        user_id = get_jwt_identity()
-        
-        # Delete all chat history for the user
-        deleted_count = ChatHistory.query.filter_by(user_id=user_id).delete()
-        db.session.commit()
-        
-        logger.info(f"Cleared {deleted_count} chat records for user {user_id}")
+        # Test RAG pipeline availability
+        pipeline_status = "available"
+        try:
+            get_rag_pipeline()
+        except Exception:
+            pipeline_status = "unavailable"
         
         return jsonify({
-            'success': True,
-            'message': f'Cleared {deleted_count} chat messages',
-            'deleted_count': deleted_count
-        })
+            'status': 'healthy',
+            'rag_pipeline': pipeline_status,
+            'timestamp': datetime.utcnow().isoformat()
+        }), 200
         
     except Exception as e:
-        logger.error(f"Failed to clear chat history: {str(e)}")
-        return jsonify({'error': 'Failed to clear chat history'}), 500
-
-@chat_bp.route('/export', methods=['GET'])
-@jwt_required()
-def export_chat_history():
-    """
-    Export user's chat history as JSON
-    """
-    try:
-        user_id = get_jwt_identity()
-        
-        # Get all chat history
-        chats = ChatHistory.query.filter_by(user_id=user_id)\
-            .order_by(ChatHistory.created_at.asc()).all()
-        
-        # Format for export
-        export_data = {
-            'export_date': datetime.utcnow().isoformat(),
-            'user_id': user_id,
-            'total_conversations': len(chats),
-            'conversations': [
-                {
-                    'id': chat.id,
-                    'timestamp': chat.created_at.isoformat(),
-                    'user_message': chat.user_message,
-                    'ai_response': chat.ai_response,
-                    'confidence_score': chat.confidence_score,
-                    'response_time_ms': chat.response_time_ms,
-                    'model_version': chat.model_version,
-                    'user_feedback': chat.user_feedback
-                }
-                for chat in chats
-            ]
-        }
-        
+        logger.error(f"Health check error: {str(e)}")
         return jsonify({
-            'success': True,
-            'export_data': export_data
-        })
-        
-    except Exception as e:
-        logger.error(f"Failed to export chat history: {str(e)}")
-        return jsonify({'error': 'Failed to export chat history'}), 500
+            'status': 'unhealthy',
+            'error': str(e)
+        }), 503
