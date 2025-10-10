@@ -1,4 +1,4 @@
-﻿"""
+"""
 Health Profile Management Routes.
 
 This module provides endpoints for managing user health profiles,
@@ -37,15 +37,15 @@ def get_health_profile():
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
-        
+
         if not user:
             return jsonify({'error': 'User not found'}), 404
-            
+
         health_profile = HealthProfile.query.filter_by(user_id=user_id).first()
-        
+
         if not health_profile:
             return jsonify({'message': 'No health profile found'}), 404
-            
+
         return jsonify({
             'id': health_profile.id,
             'age': health_profile.age,
@@ -61,7 +61,7 @@ def get_health_profile():
             'created_at': health_profile.created_at.isoformat(),
             'updated_at': health_profile.updated_at.isoformat()
         }), 200
-        
+
     except Exception as e:
         logger.error(f"Error retrieving health profile: {e}")
         return jsonify({'error': 'Internal server error'}), 500
@@ -74,19 +74,19 @@ def create_health_profile():
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
-        
+
         if not user:
             return jsonify({'error': 'User not found'}), 404
-            
+
         data = request.get_json()
-        
+
         # Validate required fields
         if not data:
             return jsonify({'error': 'No data provided'}), 400
-            
+
         # Check if profile already exists
         existing_profile = HealthProfile.query.filter_by(user_id=user_id).first()
-        
+
         if existing_profile:
             # Update existing profile
             existing_profile.age = data.get('age', existing_profile.age)
@@ -100,9 +100,9 @@ def create_health_profile():
             existing_profile.emergency_contact = data.get('emergency_contact', existing_profile.emergency_contact)
             existing_profile.medical_history = data.get('medical_history', existing_profile.medical_history)
             existing_profile.updated_at = datetime.utcnow()
-            
+
             db.session.commit()
-            
+
             return jsonify({
                 'message': 'Health profile updated successfully',
                 'profile_id': existing_profile.id
@@ -122,15 +122,15 @@ def create_health_profile():
                 emergency_contact=data.get('emergency_contact'),
                 medical_history=data.get('medical_history', [])
             )
-            
+
             db.session.add(health_profile)
             db.session.commit()
-            
+
             return jsonify({
                 'message': 'Health profile created successfully',
                 'profile_id': health_profile.id
             }), 201
-            
+
     except SQLAlchemyError as e:
         db.session.rollback()
         logger.error(f"Database error creating/updating health profile: {e}")
@@ -147,15 +147,15 @@ def update_health_profile():
     try:
         user_id = get_jwt_identity()
         health_profile = HealthProfile.query.filter_by(user_id=user_id).first()
-        
+
         if not health_profile:
             return jsonify({'error': 'Health profile not found'}), 404
-            
+
         data = request.get_json()
-        
+
         if not data:
             return jsonify({'error': 'No data provided'}), 400
-            
+
         # Update fields
         health_profile.age = data.get('age', health_profile.age)
         health_profile.gender = data.get('gender', health_profile.gender)
@@ -168,11 +168,11 @@ def update_health_profile():
         health_profile.emergency_contact = data.get('emergency_contact', health_profile.emergency_contact)
         health_profile.medical_history = data.get('medical_history', health_profile.medical_history)
         health_profile.updated_at = datetime.utcnow()
-        
+
         db.session.commit()
-        
+
         return jsonify({'message': 'Health profile updated successfully'}), 200
-        
+
     except SQLAlchemyError as e:
         db.session.rollback()
         logger.error(f"Database error updating health profile: {e}")
@@ -189,15 +189,15 @@ def delete_health_profile():
     try:
         user_id = get_jwt_identity()
         health_profile = HealthProfile.query.filter_by(user_id=user_id).first()
-        
+
         if not health_profile:
             return jsonify({'error': 'Health profile not found'}), 404
-            
+
         db.session.delete(health_profile)
         db.session.commit()
-        
+
         return jsonify({'message': 'Health profile deleted successfully'}), 200
-        
+
     except SQLAlchemyError as e:
         db.session.rollback()
         logger.error(f"Database error deleting health profile: {e}")
@@ -214,13 +214,13 @@ def get_health_recommendations():
     try:
         user_id = get_jwt_identity()
         health_profile = HealthProfile.query.filter_by(user_id=user_id).first()
-        
+
         if not health_profile:
             return jsonify({'error': 'Health profile not found'}), 404
-            
+
         if not rag_pipeline:
             return jsonify({'error': 'RAG pipeline not available'}), 503
-            
+
         # Create context from health profile
         context = f"""
         Age: {health_profile.age}
@@ -229,16 +229,16 @@ def get_health_recommendations():
         Current medications: {', '.join(health_profile.current_medications) if health_profile.current_medications else 'None'}
         Allergies: {', '.join(health_profile.allergies) if health_profile.allergies else 'None'}
         """
-        
+
         # Generate recommendations
         query = "Provide personalized health recommendations based on my profile"
         recommendations = rag_pipeline.generate_response(query, context)
-        
+
         return jsonify({
             'recommendations': recommendations,
             'generated_at': datetime.utcnow().isoformat()
         }), 200
-        
+
     except Exception as e:
         logger.error(f"Error generating health recommendations: {e}")
         return jsonify({'error': 'Internal server error'}), 500
@@ -251,17 +251,17 @@ def calculate_bmi():
     try:
         user_id = get_jwt_identity()
         health_profile = HealthProfile.query.filter_by(user_id=user_id).first()
-        
+
         if not health_profile:
             return jsonify({'error': 'Health profile not found'}), 404
-            
+
         if not health_profile.height or not health_profile.weight:
             return jsonify({'error': 'Height and weight required for BMI calculation'}), 400
-            
+
         # Calculate BMI (weight in kg / height in m^2)
         height_m = health_profile.height / 100  # Convert cm to m
         bmi = health_profile.weight / (height_m ** 2)
-        
+
         # Determine BMI category
         if bmi < 18.5:
             category = "Underweight"
@@ -271,14 +271,14 @@ def calculate_bmi():
             category = "Overweight"
         else:
             category = "Obese"
-            
+
         return jsonify({
             'bmi': round(bmi, 2),
             'category': category,
             'height': health_profile.height,
             'weight': health_profile.weight
         }), 200
-        
+
     except Exception as e:
         logger.error(f"Error calculating BMI: {e}")
         return jsonify({'error': 'Internal server error'}), 500
@@ -292,5 +292,3 @@ def health_check():
         'service': 'health-profile',
         'timestamp': datetime.utcnow().isoformat()
     }), 200
-
-

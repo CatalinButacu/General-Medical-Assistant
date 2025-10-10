@@ -1,4 +1,4 @@
-﻿"""
+"""
 Medicine Cabinet Management Routes.
 
 This module provides endpoints for managing user medicine cabinets,
@@ -8,7 +8,7 @@ including medication tracking, dosage schedules, and drug interactions.
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import SQLAlchemyError
-from datetime import datetime, timedelta
+from datetime import datetime
 import logging
 
 from ..models import db, User, MedicineCabinet
@@ -37,12 +37,12 @@ def get_medicine_cabinet():
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
-        
+
         if not user:
             return jsonify({'error': 'User not found'}), 404
-            
+
         medicines = MedicineCabinet.query.filter_by(user_id=user_id).all()
-        
+
         medicine_list = []
         for medicine in medicines:
             medicine_list.append({
@@ -57,12 +57,12 @@ def get_medicine_cabinet():
                 'created_at': medicine.created_at.isoformat(),
                 'updated_at': medicine.updated_at.isoformat()
             })
-            
+
         return jsonify({
             'medicines': medicine_list,
             'total_count': len(medicine_list)
         }), 200
-        
+
     except Exception as e:
         logger.error(f"Error retrieving medicine cabinet: {e}")
         return jsonify({'error': 'Internal server error'}), 500
@@ -75,32 +75,32 @@ def add_medicine():
     try:
         user_id = get_jwt_identity()
         user = User.query.get(user_id)
-        
+
         if not user:
             return jsonify({'error': 'User not found'}), 404
-            
+
         data = request.get_json()
-        
+
         # Validate required fields
         if not data or not data.get('name'):
             return jsonify({'error': 'Medicine name is required'}), 400
-            
+
         # Parse dates if provided
         start_date = None
         end_date = None
-        
+
         if data.get('start_date'):
             try:
                 start_date = datetime.fromisoformat(data['start_date'].replace('Z', '+00:00'))
             except ValueError:
                 return jsonify({'error': 'Invalid start_date format'}), 400
-                
+
         if data.get('end_date'):
             try:
                 end_date = datetime.fromisoformat(data['end_date'].replace('Z', '+00:00'))
             except ValueError:
                 return jsonify({'error': 'Invalid end_date format'}), 400
-                
+
         # Create new medicine entry
         medicine = MedicineCabinet(
             user_id=user_id,
@@ -112,15 +112,15 @@ def add_medicine():
             notes=data.get('notes'),
             is_active=data.get('is_active', True)
         )
-        
+
         db.session.add(medicine)
         db.session.commit()
-        
+
         return jsonify({
             'message': 'Medicine added successfully',
             'medicine_id': medicine.id
         }), 201
-        
+
     except SQLAlchemyError as e:
         db.session.rollback()
         logger.error(f"Database error adding medicine: {e}")
@@ -137,13 +137,13 @@ def get_medicine(medicine_id):
     try:
         user_id = get_jwt_identity()
         medicine = MedicineCabinet.query.filter_by(
-            id=medicine_id, 
+            id=medicine_id,
             user_id=user_id
         ).first()
-        
+
         if not medicine:
             return jsonify({'error': 'Medicine not found'}), 404
-            
+
         return jsonify({
             'id': medicine.id,
             'name': medicine.name,
@@ -156,7 +156,7 @@ def get_medicine(medicine_id):
             'created_at': medicine.created_at.isoformat(),
             'updated_at': medicine.updated_at.isoformat()
         }), 200
-        
+
     except Exception as e:
         logger.error(f"Error retrieving medicine: {e}")
         return jsonify({'error': 'Internal server error'}), 500
@@ -169,25 +169,25 @@ def update_medicine(medicine_id):
     try:
         user_id = get_jwt_identity()
         medicine = MedicineCabinet.query.filter_by(
-            id=medicine_id, 
+            id=medicine_id,
             user_id=user_id
         ).first()
-        
+
         if not medicine:
             return jsonify({'error': 'Medicine not found'}), 404
-            
+
         data = request.get_json()
-        
+
         if not data:
             return jsonify({'error': 'No data provided'}), 400
-            
+
         # Update fields
         medicine.name = data.get('name', medicine.name)
         medicine.dosage = data.get('dosage', medicine.dosage)
         medicine.frequency = data.get('frequency', medicine.frequency)
         medicine.notes = data.get('notes', medicine.notes)
         medicine.is_active = data.get('is_active', medicine.is_active)
-        
+
         # Update dates if provided
         if 'start_date' in data:
             if data['start_date']:
@@ -199,7 +199,7 @@ def update_medicine(medicine_id):
                     return jsonify({'error': 'Invalid start_date format'}), 400
             else:
                 medicine.start_date = None
-                
+
         if 'end_date' in data:
             if data['end_date']:
                 try:
@@ -210,13 +210,13 @@ def update_medicine(medicine_id):
                     return jsonify({'error': 'Invalid end_date format'}), 400
             else:
                 medicine.end_date = None
-        
+
         medicine.updated_at = datetime.utcnow()
-        
+
         db.session.commit()
-        
+
         return jsonify({'message': 'Medicine updated successfully'}), 200
-        
+
     except SQLAlchemyError as e:
         db.session.rollback()
         logger.error(f"Database error updating medicine: {e}")
@@ -332,5 +332,3 @@ def health_check():
         'service': 'medicine',
         'timestamp': datetime.utcnow().isoformat()
     }), 200
-
-

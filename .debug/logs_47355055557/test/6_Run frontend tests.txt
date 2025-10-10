@@ -1,0 +1,25 @@
+﻿2025-10-10T14:09:00.6432000Z ##[group]Run npm test
+2025-10-10T14:09:00.6432275Z [36;1mnpm test[0m
+2025-10-10T14:09:00.7895810Z shell: /usr/bin/bash -e {0}
+2025-10-10T14:09:00.7896155Z env:
+2025-10-10T14:09:00.7896393Z   REGISTRY: ghcr.io
+2025-10-10T14:09:00.7896730Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T14:09:00.7897228Z   pythonLocation: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:00.7898155Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib/pkgconfig
+2025-10-10T14:09:00.7898725Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:00.7899201Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:00.7899673Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:00.7900145Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib
+2025-10-10T14:09:00.7900540Z ##[endgroup]
+2025-10-10T14:09:01.4641443Z 
+2025-10-10T14:09:01.4671998Z > trae-project@0.0.0 test
+2025-10-10T14:09:01.4672594Z > npm run lint && npm run check
+2025-10-10T14:09:01.4672931Z 
+2025-10-10T14:09:01.4672960Z 
+2025-10-10T14:09:01.4673144Z > trae-project@0.0.0 lint
+2025-10-10T14:09:01.4673509Z > eslint .
+2025-10-10T14:09:01.4673685Z 
+2025-10-10T14:09:03.9139045Z 
+2025-10-10T14:09:03.9139623Z > trae-project@0.0.0 check
+2025-10-10T14:09:03.9140120Z > tsc --noEmit
+2025-10-10T14:09:03.9140318Z 

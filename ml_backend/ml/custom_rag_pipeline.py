@@ -1,4 +1,4 @@
-﻿"""Custom RAG Pipeline for Medical Assistant
+"""Custom RAG Pipeline for Medical Assistant
 Combines BioBERT embeddings with FAISS vector search and medical knowledge
 """
 

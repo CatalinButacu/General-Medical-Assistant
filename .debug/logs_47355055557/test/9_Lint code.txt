@@ -1,0 +1,673 @@
+﻿2025-10-10T14:09:15.8005405Z ##[group]Run npm run lint
+2025-10-10T14:09:15.8005803Z [36;1mnpm run lint[0m
+2025-10-10T14:09:15.8006111Z [36;1mcd ml_backend[0m
+2025-10-10T14:09:15.8006549Z [36;1mflake8 . --max-line-length=88 --extend-ignore=E203,W503[0m
+2025-10-10T14:09:15.8054453Z shell: /usr/bin/bash -e {0}
+2025-10-10T14:09:15.8054803Z env:
+2025-10-10T14:09:15.8055052Z   REGISTRY: ghcr.io
+2025-10-10T14:09:15.8055409Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T14:09:15.8055957Z   pythonLocation: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:15.8056582Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib/pkgconfig
+2025-10-10T14:09:15.8057212Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:15.8057897Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:15.8058444Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:15.8058998Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib
+2025-10-10T14:09:15.8059456Z ##[endgroup]
+2025-10-10T14:09:15.9802598Z 
+2025-10-10T14:09:15.9807117Z > trae-project@0.0.0 lint
+2025-10-10T14:09:15.9828288Z > eslint .
+2025-10-10T14:09:15.9828803Z 
+2025-10-10T14:09:19.3634264Z ./app.py:127:1: W391 blank line at end of file
+2025-10-10T14:09:19.3638361Z ./ml/__init__.py:1:46: W292 no newline at end of file
+2025-10-10T14:09:19.3639151Z ./ml/custom_embeddings.py:7:1: F401 'numpy as np' imported but unused
+2025-10-10T14:09:19.3640236Z ./ml/custom_embeddings.py:11:1: F401 'sklearn.metrics.pairwise.cosine_similarity' imported but unused
+2025-10-10T14:09:19.3641322Z ./ml/custom_embeddings.py:12:1: F401 'typing.Union' imported but unused
+2025-10-10T14:09:19.3642172Z ./ml/custom_embeddings.py:12:1: F401 'typing.Any' imported but unused
+2025-10-10T14:09:19.3643152Z ./ml/custom_embeddings.py:172:41: F821 undefined name 'SentenceTransformer'
+2025-10-10T14:09:19.3644278Z ./ml/custom_embeddings.py:243:17: F811 redefinition of unused 'cosine_similarity' from line 11
+2025-10-10T14:09:19.3645340Z ./ml/data_preprocessing.py:6:1: F401 'pandas as pd' imported but unused
+2025-10-10T14:09:19.3646257Z ./ml/data_preprocessing.py:17:1: F401 'torch' imported but unused
+2025-10-10T14:09:19.3647185Z ./ml/data_preprocessing.py:48:89: E501 line too long (97 > 88 characters)
+2025-10-10T14:09:19.3649407Z ./ml/data_preprocessing.py:50:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3650320Z ./ml/data_preprocessing.py:85:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3651224Z ./ml/data_preprocessing.py:99:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3652575Z ./ml/data_preprocessing.py:104:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3653481Z ./ml/data_preprocessing.py:107:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3654379Z ./ml/data_preprocessing.py:110:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3655268Z ./ml/data_preprocessing.py:115:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3656148Z ./ml/data_preprocessing.py:117:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3657039Z ./ml/data_preprocessing.py:126:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3670714Z ./ml/data_preprocessing.py:129:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3671778Z ./ml/data_preprocessing.py:132:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3672709Z ./ml/data_preprocessing.py:141:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3673611Z ./ml/data_preprocessing.py:146:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3674553Z ./ml/data_preprocessing.py:152:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3677831Z ./ml/data_preprocessing.py:156:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3678817Z ./ml/data_preprocessing.py:163:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3679722Z ./ml/data_preprocessing.py:167:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3680609Z ./ml/data_preprocessing.py:170:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3681943Z ./ml/data_preprocessing.py:173:89: E501 line too long (95 > 88 characters)
+2025-10-10T14:09:19.3682883Z ./ml/data_preprocessing.py:174:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3683762Z ./ml/data_preprocessing.py:176:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3685848Z ./ml/data_preprocessing.py:177:89: E501 line too long (123 > 88 characters)
+2025-10-10T14:09:19.3686793Z ./ml/data_preprocessing.py:181:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3687849Z ./ml/data_preprocessing.py:184:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3688767Z ./ml/data_preprocessing.py:188:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3689652Z ./ml/data_preprocessing.py:196:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3690525Z ./ml/data_preprocessing.py:206:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3691460Z ./ml/data_preprocessing.py:207:89: E501 line too long (105 > 88 characters)
+2025-10-10T14:09:19.3693792Z ./ml/data_preprocessing.py:215:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3694718Z ./ml/data_preprocessing.py:218:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3695618Z ./ml/data_preprocessing.py:223:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3696516Z ./ml/data_preprocessing.py:227:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3697708Z ./ml/data_preprocessing.py:229:89: E501 line too long (89 > 88 characters)
+2025-10-10T14:09:19.3698654Z ./ml/data_preprocessing.py:230:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3699543Z ./ml/data_preprocessing.py:232:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3700441Z ./ml/data_preprocessing.py:233:89: E501 line too long (94 > 88 characters)
+2025-10-10T14:09:19.3701344Z ./ml/data_preprocessing.py:237:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3702226Z ./ml/data_preprocessing.py:240:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3703118Z ./ml/data_preprocessing.py:245:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3704005Z ./ml/data_preprocessing.py:250:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3704870Z ./ml/data_preprocessing.py:262:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3705748Z ./ml/data_preprocessing.py:267:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3706648Z ./ml/data_preprocessing.py:270:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3707713Z ./ml/data_preprocessing.py:274:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3708609Z ./ml/data_preprocessing.py:283:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3709772Z ./ml/data_preprocessing.py:290:89: E501 line too long (96 > 88 characters)
+2025-10-10T14:09:19.3710802Z ./ml/data_preprocessing.py:299:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3711703Z ./ml/data_preprocessing.py:304:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3712595Z ./ml/data_preprocessing.py:311:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3713417Z ./ml/data_preprocessing.py:315:35: W291 trailing whitespace
+2025-10-10T14:09:19.3714181Z ./ml/data_preprocessing.py:316:53: W291 trailing whitespace
+2025-10-10T14:09:19.3715029Z ./ml/data_preprocessing.py:319:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3715934Z ./ml/data_preprocessing.py:325:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3716854Z ./ml/data_preprocessing.py:327:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3718026Z ./ml/data_preprocessing.py:331:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3719049Z ./ml/data_preprocessing.py:334:89: E501 line too long (108 > 88 characters)
+2025-10-10T14:09:19.3719988Z ./ml/data_preprocessing.py:340:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3720878Z ./ml/data_preprocessing.py:344:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3721767Z ./ml/data_preprocessing.py:346:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3722654Z ./ml/data_preprocessing.py:350:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3723721Z ./ml/data_preprocessing.py:355:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3724533Z ./ml/data_preprocessing.py:357:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3725395Z ./ml/data_preprocessing.py:361:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3726254Z ./ml/data_preprocessing.py:365:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3727055Z ./ml/data_preprocessing.py:370:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3729718Z ./ml/data_preprocessing.py:374:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3730551Z ./ml/data_preprocessing.py:376:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3731532Z ./ml/data_preprocessing.py:377:89: E501 line too long (119 > 88 characters)
+2025-10-10T14:09:19.3732500Z ./ml/data_preprocessing.py:381:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3733471Z ./ml/data_preprocessing.py:383:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3734551Z ./ml/data_preprocessing.py:387:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3735496Z ./ml/data_preprocessing.py:398:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3736400Z ./ml/data_preprocessing.py:400:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3737385Z ./ml/data_preprocessing.py:402:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3741007Z ./ml/data_preprocessing.py:403:89: E501 line too long (128 > 88 characters)
+2025-10-10T14:09:19.3756494Z ./ml/data_preprocessing.py:407:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3757385Z ./ml/data_preprocessing.py:412:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3761136Z ./ml/data_preprocessing.py:417:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3761916Z ./ml/data_preprocessing.py:420:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3762676Z ./ml/data_preprocessing.py:424:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3763459Z ./ml/data_preprocessing.py:428:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3764196Z ./ml/data_preprocessing.py:429:44: W291 trailing whitespace
+2025-10-10T14:09:19.3765090Z ./ml/data_preprocessing.py:430:36: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3765946Z ./ml/data_preprocessing.py:430:67: W291 trailing whitespace
+2025-10-10T14:09:19.3766828Z ./ml/data_preprocessing.py:431:36: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3768126Z ./ml/data_preprocessing.py:432:36: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3769414Z ./ml/data_preprocessing.py:433:36: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3770431Z ./ml/data_preprocessing.py:434:36: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3771504Z ./ml/data_preprocessing.py:435:36: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3772476Z ./ml/data_preprocessing.py:437:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3773293Z ./ml/data_preprocessing.py:441:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3774111Z ./ml/data_preprocessing.py:444:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3774847Z ./ml/data_preprocessing.py:447:45: W291 trailing whitespace
+2025-10-10T14:09:19.3775615Z ./ml/data_preprocessing.py:453:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3776428Z ./ml/data_preprocessing.py:459:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3777250Z ./ml/data_preprocessing.py:464:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3778236Z ./ml/data_preprocessing.py:481:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3779181Z ./ml/data_preprocessing.py:483:33: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3780219Z ./ml/data_preprocessing.py:484:33: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3781426Z ./ml/data_preprocessing.py:485:33: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3782201Z ./ml/data_preprocessing.py:487:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3782910Z ./ml/data_preprocessing.py:491:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3783736Z ./ml/data_preprocessing.py:493:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3784521Z ./ml/data_preprocessing.py:500:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3785306Z ./ml/data_preprocessing.py:504:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3786080Z ./ml/data_preprocessing.py:506:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3786894Z ./ml/data_preprocessing.py:514:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3787971Z ./ml/data_preprocessing.py:517:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3788760Z ./ml/data_preprocessing.py:519:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3789596Z ./ml/data_preprocessing.py:524:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3790494Z ./ml/data_preprocessing.py:530:89: E501 line too long (106 > 88 characters)
+2025-10-10T14:09:19.3791391Z ./ml/data_preprocessing.py:532:89: E501 line too long (104 > 88 characters)
+2025-10-10T14:09:19.3792277Z ./ml/data_preprocessing.py:533:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3793162Z ./ml/data_preprocessing.py:535:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3794042Z ./ml/data_preprocessing.py:540:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3794916Z ./ml/data_preprocessing.py:542:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3795787Z ./ml/data_preprocessing.py:546:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3796663Z ./ml/data_preprocessing.py:550:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3797760Z ./ml/data_preprocessing.py:553:89: E501 line too long (93 > 88 characters)
+2025-10-10T14:09:19.3798653Z ./ml/data_preprocessing.py:555:89: E501 line too long (91 > 88 characters)
+2025-10-10T14:09:19.3799509Z ./ml/data_preprocessing.py:556:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3800331Z ./ml/data_preprocessing.py:564:23: W292 no newline at end of file
+2025-10-10T14:09:19.3801130Z ./ml/fine_tuning.py:8:1: F401 'torch.optim' imported but unused
+2025-10-10T14:09:19.3801934Z ./ml/fine_tuning.py:16:1: F401 'pandas as pd' imported but unused
+2025-10-10T14:09:19.3802819Z ./ml/fine_tuning.py:17:1: F401 'sklearn.metrics.confusion_matrix' imported but unused
+2025-10-10T14:09:19.3803880Z ./ml/fine_tuning.py:17:89: E501 line too long (93 > 88 characters)
+2025-10-10T14:09:19.3804538Z ./ml/fine_tuning.py:23:1: F401 'json' imported but unused
+2025-10-10T14:09:19.3805174Z ./ml/fine_tuning.py:27:1: F401 'seaborn as sns' imported but unused
+2025-10-10T14:09:19.3805841Z ./ml/fine_tuning.py:55:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3806544Z ./ml/fine_tuning.py:64:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3807286Z ./ml/fine_tuning.py:71:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3808209Z ./ml/fine_tuning.py:75:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3808909Z ./ml/fine_tuning.py:85:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3809541Z ./ml/fine_tuning.py:88:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3810214Z ./ml/fine_tuning.py:92:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3810932Z ./ml/fine_tuning.py:101:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3811696Z ./ml/fine_tuning.py:109:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3812481Z ./ml/fine_tuning.py:118:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3813255Z ./ml/fine_tuning.py:122:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3813958Z ./ml/fine_tuning.py:123:23: W291 trailing whitespace
+2025-10-10T14:09:19.3814680Z ./ml/fine_tuning.py:129:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3815405Z ./ml/fine_tuning.py:132:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3816272Z ./ml/fine_tuning.py:136:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3816889Z ./ml/fine_tuning.py:141:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3817654Z ./ml/fine_tuning.py:145:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3818254Z ./ml/fine_tuning.py:148:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3818941Z ./ml/fine_tuning.py:153:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3819618Z ./ml/fine_tuning.py:160:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3820323Z ./ml/fine_tuning.py:163:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3821027Z ./ml/fine_tuning.py:167:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3821727Z ./ml/fine_tuning.py:170:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3822561Z ./ml/fine_tuning.py:174:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3823260Z ./ml/fine_tuning.py:180:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3823973Z ./ml/fine_tuning.py:182:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3824693Z ./ml/fine_tuning.py:186:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3825395Z ./ml/fine_tuning.py:191:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3826121Z ./ml/fine_tuning.py:195:89: E501 line too long (92 > 88 characters)
+2025-10-10T14:09:19.3826866Z ./ml/fine_tuning.py:204:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3831358Z ./ml/fine_tuning.py:207:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3832139Z ./ml/fine_tuning.py:214:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3832883Z ./ml/fine_tuning.py:219:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3833624Z ./ml/fine_tuning.py:223:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3834330Z ./ml/fine_tuning.py:227:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3835054Z ./ml/fine_tuning.py:232:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3835772Z ./ml/fine_tuning.py:235:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3836475Z ./ml/fine_tuning.py:238:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3837177Z ./ml/fine_tuning.py:241:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3838048Z ./ml/fine_tuning.py:245:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3838765Z ./ml/fine_tuning.py:252:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3839475Z ./ml/fine_tuning.py:256:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3840381Z ./ml/fine_tuning.py:258:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3841216Z ./ml/fine_tuning.py:260:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3842135Z ./ml/fine_tuning.py:261:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3843068Z ./ml/fine_tuning.py:262:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3843976Z ./ml/fine_tuning.py:263:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3844893Z ./ml/fine_tuning.py:264:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3845811Z ./ml/fine_tuning.py:265:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3846599Z ./ml/fine_tuning.py:269:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3847311Z ./ml/fine_tuning.py:272:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3848186Z ./ml/fine_tuning.py:275:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3848898Z ./ml/fine_tuning.py:283:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3849542Z ./ml/fine_tuning.py:286:31: W291 trailing whitespace
+2025-10-10T14:09:19.3850175Z ./ml/fine_tuning.py:287:49: W291 trailing whitespace
+2025-10-10T14:09:19.3850766Z ./ml/fine_tuning.py:292:29: W291 trailing whitespace
+2025-10-10T14:09:19.3851347Z ./ml/fine_tuning.py:293:49: W291 trailing whitespace
+2025-10-10T14:09:19.3852211Z ./ml/fine_tuning.py:297:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3852920Z ./ml/fine_tuning.py:305:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3853616Z ./ml/fine_tuning.py:312:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3854304Z ./ml/fine_tuning.py:319:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3854998Z ./ml/fine_tuning.py:322:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3855671Z ./ml/fine_tuning.py:331:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3856384Z ./ml/fine_tuning.py:334:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3857063Z ./ml/fine_tuning.py:339:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3858053Z ./ml/fine_tuning.py:344:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3858763Z ./ml/fine_tuning.py:352:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3859454Z ./ml/fine_tuning.py:358:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3860146Z ./ml/fine_tuning.py:364:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3860843Z ./ml/fine_tuning.py:367:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3861529Z ./ml/fine_tuning.py:371:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3862233Z ./ml/fine_tuning.py:374:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3862927Z ./ml/fine_tuning.py:377:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3863638Z ./ml/fine_tuning.py:384:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3864472Z ./ml/fine_tuning.py:386:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3865394Z ./ml/fine_tuning.py:387:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3866270Z ./ml/fine_tuning.py:388:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3867104Z ./ml/fine_tuning.py:389:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3868175Z ./ml/fine_tuning.py:390:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3869018Z ./ml/fine_tuning.py:394:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3869736Z ./ml/fine_tuning.py:396:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3870436Z ./ml/fine_tuning.py:399:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3871208Z ./ml/fine_tuning.py:407:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3871864Z ./ml/fine_tuning.py:410:31: W291 trailing whitespace
+2025-10-10T14:09:19.3872464Z ./ml/fine_tuning.py:411:49: W291 trailing whitespace
+2025-10-10T14:09:19.3873299Z ./ml/fine_tuning.py:416:29: W291 trailing whitespace
+2025-10-10T14:09:19.3873917Z ./ml/fine_tuning.py:417:49: W291 trailing whitespace
+2025-10-10T14:09:19.3874601Z ./ml/fine_tuning.py:421:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3875336Z ./ml/fine_tuning.py:428:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3876054Z ./ml/fine_tuning.py:435:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3876802Z ./ml/fine_tuning.py:442:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3877811Z ./ml/fine_tuning.py:445:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3878542Z ./ml/fine_tuning.py:453:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3879302Z ./ml/fine_tuning.py:456:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3880062Z ./ml/fine_tuning.py:461:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3880810Z ./ml/fine_tuning.py:466:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3881565Z ./ml/fine_tuning.py:473:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3882239Z ./ml/fine_tuning.py:478:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3882952Z ./ml/fine_tuning.py:484:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3883742Z ./ml/fine_tuning.py:486:89: E501 line too long (96 > 88 characters)
+2025-10-10T14:09:19.3884489Z ./ml/fine_tuning.py:487:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3885419Z ./ml/fine_tuning.py:490:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3886149Z ./ml/fine_tuning.py:496:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3886857Z ./ml/fine_tuning.py:503:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3887755Z ./ml/fine_tuning.py:505:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3888498Z ./ml/fine_tuning.py:511:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3889193Z ./ml/fine_tuning.py:516:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3889908Z ./ml/fine_tuning.py:522:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3890636Z ./ml/fine_tuning.py:527:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3891308Z ./ml/fine_tuning.py:529:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3891979Z ./ml/fine_tuning.py:535:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3892655Z ./ml/fine_tuning.py:538:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3893330Z ./ml/fine_tuning.py:540:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3893995Z ./ml/fine_tuning.py:547:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3894667Z ./ml/fine_tuning.py:554:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3895335Z ./ml/fine_tuning.py:558:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3896021Z ./ml/fine_tuning.py:563:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3896694Z ./ml/fine_tuning.py:565:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3897393Z ./ml/fine_tuning.py:568:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3898288Z ./ml/fine_tuning.py:570:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3899002Z ./ml/fine_tuning.py:571:89: E501 line too long (92 > 88 characters)
+2025-10-10T14:09:19.3899708Z ./ml/fine_tuning.py:575:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3900416Z ./ml/fine_tuning.py:577:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3901099Z ./ml/fine_tuning.py:585:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3901721Z ./ml/fine_tuning.py:589:47: W291 trailing whitespace
+2025-10-10T14:09:19.3902360Z ./ml/fine_tuning.py:593:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3903032Z ./ml/fine_tuning.py:599:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3903719Z ./ml/fine_tuning.py:601:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3904406Z ./ml/fine_tuning.py:604:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3905304Z ./ml/fine_tuning.py:607:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3906010Z ./ml/fine_tuning.py:614:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3906736Z ./ml/fine_tuning.py:623:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3907535Z ./ml/fine_tuning.py:630:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3908468Z ./ml/fine_tuning.py:632:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3909205Z ./ml/fine_tuning.py:636:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3909903Z ./ml/fine_tuning.py:638:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3910569Z ./ml/fine_tuning.py:643:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3911237Z ./ml/fine_tuning.py:645:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3911972Z ./ml/fine_tuning.py:651:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3912708Z ./ml/fine_tuning.py:656:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3913432Z ./ml/fine_tuning.py:660:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3914170Z ./ml/fine_tuning.py:663:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3914881Z ./ml/fine_tuning.py:669:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3915545Z ./ml/fine_tuning.py:676:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3916212Z ./ml/fine_tuning.py:683:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3917090Z ./ml/fine_tuning.py:687:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3917977Z ./ml/fine_tuning.py:696:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3918671Z ./ml/fine_tuning.py:706:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3919346Z ./ml/fine_tuning.py:712:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3920003Z ./ml/fine_tuning.py:723:6: W292 no newline at end of file
+2025-10-10T14:09:19.3920733Z ./ml/model_training.py:16:1: F401 'pandas as pd' imported but unused
+2025-10-10T14:09:19.3921737Z ./ml/model_training.py:17:1: F401 'sklearn.model_selection.train_test_split' imported but unused
+2025-10-10T14:09:19.3923454Z ./ml/model_training.py:18:1: F401 'sklearn.metrics.confusion_matrix' imported but unused
+2025-10-10T14:09:19.3924453Z ./ml/model_training.py:18:89: E501 line too long (93 > 88 characters)
+2025-10-10T14:09:19.3925284Z ./ml/model_training.py:22:1: F401 'typing.Optional' imported but unused
+2025-10-10T14:09:19.3926072Z ./ml/model_training.py:24:1: F401 'json' imported but unused
+2025-10-10T14:09:19.3926805Z ./ml/model_training.py:25:1: F401 'os' imported but unused
+2025-10-10T14:09:19.3927874Z ./ml/model_training.py:27:1: F401 'time' imported but unused
+2025-10-10T14:09:19.3928401Z ./ml/model_training.py:51:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3928877Z ./ml/model_training.py:58:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3929329Z ./ml/model_training.py:62:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3929798Z ./ml/model_training.py:63:89: E501 line too long (97 > 88 characters)
+2025-10-10T14:09:19.3930277Z ./ml/model_training.py:67:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3930735Z ./ml/model_training.py:73:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3931182Z ./ml/model_training.py:76:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3931607Z ./ml/model_training.py:79:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3932037Z ./ml/model_training.py:88:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3932490Z ./ml/model_training.py:95:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3932928Z ./ml/model_training.py:99:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3933392Z ./ml/model_training.py:100:89: E501 line too long (99 > 88 characters)
+2025-10-10T14:09:19.3933851Z ./ml/model_training.py:104:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3934281Z ./ml/model_training.py:107:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3934712Z ./ml/model_training.py:110:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3935337Z ./ml/model_training.py:119:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3935765Z ./ml/model_training.py:127:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3936200Z ./ml/model_training.py:136:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3936629Z ./ml/model_training.py:140:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3937067Z ./ml/model_training.py:144:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3937754Z ./ml/model_training.py:148:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3938191Z ./ml/model_training.py:152:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3938622Z ./ml/model_training.py:155:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3939050Z ./ml/model_training.py:160:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3939478Z ./ml/model_training.py:168:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3939912Z ./ml/model_training.py:173:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3940342Z ./ml/model_training.py:178:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3940774Z ./ml/model_training.py:185:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3941211Z ./ml/model_training.py:189:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3941640Z ./ml/model_training.py:193:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3942216Z ./ml/model_training.py:196:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3942649Z ./ml/model_training.py:208:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3943102Z ./ml/model_training.py:209:89: E501 line too long (107 > 88 characters)
+2025-10-10T14:09:19.3943553Z ./ml/model_training.py:213:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3944000Z ./ml/model_training.py:217:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3944436Z ./ml/model_training.py:221:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3944873Z ./ml/model_training.py:224:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3945301Z ./ml/model_training.py:229:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3945733Z ./ml/model_training.py:237:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3946179Z ./ml/model_training.py:241:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3946628Z ./ml/model_training.py:245:89: E501 line too long (90 > 88 characters)
+2025-10-10T14:09:19.3947080Z ./ml/model_training.py:249:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3947777Z ./ml/model_training.py:259:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3948262Z ./ml/model_training.py:260:89: E501 line too long (100 > 88 characters)
+2025-10-10T14:09:19.3948717Z ./ml/model_training.py:263:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3949147Z ./ml/model_training.py:266:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3949579Z ./ml/model_training.py:270:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3950015Z ./ml/model_training.py:273:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3950439Z ./ml/model_training.py:283:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3950870Z ./ml/model_training.py:289:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3951295Z ./ml/model_training.py:291:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3951746Z ./ml/model_training.py:292:89: E501 line too long (94 > 88 characters)
+2025-10-10T14:09:19.3952193Z ./ml/model_training.py:295:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3952618Z ./ml/model_training.py:301:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3953046Z ./ml/model_training.py:305:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3953473Z ./ml/model_training.py:307:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3953894Z ./ml/model_training.py:312:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3954317Z ./ml/model_training.py:315:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3954885Z ./ml/model_training.py:318:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3955308Z ./ml/model_training.py:320:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3955734Z ./ml/model_training.py:322:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3956162Z ./ml/model_training.py:325:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3956597Z ./ml/model_training.py:329:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3957026Z ./ml/model_training.py:333:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3957754Z ./ml/model_training.py:336:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3958227Z ./ml/model_training.py:339:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3958660Z ./ml/model_training.py:341:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3959109Z ./ml/model_training.py:342:89: E501 line too long (104 > 88 characters)
+2025-10-10T14:09:19.3959560Z ./ml/model_training.py:344:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3960013Z ./ml/model_training.py:345:89: E501 line too long (101 > 88 characters)
+2025-10-10T14:09:19.3960448Z ./ml/model_training.py:348:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3960880Z ./ml/model_training.py:352:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3961329Z ./ml/model_training.py:354:89: E501 line too long (94 > 88 characters)
+2025-10-10T14:09:19.3961894Z ./ml/model_training.py:355:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3962341Z ./ml/model_training.py:359:89: E501 line too long (107 > 88 characters)
+2025-10-10T14:09:19.3962777Z ./ml/model_training.py:360:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3963207Z ./ml/model_training.py:366:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3963636Z ./ml/model_training.py:387:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3964081Z ./ml/model_training.py:395:89: E501 line too long (114 > 88 characters)
+2025-10-10T14:09:19.3964523Z ./ml/model_training.py:397:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3964950Z ./ml/model_training.py:401:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3965372Z ./ml/model_training.py:404:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3965802Z ./ml/model_training.py:412:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3966242Z ./ml/model_training.py:417:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3966663Z ./ml/model_training.py:420:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3967093Z ./ml/model_training.py:422:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3967780Z ./ml/model_training.py:430:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3968225Z ./ml/model_training.py:435:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3968673Z ./ml/model_training.py:436:89: E501 line too long (102 > 88 characters)
+2025-10-10T14:09:19.3969115Z ./ml/model_training.py:438:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3969558Z ./ml/model_training.py:439:89: E501 line too long (97 > 88 characters)
+2025-10-10T14:09:19.3970000Z ./ml/model_training.py:442:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3970423Z ./ml/model_training.py:446:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3970867Z ./ml/model_training.py:448:89: E501 line too long (102 > 88 characters)
+2025-10-10T14:09:19.3971360Z ./ml/model_training.py:449:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3971803Z ./ml/model_training.py:453:89: E501 line too long (107 > 88 characters)
+2025-10-10T14:09:19.3972243Z ./ml/model_training.py:454:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3972687Z ./ml/model_training.py:456:89: E501 line too long (105 > 88 characters)
+2025-10-10T14:09:19.3973135Z ./ml/model_training.py:457:89: E501 line too long (102 > 88 characters)
+2025-10-10T14:09:19.3973577Z ./ml/model_training.py:458:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3974154Z ./ml/model_training.py:461:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3974596Z ./ml/model_training.py:463:89: E501 line too long (128 > 88 characters)
+2025-10-10T14:09:19.3975033Z ./ml/model_training.py:464:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3975467Z ./ml/model_training.py:469:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3975894Z ./ml/model_training.py:474:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3976343Z ./ml/model_training.py:478:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3976771Z ./ml/model_training.py:482:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3977204Z ./ml/model_training.py:487:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3977816Z ./ml/model_training.py:489:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3978265Z ./ml/model_training.py:492:89: E501 line too long (128 > 88 characters)
+2025-10-10T14:09:19.3978712Z ./ml/model_training.py:493:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3979144Z ./ml/model_training.py:499:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3979565Z ./ml/model_training.py:504:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3980021Z ./ml/model_training.py:506:89: E501 line too long (93 > 88 characters)
+2025-10-10T14:09:19.3980468Z ./ml/model_training.py:508:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3981017Z ./ml/model_training.py:512:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3981442Z ./ml/model_training.py:517:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3981861Z ./ml/model_training.py:525:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3982308Z ./ml/model_training.py:526:89: E501 line too long (131 > 88 characters)
+2025-10-10T14:09:19.3982750Z ./ml/model_training.py:527:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3983170Z ./ml/model_training.py:532:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3983621Z ./ml/model_training.py:535:89: E501 line too long (89 > 88 characters)
+2025-10-10T14:09:19.3984060Z ./ml/model_training.py:542:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3984482Z ./ml/model_training.py:545:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3984987Z ./ml/model_training.py:547:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3985408Z ./ml/model_training.py:554:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3985845Z ./ml/model_training.py:559:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3986266Z ./ml/model_training.py:564:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3986711Z ./ml/model_training.py:566:89: E501 line too long (107 > 88 characters)
+2025-10-10T14:09:19.3987150Z ./ml/model_training.py:567:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3987859Z ./ml/model_training.py:574:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3988303Z ./ml/model_training.py:577:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3988764Z ./ml/model_training.py:578:89: E501 line too long (103 > 88 characters)
+2025-10-10T14:09:19.3989204Z ./ml/model_training.py:581:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3989652Z ./ml/model_training.py:584:89: E501 line too long (101 > 88 characters)
+2025-10-10T14:09:19.3990093Z ./ml/model_training.py:585:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3990517Z ./ml/model_training.py:588:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3990949Z ./ml/model_training.py:592:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3991393Z ./ml/model_training.py:595:89: E501 line too long (90 > 88 characters)
+2025-10-10T14:09:19.3991830Z ./ml/model_training.py:596:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3992279Z ./ml/model_training.py:597:89: E501 line too long (96 > 88 characters)
+2025-10-10T14:09:19.3992710Z ./ml/model_training.py:598:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3993273Z ./ml/model_training.py:600:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3993707Z ./ml/model_training.py:605:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3994135Z ./ml/model_training.py:609:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3994558Z ./ml/model_training.py:610:39: W292 no newline at end of file
+2025-10-10T14:09:19.3994948Z ./models.py:223:10: W292 no newline at end of file
+2025-10-10T14:09:19.3995330Z ./routes/__init__.py:11:69: W292 no newline at end of file
+2025-10-10T14:09:19.3995842Z ./routes/auth.py:10:1: F401 'werkzeug.security.check_password_hash' imported but unused
+2025-10-10T14:09:19.3996341Z ./routes/auth.py:29:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3996748Z ./routes/auth.py:35:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3997138Z ./routes/auth.py:39:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3997819Z ./routes/auth.py:42:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3998224Z ./routes/auth.py:49:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3998615Z ./routes/auth.py:52:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3999000Z ./routes/auth.py:54:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3999382Z ./routes/auth.py:59:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3999769Z ./routes/auth.py:71:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4000156Z ./routes/auth.py:75:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4000686Z ./routes/auth.py:78:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4001078Z ./routes/auth.py:81:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4001473Z ./routes/auth.py:91:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4001854Z ./routes/auth.py:93:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4002252Z ./routes/auth.py:100:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4002653Z ./routes/auth.py:113:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4003056Z ./routes/auth.py:116:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4003451Z ./routes/auth.py:122:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4003839Z ./routes/auth.py:127:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4004230Z ./routes/auth.py:140:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4004622Z ./routes/auth.py:143:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4005017Z ./routes/auth.py:146:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4005410Z ./routes/auth.py:148:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4005802Z ./routes/auth.py:161:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4006194Z ./routes/auth.py:164:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4006611Z ./routes/auth.py:167:89: E501 line too long (92 > 88 characters)
+2025-10-10T14:09:19.4007023Z ./routes/auth.py:169:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4007585Z ./routes/auth.py:182:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4008035Z ./routes/auth.py:185:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4008427Z ./routes/auth.py:187:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4008818Z ./routes/auth.py:195:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4009211Z ./routes/auth.py:197:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4009599Z ./routes/auth.py:199:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4009994Z ./routes/auth.py:204:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4010387Z ./routes/auth.py:218:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4010774Z ./routes/auth.py:221:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4011164Z ./routes/auth.py:223:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4011557Z ./routes/auth.py:227:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4011945Z ./routes/auth.py:231:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4012472Z ./routes/auth.py:235:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4012858Z ./routes/auth.py:237:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4013253Z ./routes/auth.py:239:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4013632Z ./routes/auth.py:252:1: W391 blank line at end of file
+2025-10-10T14:09:19.4014057Z ./routes/chat.py:5:1: F401 'flask.stream_template' imported but unused
+2025-10-10T14:09:19.4014474Z ./routes/chat.py:8:1: F401 'json' imported but unused
+2025-10-10T14:09:19.4014860Z ./routes/chat.py:44:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4015248Z ./routes/chat.py:48:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4015643Z ./routes/chat.py:61:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4016061Z ./routes/chat.py:64:89: E501 line too long (102 > 88 characters)
+2025-10-10T14:09:19.4016463Z ./routes/chat.py:66:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4016850Z ./routes/chat.py:69:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4017259Z ./routes/chat.py:70:89: E501 line too long (89 > 88 characters)
+2025-10-10T14:09:19.4017768Z ./routes/chat.py:71:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4018157Z ./routes/chat.py:76:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4018512Z ./routes/chat.py:90:27: W291 trailing whitespace
+2025-10-10T14:09:19.4018878Z ./routes/chat.py:93:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4019389Z ./routes/chat.py:96:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4019776Z ./routes/chat.py:100:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4020171Z ./routes/chat.py:105:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4020533Z ./routes/chat.py:118:27: W291 trailing whitespace
+2025-10-10T14:09:19.4020899Z ./routes/chat.py:121:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4021289Z ./routes/chat.py:124:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4021691Z ./routes/chat.py:127:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4022077Z ./routes/chat.py:129:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4022468Z ./routes/chat.py:131:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4022852Z ./routes/chat.py:145:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4023215Z ./routes/chat.py:148:27: W291 trailing whitespace
+2025-10-10T14:09:19.4023585Z ./routes/chat.py:151:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4023977Z ./routes/chat.py:154:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4024367Z ./routes/chat.py:157:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4024761Z ./routes/chat.py:159:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4025148Z ./routes/chat.py:167:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4025537Z ./routes/chat.py:179:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4025934Z ./routes/chat.py:187:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4026350Z ./routes/chat.py:188:89: E501 line too long (128 > 88 characters)
+2025-10-10T14:09:19.4026761Z ./routes/chat.py:194:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4027168Z ./routes/chat.py:197:89: E501 line too long (125 > 88 characters)
+2025-10-10T14:09:19.4027699Z ./routes/chat.py:199:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4028094Z ./routes/chat.py:208:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4028486Z ./routes/chat.py:211:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4028878Z ./routes/chat.py:213:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4029267Z ./routes/chat.py:215:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4029649Z ./routes/chat.py:220:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4030057Z ./routes/chat.py:227:89: E501 line too long (90 > 88 characters)
+2025-10-10T14:09:19.4030464Z ./routes/chat.py:233:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4030945Z ./routes/chat.py:236:27: W291 trailing whitespace
+2025-10-10T14:09:19.4031315Z ./routes/chat.py:239:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4031703Z ./routes/chat.py:242:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4032066Z ./routes/chat.py:244:27: W291 trailing whitespace
+2025-10-10T14:09:19.4032433Z ./routes/chat.py:247:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4032822Z ./routes/chat.py:250:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4033218Z ./routes/chat.py:253:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4033609Z ./routes/chat.py:255:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4033997Z ./routes/chat.py:257:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4034391Z ./routes/chat.py:271:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4034780Z ./routes/chat.py:274:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4035167Z ./routes/chat.py:286:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4035561Z ./routes/chat.py:294:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4035944Z ./routes/chat.py:301:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4036354Z ./routes/chat.py:305:89: E501 line too long (122 > 88 characters)
+2025-10-10T14:09:19.4036758Z ./routes/chat.py:308:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4037147Z ./routes/chat.py:324:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4037781Z ./routes/chat.py:330:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4038175Z ./routes/chat.py:338:1: W391 blank line at end of file
+2025-10-10T14:09:19.4038620Z ./routes/health_profile.py:21:89: E501 line too long (91 > 88 characters)
+2025-10-10T14:09:19.4039111Z ./routes/health_profile.py:40:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4039584Z ./routes/health_profile.py:43:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4040040Z ./routes/health_profile.py:45:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4040503Z ./routes/health_profile.py:48:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4040961Z ./routes/health_profile.py:64:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4041422Z ./routes/health_profile.py:77:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4041887Z ./routes/health_profile.py:80:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4042342Z ./routes/health_profile.py:82:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4042808Z ./routes/health_profile.py:86:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4043265Z ./routes/health_profile.py:89:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4043737Z ./routes/health_profile.py:96:89: E501 line too long (93 > 88 characters)
+2025-10-10T14:09:19.4044225Z ./routes/health_profile.py:97:89: E501 line too long (90 > 88 characters)
+2025-10-10T14:09:19.4044708Z ./routes/health_profile.py:98:89: E501 line too long (117 > 88 characters)
+2025-10-10T14:09:19.4045196Z ./routes/health_profile.py:99:89: E501 line too long (120 > 88 characters)
+2025-10-10T14:09:19.4045700Z ./routes/health_profile.py:100:89: E501 line too long (114 > 88 characters)
+2025-10-10T14:09:19.4046196Z ./routes/health_profile.py:101:89: E501 line too long (108 > 88 characters)
+2025-10-10T14:09:19.4046676Z ./routes/health_profile.py:103:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4047150Z ./routes/health_profile.py:105:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4047723Z ./routes/health_profile.py:125:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4048189Z ./routes/health_profile.py:128:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4048655Z ./routes/health_profile.py:133:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4049113Z ./routes/health_profile.py:150:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4049578Z ./routes/health_profile.py:153:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4050044Z ./routes/health_profile.py:155:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4050629Z ./routes/health_profile.py:158:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4051112Z ./routes/health_profile.py:166:89: E501 line too long (109 > 88 characters)
+2025-10-10T14:09:19.4051608Z ./routes/health_profile.py:167:89: E501 line too long (112 > 88 characters)
+2025-10-10T14:09:19.4052091Z ./routes/health_profile.py:168:89: E501 line too long (106 > 88 characters)
+2025-10-10T14:09:19.4052585Z ./routes/health_profile.py:169:89: E501 line too long (100 > 88 characters)
+2025-10-10T14:09:19.4053065Z ./routes/health_profile.py:171:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4053528Z ./routes/health_profile.py:173:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4053993Z ./routes/health_profile.py:175:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4054456Z ./routes/health_profile.py:192:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4054917Z ./routes/health_profile.py:195:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4055383Z ./routes/health_profile.py:198:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4055841Z ./routes/health_profile.py:200:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4056311Z ./routes/health_profile.py:217:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4056775Z ./routes/health_profile.py:220:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4057344Z ./routes/health_profile.py:223:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4057933Z ./routes/health_profile.py:228:89: E501 line too long (123 > 88 characters)
+2025-10-10T14:09:19.4058423Z ./routes/health_profile.py:229:89: E501 line too long (126 > 88 characters)
+2025-10-10T14:09:19.4058907Z ./routes/health_profile.py:230:89: E501 line too long (96 > 88 characters)
+2025-10-10T14:09:19.4059384Z ./routes/health_profile.py:232:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4059850Z ./routes/health_profile.py:236:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4060314Z ./routes/health_profile.py:241:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4060780Z ./routes/health_profile.py:254:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4061246Z ./routes/health_profile.py:257:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4061727Z ./routes/health_profile.py:259:89: E501 line too long (92 > 88 characters)
+2025-10-10T14:09:19.4062211Z ./routes/health_profile.py:260:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4062677Z ./routes/health_profile.py:264:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4063141Z ./routes/health_profile.py:274:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4063606Z ./routes/health_profile.py:281:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4064054Z ./routes/health_profile.py:296:1: W391 blank line at end of file
+2025-10-10T14:09:19.4064529Z ./routes/medicine.py:11:1: F401 'datetime.timedelta' imported but unused
+2025-10-10T14:09:19.4064995Z ./routes/medicine.py:40:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4065421Z ./routes/medicine.py:43:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4065843Z ./routes/medicine.py:45:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4066287Z ./routes/medicine.py:53:89: E501 line too long (95 > 88 characters)
+2025-10-10T14:09:19.4066732Z ./routes/medicine.py:54:89: E501 line too long (89 > 88 characters)
+2025-10-10T14:09:19.4067170Z ./routes/medicine.py:60:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4067693Z ./routes/medicine.py:65:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4068108Z ./routes/medicine.py:78:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4068529Z ./routes/medicine.py:81:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4068949Z ./routes/medicine.py:83:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4069364Z ./routes/medicine.py:87:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4069909Z ./routes/medicine.py:91:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4070338Z ./routes/medicine.py:94:89: E501 line too long (94 > 88 characters)
+2025-10-10T14:09:19.4070768Z ./routes/medicine.py:97:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4071246Z ./routes/medicine.py:100:89: E501 line too long (90 > 88 characters)
+2025-10-10T14:09:19.4071688Z ./routes/medicine.py:103:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4072124Z ./routes/medicine.py:115:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4072549Z ./routes/medicine.py:118:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4072966Z ./routes/medicine.py:123:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4073360Z ./routes/medicine.py:140:28: W291 trailing whitespace
+2025-10-10T14:09:19.4073759Z ./routes/medicine.py:143:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4074179Z ./routes/medicine.py:146:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4074623Z ./routes/medicine.py:152:89: E501 line too long (91 > 88 characters)
+2025-10-10T14:09:19.4075054Z ./routes/medicine.py:159:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4075447Z ./routes/medicine.py:172:28: W291 trailing whitespace
+2025-10-10T14:09:19.4075848Z ./routes/medicine.py:175:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4076265Z ./routes/medicine.py:178:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4076853Z ./routes/medicine.py:180:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4077281Z ./routes/medicine.py:183:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4077801Z ./routes/medicine.py:190:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4078229Z ./routes/medicine.py:202:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4078658Z ./routes/medicine.py:213:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4079077Z ./routes/medicine.py:215:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4079504Z ./routes/medicine.py:217:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4079926Z ./routes/medicine.py:219:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4080329Z ./routes/medicine.py:336:1: W391 blank line at end of file
+2025-10-10T14:09:19.4080860Z ./scripts/prepare_medical_data.py:18:1: F401 'nltk.tokenize.sent_tokenize' imported but unused
+2025-10-10T14:09:19.4081501Z ./scripts/prepare_medical_data.py:181:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4082160Z ./scripts/prepare_medical_data.py:182:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4082806Z ./scripts/prepare_medical_data.py:183:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4083436Z ./scripts/prepare_medical_data.py:186:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4084080Z ./scripts/prepare_medical_data.py:192:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4084722Z ./scripts/prepare_medical_data.py:193:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4085353Z ./scripts/prepare_medical_data.py:196:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4085996Z ./scripts/prepare_medical_data.py:202:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4086631Z ./scripts/prepare_medical_data.py:203:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4087263Z ./scripts/prepare_medical_data.py:206:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4087950Z ./scripts/prepare_medical_data.py:363:1: W391 blank line at end of file
+2025-10-10T14:09:19.4099170Z ##[error]Process completed with exit code 1.

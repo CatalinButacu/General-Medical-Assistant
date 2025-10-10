@@ -1,0 +1,57 @@
+﻿2025-10-10T13:56:20.4853420Z ##[group]Run echo "Security scan completed. Results:"
+2025-10-10T13:56:20.4853851Z [36;1mecho "Security scan completed. Results:"[0m
+2025-10-10T13:56:20.4854176Z [36;1mif [ -f trivy-results.txt ]; then[0m
+2025-10-10T13:56:20.4854513Z [36;1m  cat trivy-results.txt[0m
+2025-10-10T13:56:20.4854758Z [36;1melse[0m
+2025-10-10T13:56:20.4855062Z [36;1m  echo "No security issues found or scan results file not generated."[0m
+2025-10-10T13:56:20.4855687Z [36;1mfi[0m
+2025-10-10T13:56:20.4887996Z shell: /usr/bin/bash -e {0}
+2025-10-10T13:56:20.4888246Z env:
+2025-10-10T13:56:20.4888433Z   REGISTRY: ghcr.io
+2025-10-10T13:56:20.4888698Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T13:56:20.4888993Z ##[endgroup]
+2025-10-10T13:56:20.4940729Z Security scan completed. Results:
+2025-10-10T13:56:20.4951108Z 
+2025-10-10T13:56:20.4953261Z Report Summary
+2025-10-10T13:56:20.4954729Z 
+2025-10-10T13:56:20.4955533Z ┌───────────────────┬──────┬─────────────────┬─────────┐
+2025-10-10T13:56:20.4956180Z │      Target       │ Type │ Vulnerabilities │ Secrets │
+2025-10-10T13:56:20.4956888Z ├───────────────────┼──────┼─────────────────┼─────────┤
+2025-10-10T13:56:20.4957833Z │ package-lock.json │ npm  │        4        │    -    │
+2025-10-10T13:56:20.4960122Z └───────────────────┴──────┴─────────────────┴─────────┘
+2025-10-10T13:56:20.4960708Z Legend:
+2025-10-10T13:56:20.4963732Z - '-': Not scanned
+2025-10-10T13:56:20.4964117Z - '0': Clean (no security findings detected)
+2025-10-10T13:56:20.4964435Z 
+2025-10-10T13:56:20.4964441Z 
+2025-10-10T13:56:20.4964590Z For OSS Maintainers: VEX Notice
+2025-10-10T13:56:20.4964976Z --------------------------------
+2025-10-10T13:56:20.4966399Z If you're an OSS maintainer and Trivy has detected vulnerabilities in your project that you believe are not actually exploitable, consider issuing a VEX (Vulnerability Exploitability eXchange) statement.
+2025-10-10T13:56:20.4968645Z VEX allows you to communicate the actual status of vulnerabilities in your project, improving security transparency and reducing false positives for your users.
+2025-10-10T13:56:20.4970167Z Learn more and start using VEX: https://trivy.dev/v0.65/docs/supply-chain/vex/repo#publishing-vex-documents
+2025-10-10T13:56:20.4970842Z 
+2025-10-10T13:56:20.4971191Z To disable this notice, set the TRIVY_DISABLE_VEX_NOTICE environment variable.
+2025-10-10T13:56:20.4971752Z 
+2025-10-10T13:56:20.4971762Z 
+2025-10-10T13:56:20.4971926Z package-lock.json (npm)
+2025-10-10T13:56:20.4972319Z =======================
+2025-10-10T13:56:20.4972771Z Total: 4 (UNKNOWN: 0, LOW: 0, MEDIUM: 0, HIGH: 4, CRITICAL: 0)
+2025-10-10T13:56:20.4973167Z 
+2025-10-10T13:56:20.4973917Z ┌─────────┬────────────────┬──────────┬────────┬───────────────────┬───────────────┬──────────────────────────────────────────────────────────────┐
+2025-10-10T13:56:20.4975256Z │ Library │ Vulnerability  │ Severity │ Status │ Installed Version │ Fixed Version │                            Title                             │
+2025-10-10T13:56:20.4977055Z ├─────────┼────────────────┼──────────┼────────┼───────────────────┼───────────────┼──────────────────────────────────────────────────────────────┤
+2025-10-10T13:56:20.4978352Z │ multer  │ CVE-2025-47935 │ HIGH     │ fixed  │ 1.4.5-lts.2       │ 2.0.0         │ Multer vulnerable to Denial of Service via memory leaks from │
+2025-10-10T13:56:20.4979091Z │         │                │          │        │                   │               │ unclosed streams...                                          │
+2025-10-10T13:56:20.4979619Z │         │                │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2025-47935                   │
+2025-10-10T13:56:20.4980173Z │         ├────────────────┤          │        │                   │               ├──────────────────────────────────────────────────────────────┤
+2025-10-10T13:56:20.4980738Z │         │ CVE-2025-47944 │          │        │                   │               │ Multer vulnerable to Denial of Service from maliciously      │
+2025-10-10T13:56:20.4981537Z │         │                │          │        │                   │               │ crafted requests                                             │
+2025-10-10T13:56:20.4982037Z │         │                │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2025-47944                   │
+2025-10-10T13:56:20.4982576Z │         ├────────────────┤          │        │                   ├───────────────┼──────────────────────────────────────────────────────────────┤
+2025-10-10T13:56:20.4983123Z │         │ CVE-2025-48997 │          │        │                   │ 2.0.1         │ multer: Multer vulnerable to Denial of Service via unhandled │
+2025-10-10T13:56:20.4983662Z │         │                │          │        │                   │               │ exception                                                    │
+2025-10-10T13:56:20.4984307Z │         │                │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2025-48997                   │
+2025-10-10T13:56:20.4984855Z │         ├────────────────┤          │        │                   ├───────────────┼──────────────────────────────────────────────────────────────┤
+2025-10-10T13:56:20.4986191Z │         │ CVE-2025-7338  │          │        │                   │ 2.0.2         │ multer: Multer Denial of Service                             │
+2025-10-10T13:56:20.4986910Z │         │                │          │        │                   │               │ https://avd.aquasec.com/nvd/cve-2025-7338                    │
+2025-10-10T13:56:20.4987519Z └─────────┴────────────────┴──────────┴────────┴───────────────────┴───────────────┴──────────────────────────────────────────────────────────────┘

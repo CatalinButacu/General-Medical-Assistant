@@ -1,15 +1,15 @@
-﻿"""Custom BioBERT Embeddings for Medical RAG System
+"""Custom BioBERT Embeddings for Medical RAG System
 Optimized for medical text processing and semantic similarity
 """
 
 import os
 import logging
-import numpy as np
 import torch
 from pathlib import Path
 from transformers import AutoTokenizer, AutoModel
+from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-from typing import List, Union, Optional, Dict, Any
+from typing import List, Optional, Dict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -240,7 +240,6 @@ class MedicalEmbeddingManager:
                 emb2 = self.sentence_transformer.encode([text2])
 
                 # Calculate cosine similarity
-                from sklearn.metrics.pairwise import cosine_similarity
                 similarity = cosine_similarity(emb1, emb2)[0][0]
                 return float(similarity)
 

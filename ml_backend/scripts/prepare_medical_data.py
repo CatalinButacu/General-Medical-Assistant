@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 Medical Data Preparation Script
 
@@ -15,7 +15,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import nltk
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import re
 
@@ -178,32 +178,32 @@ class MedicalDataPreprocessor:
                 'id': 'doc_001',
                 'title': 'Cardiovascular Disease Prevention',
                 'content': ('Regular exercise and healthy diet are crucial for '
-                           'preventing heart disease. Monitoring blood pressure '
-                           'and cholesterol levels helps identify risk factors '
-                           'early.'),
+                            'preventing heart disease. Monitoring blood pressure '
+                            'and cholesterol levels helps identify risk factors '
+                            'early.'),
                 'category': 'cardiology',
                 'keywords': ['heart', 'cardiovascular', 'prevention',
-                           'exercise', 'diet']
+                             'exercise', 'diet']
             },
             {
                 'id': 'doc_002',
                 'title': 'Diabetes Management Guidelines',
                 'content': ('Type 2 diabetes management involves blood glucose '
-                           'monitoring, medication adherence, and lifestyle '
-                           'modifications including diet and exercise.'),
+                            'monitoring, medication adherence, and lifestyle '
+                            'modifications including diet and exercise.'),
                 'category': 'endocrinology',
                 'keywords': ['diabetes', 'glucose', 'insulin', 'management',
-                           'lifestyle']
+                             'lifestyle']
             },
             {
                 'id': 'doc_003',
                 'title': 'Mental Health and Depression',
                 'content': ('Depression is a common mental health condition '
-                           'that affects mood, thoughts, and daily activities. '
-                           'Treatment includes therapy and medication.'),
+                            'that affects mood, thoughts, and daily activities. '
+                            'Treatment includes therapy and medication.'),
                 'category': 'psychiatry',
                 'keywords': ['depression', 'mental health', 'therapy', 'mood',
-                           'treatment']
+                             'treatment']
             },
             {
                 'id': 'doc_004',
@@ -356,8 +356,3 @@ def main():
 
 if __name__ == "__main__":
     exit(main())
-
-
-
-
-

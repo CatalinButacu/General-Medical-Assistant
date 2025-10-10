@@ -1,0 +1,1485 @@
+﻿2025-10-10T13:56:10.6650401Z Current runner version: '2.328.0'
+2025-10-10T13:56:10.6706755Z ##[group]Runner Image Provisioner
+2025-10-10T13:56:10.6728654Z Hosted Compute Agent
+2025-10-10T13:56:10.6729532Z Version: 20250912.392
+2025-10-10T13:56:10.6730499Z Commit: d921fda672a98b64f4f82364647e2f10b2267d0b
+2025-10-10T13:56:10.6731679Z Build Date: 2025-09-12T15:23:14Z
+2025-10-10T13:56:10.6732720Z ##[endgroup]
+2025-10-10T13:56:10.6733530Z ##[group]Operating System
+2025-10-10T13:56:10.6734420Z Ubuntu
+2025-10-10T13:56:10.6735256Z 24.04.3
+2025-10-10T13:56:10.6735957Z LTS
+2025-10-10T13:56:10.6736759Z ##[endgroup]
+2025-10-10T13:56:10.6737738Z ##[group]Runner Image
+2025-10-10T13:56:10.6738622Z Image: ubuntu-24.04
+2025-10-10T13:56:10.6739382Z Version: 20250929.60.1
+2025-10-10T13:56:10.6741276Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20250929.60/images/ubuntu/Ubuntu2404-Readme.md
+2025-10-10T13:56:10.6743933Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20250929.60
+2025-10-10T13:56:10.6745692Z ##[endgroup]
+2025-10-10T13:56:10.6756703Z ##[group]GITHUB_TOKEN Permissions
+2025-10-10T13:56:10.6780082Z Contents: read
+2025-10-10T13:56:10.6781082Z Metadata: read
+2025-10-10T13:56:10.6781888Z Packages: read
+2025-10-10T13:56:10.6782762Z ##[endgroup]
+2025-10-10T13:56:10.6786180Z Secret source: Actions
+2025-10-10T13:56:10.6787397Z Prepare workflow directory
+2025-10-10T13:56:10.8242905Z Prepare all required actions
+2025-10-10T13:56:10.8299030Z Getting action download info
+2025-10-10T13:56:11.1217069Z Download action repository 'actions/checkout@v4' (SHA:08eba0b27e820071cde6df949e0beb9ba4906955)
+2025-10-10T13:56:11.2936416Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2025-10-10T13:56:11.3971887Z Download action repository 'actions/setup-python@v4' (SHA:7f4fc3e22c37d6ff65e88745f38bd3157c663f7c)
+2025-10-10T13:56:11.6423961Z Complete job name: test
+2025-10-10T13:56:11.7176709Z ##[group]Run actions/checkout@v4
+2025-10-10T13:56:11.7178324Z with:
+2025-10-10T13:56:11.7179180Z   repository: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T13:56:11.7180516Z   token: ***
+2025-10-10T13:56:11.7181169Z   ssh-strict: true
+2025-10-10T13:56:11.7181854Z   ssh-user: git
+2025-10-10T13:56:11.7182549Z   persist-credentials: true
+2025-10-10T13:56:11.7183342Z   clean: true
+2025-10-10T13:56:11.7184042Z   sparse-checkout-cone-mode: true
+2025-10-10T13:56:11.7184917Z   fetch-depth: 1
+2025-10-10T13:56:11.7185589Z   fetch-tags: false
+2025-10-10T13:56:11.7186298Z   show-progress: true
+2025-10-10T13:56:11.7187007Z   lfs: false
+2025-10-10T13:56:11.7187859Z   submodules: false
+2025-10-10T13:56:11.7188600Z   set-safe-directory: true
+2025-10-10T13:56:11.7189678Z env:
+2025-10-10T13:56:11.7190336Z   REGISTRY: ghcr.io
+2025-10-10T13:56:11.7191202Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T13:56:11.7192282Z ##[endgroup]
+2025-10-10T13:56:11.8387002Z Syncing repository: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T13:56:11.8390600Z ##[group]Getting Git version info
+2025-10-10T13:56:11.8392495Z Working directory is '/home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant'
+2025-10-10T13:56:11.8395917Z [command]/usr/bin/git version
+2025-10-10T13:56:11.8454133Z git version 2.51.0
+2025-10-10T13:56:11.8485041Z ##[endgroup]
+2025-10-10T13:56:11.8502821Z Temporarily overriding HOME='/home/runner/work/_temp/8356061a-6626-46d3-b9d4-f9fce0e790e6' before making global git config changes
+2025-10-10T13:56:11.8508518Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-10T13:56:11.8523037Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant
+2025-10-10T13:56:11.8564895Z Deleting the contents of '/home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant'
+2025-10-10T13:56:11.8570161Z ##[group]Initializing the repository
+2025-10-10T13:56:11.8575297Z [command]/usr/bin/git init /home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant
+2025-10-10T13:56:11.8699011Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-10-10T13:56:11.8702628Z hint: is subject to change. To configure the initial branch name to use in all
+2025-10-10T13:56:11.8706737Z hint: of your new repositories, which will suppress this warning, call:
+2025-10-10T13:56:11.8709182Z hint:
+2025-10-10T13:56:11.8710680Z hint: 	git config --global init.defaultBranch <name>
+2025-10-10T13:56:11.8713031Z hint:
+2025-10-10T13:56:11.8714695Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-10-10T13:56:11.8717807Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-10-10T13:56:11.8720107Z hint:
+2025-10-10T13:56:11.8721301Z hint: 	git branch -m <name>
+2025-10-10T13:56:11.8722604Z hint:
+2025-10-10T13:56:11.8724330Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2025-10-10T13:56:11.8728062Z Initialized empty Git repository in /home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant/.git/
+2025-10-10T13:56:11.8734499Z [command]/usr/bin/git remote add origin https://github.com/CatalinButacu/RAG-Medical-Assistant
+2025-10-10T13:56:11.8765832Z ##[endgroup]
+2025-10-10T13:56:11.8769321Z ##[group]Disabling automatic garbage collection
+2025-10-10T13:56:11.8771639Z [command]/usr/bin/git config --local gc.auto 0
+2025-10-10T13:56:11.8804566Z ##[endgroup]
+2025-10-10T13:56:11.8806606Z ##[group]Setting up auth
+2025-10-10T13:56:11.8811891Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-10T13:56:11.8846953Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-10T13:56:11.9214265Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-10T13:56:11.9251200Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-10T13:56:11.9488104Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-10-10T13:56:11.9528399Z ##[endgroup]
+2025-10-10T13:56:11.9531833Z ##[group]Fetching the repository
+2025-10-10T13:56:11.9553260Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +6c306fab5048aeed877ddaf60fa2088159bc9125:refs/remotes/origin/main
+2025-10-10T13:56:12.4044453Z From https://github.com/CatalinButacu/RAG-Medical-Assistant
+2025-10-10T13:56:12.4049495Z  * [new ref]         6c306fab5048aeed877ddaf60fa2088159bc9125 -> origin/main
+2025-10-10T13:56:12.4071524Z ##[endgroup]
+2025-10-10T13:56:12.4074173Z ##[group]Determining the checkout info
+2025-10-10T13:56:12.4078047Z ##[endgroup]
+2025-10-10T13:56:12.4080681Z [command]/usr/bin/git sparse-checkout disable
+2025-10-10T13:56:12.4125244Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2025-10-10T13:56:12.4159740Z ##[group]Checking out the ref
+2025-10-10T13:56:12.4161848Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2025-10-10T13:56:12.4299795Z Switched to a new branch 'main'
+2025-10-10T13:56:12.4303368Z branch 'main' set up to track 'origin/main'.
+2025-10-10T13:56:12.4312213Z ##[endgroup]
+2025-10-10T13:56:12.4351969Z [command]/usr/bin/git log -1 --format=%H
+2025-10-10T13:56:12.4376670Z 6c306fab5048aeed877ddaf60fa2088159bc9125
+2025-10-10T13:56:12.4612868Z ##[group]Run actions/setup-node@v4
+2025-10-10T13:56:12.4613320Z with:
+2025-10-10T13:56:12.4613645Z   node-version: 20
+2025-10-10T13:56:12.4613976Z   cache: npm
+2025-10-10T13:56:12.4614301Z   always-auth: false
+2025-10-10T13:56:12.4614661Z   check-latest: false
+2025-10-10T13:56:12.4615145Z   token: ***
+2025-10-10T13:56:12.4615467Z env:
+2025-10-10T13:56:12.4615772Z   REGISTRY: ghcr.io
+2025-10-10T13:56:12.4616169Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T13:56:12.4616814Z ##[endgroup]
+2025-10-10T13:56:12.6694912Z Found in cache @ /opt/hostedtoolcache/node/20.19.5/x64
+2025-10-10T13:56:12.6708210Z ##[group]Environment details
+2025-10-10T13:56:13.1164288Z node: v20.19.5
+2025-10-10T13:56:13.1165797Z npm: 10.8.2
+2025-10-10T13:56:13.1166720Z yarn: 1.22.22
+2025-10-10T13:56:13.1168323Z ##[endgroup]
+2025-10-10T13:56:13.1195888Z [command]/opt/hostedtoolcache/node/20.19.5/x64/bin/npm config get cache
+2025-10-10T13:56:13.3521077Z /home/runner/.npm
+2025-10-10T13:56:13.5415405Z npm cache is not found
+2025-10-10T13:56:13.5573518Z ##[group]Run actions/setup-python@v4
+2025-10-10T13:56:13.5573953Z with:
+2025-10-10T13:56:13.5574303Z   python-version: 3.9
+2025-10-10T13:56:13.5574623Z   cache: pip
+2025-10-10T13:56:13.5574918Z   check-latest: false
+2025-10-10T13:56:13.5575542Z   token: ***
+2025-10-10T13:56:13.5576045Z   update-environment: true
+2025-10-10T13:56:13.5576517Z   allow-prereleases: false
+2025-10-10T13:56:13.5576831Z env:
+2025-10-10T13:56:13.5577104Z   REGISTRY: ghcr.io
+2025-10-10T13:56:13.5577703Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T13:56:13.5578146Z ##[endgroup]
+2025-10-10T13:56:13.7332093Z ##[group]Installed versions
+2025-10-10T13:56:13.7479989Z Successfully set up CPython (3.9.23)
+2025-10-10T13:56:13.7481176Z ##[endgroup]
+2025-10-10T13:56:13.8245245Z [command]/opt/hostedtoolcache/Python/3.9.23/x64/bin/pip cache dir
+2025-10-10T13:56:16.7255487Z /home/runner/.cache/pip
+2025-10-10T13:56:16.8490443Z pip cache is not found
+2025-10-10T13:56:16.8610191Z ##[group]Run npm ci
+2025-10-10T13:56:16.8610473Z [36;1mnpm ci[0m
+2025-10-10T13:56:16.8610728Z [36;1mpip install -r ml_backend/requirements.txt[0m
+2025-10-10T13:56:16.8655854Z shell: /usr/bin/bash -e {0}
+2025-10-10T13:56:16.8656123Z env:
+2025-10-10T13:56:16.8656292Z   REGISTRY: ghcr.io
+2025-10-10T13:56:16.8656539Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T13:56:16.8656901Z   pythonLocation: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T13:56:16.8657300Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib/pkgconfig
+2025-10-10T13:56:16.8658212Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T13:56:16.8658560Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T13:56:16.8658891Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T13:56:16.8659241Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib
+2025-10-10T13:56:16.8659539Z ##[endgroup]
+2025-10-10T13:56:24.3290087Z npm warn deprecated multer@1.4.5-lts.2: Multer 1.x is impacted by a number of vulnerabilities, which have been patched in 2.x. You should upgrade to the latest 2.x version.
+2025-10-10T13:56:25.2076244Z npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+2025-10-10T13:56:29.7041672Z 
+2025-10-10T13:56:29.7042662Z added 601 packages, and audited 602 packages in 13s
+2025-10-10T13:56:29.7048419Z 
+2025-10-10T13:56:29.7052336Z 101 packages are looking for funding
+2025-10-10T13:56:29.7058175Z   run `npm fund` for details
+2025-10-10T13:56:29.7207928Z 
+2025-10-10T13:56:29.7208772Z 4 vulnerabilities (2 moderate, 2 high)
+2025-10-10T13:56:29.7212499Z 
+2025-10-10T13:56:29.7213064Z To address all issues (including breaking changes), run:
+2025-10-10T13:56:29.7214074Z   npm audit fix --force
+2025-10-10T13:56:29.7214658Z 
+2025-10-10T13:56:29.7218376Z Run `npm audit` for details.
+2025-10-10T13:56:31.8999158Z Collecting torch>=2.0.0 (from -r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:31.9233858Z   Downloading torch-2.8.0-cp39-cp39-manylinux_2_28_x86_64.whl.metadata (30 kB)
+2025-10-10T13:56:31.9811206Z Collecting transformers>=4.30.0 (from -r ml_backend/requirements.txt (line 3))
+2025-10-10T13:56:31.9851490Z   Downloading transformers-4.57.0-py3-none-any.whl.metadata (41 kB)
+2025-10-10T13:56:32.8545893Z Collecting sentence-transformers>=2.2.0 (from -r ml_backend/requirements.txt (line 4))
+2025-10-10T13:56:32.8602023Z   Downloading sentence_transformers-5.1.1-py3-none-any.whl.metadata (16 kB)
+2025-10-10T13:56:32.9734026Z Collecting scikit-learn>=1.3.0 (from -r ml_backend/requirements.txt (line 5))
+2025-10-10T13:56:32.9789989Z   Downloading scikit_learn-1.6.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (18 kB)
+2025-10-10T13:56:33.2272114Z Collecting numpy>=1.24.0 (from -r ml_backend/requirements.txt (line 6))
+2025-10-10T13:56:33.2321546Z   Downloading numpy-2.0.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (60 kB)
+2025-10-10T13:56:33.3995502Z Collecting pandas>=2.0.0 (from -r ml_backend/requirements.txt (line 7))
+2025-10-10T13:56:33.4050429Z   Downloading pandas-2.3.3-cp39-cp39-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+2025-10-10T13:56:33.4838450Z Collecting faiss-cpu>=1.7.4 (from -r ml_backend/requirements.txt (line 10))
+2025-10-10T13:56:33.4892170Z   Downloading faiss_cpu-1.12.0-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (5.1 kB)
+2025-10-10T13:56:33.5041752Z Collecting annoy>=1.17.0 (from -r ml_backend/requirements.txt (line 11))
+2025-10-10T13:56:33.5105641Z   Downloading annoy-1.17.3.tar.gz (647 kB)
+2025-10-10T13:56:33.5201604Z      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 647.5/647.5 kB 78.2 MB/s  0:00:00
+2025-10-10T13:56:33.5399755Z   Installing build dependencies: started
+2025-10-10T13:56:34.3319996Z   Installing build dependencies: finished with status 'done'
+2025-10-10T13:56:34.3332050Z   Getting requirements to build wheel: started
+2025-10-10T13:56:34.6916895Z   Getting requirements to build wheel: finished with status 'done'
+2025-10-10T13:56:34.6949962Z   Installing backend dependencies: started
+2025-10-10T13:56:35.2941925Z   Installing backend dependencies: finished with status 'done'
+2025-10-10T13:56:35.2953948Z   Preparing metadata (pyproject.toml): started
+2025-10-10T13:56:35.5302041Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2025-10-10T13:56:35.5454042Z Collecting hnswlib>=0.7.0 (from -r ml_backend/requirements.txt (line 12))
+2025-10-10T13:56:35.5514091Z   Downloading hnswlib-0.8.0.tar.gz (36 kB)
+2025-10-10T13:56:35.5650920Z   Installing build dependencies: started
+2025-10-10T13:56:52.3135507Z   Installing build dependencies: finished with status 'done'
+2025-10-10T13:56:52.3144276Z   Getting requirements to build wheel: started
+2025-10-10T13:56:52.9612511Z   Getting requirements to build wheel: finished with status 'done'
+2025-10-10T13:56:52.9626709Z   Preparing metadata (pyproject.toml): started
+2025-10-10T13:56:53.2159872Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2025-10-10T13:56:53.2354028Z Collecting nltk>=3.8 (from -r ml_backend/requirements.txt (line 15))
+2025-10-10T13:56:53.2396993Z   Downloading nltk-3.9.2-py3-none-any.whl.metadata (3.2 kB)
+2025-10-10T13:56:53.3829577Z Collecting spacy>=3.6.0 (from -r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:53.3881221Z   Downloading spacy-3.8.7-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (27 kB)
+2025-10-10T13:56:53.4615877Z Collecting gensim>=4.3.0 (from -r ml_backend/requirements.txt (line 17))
+2025-10-10T13:56:53.4677623Z   Downloading gensim-4.3.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (8.3 kB)
+2025-10-10T13:56:53.4952901Z Collecting flask>=2.3.0 (from -r ml_backend/requirements.txt (line 20))
+2025-10-10T13:56:53.4995287Z   Downloading flask-3.1.2-py3-none-any.whl.metadata (3.2 kB)
+2025-10-10T13:56:53.5204608Z Collecting flask-cors>=4.0.0 (from -r ml_backend/requirements.txt (line 21))
+2025-10-10T13:56:53.5362222Z   Downloading flask_cors-6.0.1-py3-none-any.whl.metadata (5.3 kB)
+2025-10-10T13:56:53.5569254Z Collecting gunicorn>=21.0.0 (from -r ml_backend/requirements.txt (line 22))
+2025-10-10T13:56:53.5612741Z   Downloading gunicorn-23.0.0-py3-none-any.whl.metadata (4.4 kB)
+2025-10-10T13:56:53.6129125Z Collecting marshmallow>=3.19.0 (from -r ml_backend/requirements.txt (line 23))
+2025-10-10T13:56:53.6178396Z   Downloading marshmallow-4.0.1-py3-none-any.whl.metadata (7.4 kB)
+2025-10-10T13:56:53.6669820Z Collecting mlflow>=2.5.0 (from -r ml_backend/requirements.txt (line 26))
+2025-10-10T13:56:53.6729794Z   Downloading mlflow-3.1.4-py3-none-any.whl.metadata (29 kB)
+2025-10-10T13:56:53.8073638Z Collecting psycopg2-binary>=2.9.0 (from -r ml_backend/requirements.txt (line 29))
+2025-10-10T13:56:53.8122731Z   Downloading psycopg2_binary-2.9.11-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (4.9 kB)
+2025-10-10T13:56:53.8457739Z Collecting redis>=4.6.0 (from -r ml_backend/requirements.txt (line 30))
+2025-10-10T13:56:53.8504235Z   Downloading redis-6.4.0-py3-none-any.whl.metadata (10 kB)
+2025-10-10T13:56:54.1940485Z Collecting sqlalchemy>=2.0.0 (from -r ml_backend/requirements.txt (line 31))
+2025-10-10T13:56:54.1987941Z   Downloading sqlalchemy-2.0.43-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.6 kB)
+2025-10-10T13:56:54.4780374Z Collecting pillow>=10.0.0 (from -r ml_backend/requirements.txt (line 34))
+2025-10-10T13:56:54.4826544Z   Downloading pillow-11.3.0-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (9.0 kB)
+2025-10-10T13:56:54.5757627Z Collecting opencv-python>=4.8.0 (from -r ml_backend/requirements.txt (line 35))
+2025-10-10T13:56:54.5805486Z   Downloading opencv_python-4.12.0.88-cp37-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (19 kB)
+2025-10-10T13:56:54.6063742Z Collecting python-dotenv>=1.0.0 (from -r ml_backend/requirements.txt (line 38))
+2025-10-10T13:56:54.6108997Z   Downloading python_dotenv-1.1.1-py3-none-any.whl.metadata (24 kB)
+2025-10-10T13:56:54.7602926Z Collecting pydantic>=2.0.0 (from -r ml_backend/requirements.txt (line 39))
+2025-10-10T13:56:54.7651989Z   Downloading pydantic-2.12.0-py3-none-any.whl.metadata (83 kB)
+2025-10-10T13:56:54.8032501Z Collecting requests>=2.31.0 (from -r ml_backend/requirements.txt (line 40))
+2025-10-10T13:56:54.8086169Z   Downloading requests-2.32.5-py3-none-any.whl.metadata (4.9 kB)
+2025-10-10T13:56:54.8473398Z Collecting tqdm>=4.65.0 (from -r ml_backend/requirements.txt (line 41))
+2025-10-10T13:56:54.8521656Z   Downloading tqdm-4.67.1-py3-none-any.whl.metadata (57 kB)
+2025-10-10T13:56:54.8963945Z Collecting pytest>=7.4.0 (from -r ml_backend/requirements.txt (line 44))
+2025-10-10T13:56:54.9010807Z   Downloading pytest-8.4.2-py3-none-any.whl.metadata (7.7 kB)
+2025-10-10T13:56:54.9215503Z Collecting pytest-cov>=4.1.0 (from -r ml_backend/requirements.txt (line 45))
+2025-10-10T13:56:54.9256687Z   Downloading pytest_cov-7.0.0-py3-none-any.whl.metadata (31 kB)
+2025-10-10T13:56:54.9874131Z Collecting black>=23.0.0 (from -r ml_backend/requirements.txt (line 46))
+2025-10-10T13:56:54.9923919Z   Downloading black-25.9.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl.metadata (83 kB)
+2025-10-10T13:56:55.0242261Z Collecting flake8>=6.0.0 (from -r ml_backend/requirements.txt (line 47))
+2025-10-10T13:56:55.0325926Z   Downloading flake8-7.3.0-py2.py3-none-any.whl.metadata (3.8 kB)
+2025-10-10T13:56:55.2321956Z Collecting mypy>=1.5.0 (from -r ml_backend/requirements.txt (line 48))
+2025-10-10T13:56:55.2371577Z   Downloading mypy-1.18.2-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.2 kB)
+2025-10-10T13:56:55.2582148Z Collecting prometheus-client>=0.17.0 (from -r ml_backend/requirements.txt (line 51))
+2025-10-10T13:56:55.2625807Z   Downloading prometheus_client-0.23.1-py3-none-any.whl.metadata (1.9 kB)
+2025-10-10T13:56:55.2815768Z Collecting structlog>=23.1.0 (from -r ml_backend/requirements.txt (line 52))
+2025-10-10T13:56:55.2860784Z   Downloading structlog-25.4.0-py3-none-any.whl.metadata (7.6 kB)
+2025-10-10T13:56:55.3114198Z Collecting filelock (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.3160177Z   Downloading filelock-3.19.1-py3-none-any.whl.metadata (2.1 kB)
+2025-10-10T13:56:55.3392680Z Collecting typing-extensions>=4.10.0 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.3451884Z   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+2025-10-10T13:56:55.3658240Z Collecting sympy>=1.13.3 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.3703492Z   Downloading sympy-1.14.0-py3-none-any.whl.metadata (12 kB)
+2025-10-10T13:56:55.3980004Z Collecting networkx (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.4056460Z   Downloading networkx-3.2.1-py3-none-any.whl.metadata (5.2 kB)
+2025-10-10T13:56:55.4290073Z Collecting jinja2 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.4343037Z   Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+2025-10-10T13:56:55.4616028Z Collecting fsspec (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.4660657Z   Downloading fsspec-2025.9.0-py3-none-any.whl.metadata (10 kB)
+2025-10-10T13:56:55.5218326Z Collecting nvidia-cuda-nvrtc-cu12==12.8.93 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.5264550Z   Downloading nvidia_cuda_nvrtc_cu12-12.8.93-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl.metadata (1.7 kB)
+2025-10-10T13:56:55.5418805Z Collecting nvidia-cuda-runtime-cu12==12.8.90 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.5466107Z   Downloading nvidia_cuda_runtime_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.7 kB)
+2025-10-10T13:56:55.5652416Z Collecting nvidia-cuda-cupti-cu12==12.8.90 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.5696963Z   Downloading nvidia_cuda_cupti_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.7 kB)
+2025-10-10T13:56:55.5960559Z Collecting nvidia-cudnn-cu12==9.10.2.21 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.6015662Z   Downloading nvidia_cudnn_cu12-9.10.2.21-py3-none-manylinux_2_27_x86_64.whl.metadata (1.8 kB)
+2025-10-10T13:56:55.6168993Z Collecting nvidia-cublas-cu12==12.8.4.1 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.6211469Z   Downloading nvidia_cublas_cu12-12.8.4.1-py3-none-manylinux_2_27_x86_64.whl.metadata (1.7 kB)
+2025-10-10T13:56:55.6387005Z Collecting nvidia-cufft-cu12==11.3.3.83 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.6432173Z   Downloading nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.7 kB)
+2025-10-10T13:56:55.6600157Z Collecting nvidia-curand-cu12==10.3.9.90 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.6642013Z   Downloading nvidia_curand_cu12-10.3.9.90-py3-none-manylinux_2_27_x86_64.whl.metadata (1.7 kB)
+2025-10-10T13:56:55.6816609Z Collecting nvidia-cusolver-cu12==11.7.3.90 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.6868498Z   Downloading nvidia_cusolver_cu12-11.7.3.90-py3-none-manylinux_2_27_x86_64.whl.metadata (1.8 kB)
+2025-10-10T13:56:55.7031812Z Collecting nvidia-cusparse-cu12==12.5.8.93 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.7076835Z   Downloading nvidia_cusparse_cu12-12.5.8.93-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.8 kB)
+2025-10-10T13:56:55.7199956Z Collecting nvidia-cusparselt-cu12==0.7.1 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.7242779Z   Downloading nvidia_cusparselt_cu12-0.7.1-py3-none-manylinux2014_x86_64.whl.metadata (7.0 kB)
+2025-10-10T13:56:55.7391301Z Collecting nvidia-nccl-cu12==2.27.3 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.7437143Z   Downloading nvidia_nccl_cu12-2.27.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.0 kB)
+2025-10-10T13:56:55.7631834Z Collecting nvidia-nvtx-cu12==12.8.90 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.7680934Z   Downloading nvidia_nvtx_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.8 kB)
+2025-10-10T13:56:55.7928456Z Collecting nvidia-nvjitlink-cu12==12.8.93 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.7983935Z   Downloading nvidia_nvjitlink_cu12-12.8.93-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl.metadata (1.7 kB)
+2025-10-10T13:56:55.8103374Z Collecting nvidia-cufile-cu12==1.13.1.3 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.8152816Z   Downloading nvidia_cufile_cu12-1.13.1.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.7 kB)
+2025-10-10T13:56:55.8500127Z Collecting triton==3.4.0 (from torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.8565613Z   Downloading triton-3.4.0-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (1.7 kB)
+2025-10-10T13:56:55.8879924Z Requirement already satisfied: setuptools>=40.8.0 in /opt/hostedtoolcache/Python/3.9.23/x64/lib/python3.9/site-packages (from triton==3.4.0->torch>=2.0.0->-r ml_backend/requirements.txt (line 2)) (58.1.0)
+2025-10-10T13:56:55.9250533Z Collecting importlib-metadata (from triton==3.4.0->torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:56:55.9295080Z   Downloading importlib_metadata-8.7.0-py3-none-any.whl.metadata (4.8 kB)
+2025-10-10T13:56:55.9889569Z Collecting huggingface-hub<1.0,>=0.34.0 (from transformers>=4.30.0->-r ml_backend/requirements.txt (line 3))
+2025-10-10T13:56:55.9935746Z   Downloading huggingface_hub-0.35.3-py3-none-any.whl.metadata (14 kB)
+2025-10-10T13:56:56.0615796Z Collecting packaging>=20.0 (from transformers>=4.30.0->-r ml_backend/requirements.txt (line 3))
+2025-10-10T13:56:56.0659920Z   Downloading packaging-25.0-py3-none-any.whl.metadata (3.3 kB)
+2025-10-10T13:56:56.1172143Z Collecting pyyaml>=5.1 (from transformers>=4.30.0->-r ml_backend/requirements.txt (line 3))
+2025-10-10T13:56:56.1255488Z   Downloading pyyaml-6.0.3-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+2025-10-10T13:56:56.6741341Z Collecting regex!=2019.12.17 (from transformers>=4.30.0->-r ml_backend/requirements.txt (line 3))
+2025-10-10T13:56:56.6789116Z   Downloading regex-2025.9.18-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (40 kB)
+2025-10-10T13:56:56.8800120Z Collecting tokenizers<=0.23.0,>=0.22.0 (from transformers>=4.30.0->-r ml_backend/requirements.txt (line 3))
+2025-10-10T13:56:56.8852105Z   Downloading tokenizers-0.22.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.8 kB)
+2025-10-10T13:56:57.0370141Z Collecting safetensors>=0.4.3 (from transformers>=4.30.0->-r ml_backend/requirements.txt (line 3))
+2025-10-10T13:56:57.0422431Z   Downloading safetensors-0.6.2-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.1 kB)
+2025-10-10T13:56:57.1351939Z Collecting hf-xet<2.0.0,>=1.1.3 (from huggingface-hub<1.0,>=0.34.0->transformers>=4.30.0->-r ml_backend/requirements.txt (line 3))
+2025-10-10T13:56:57.1396144Z   Downloading hf_xet-1.1.10-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.7 kB)
+2025-10-10T13:56:57.4499543Z Collecting scipy (from sentence-transformers>=2.2.0->-r ml_backend/requirements.txt (line 4))
+2025-10-10T13:56:57.4547685Z   Downloading scipy-1.13.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (60 kB)
+2025-10-10T13:56:57.5287071Z Collecting joblib>=1.2.0 (from scikit-learn>=1.3.0->-r ml_backend/requirements.txt (line 5))
+2025-10-10T13:56:57.5330960Z   Downloading joblib-1.5.2-py3-none-any.whl.metadata (5.6 kB)
+2025-10-10T13:56:57.5479022Z Collecting threadpoolctl>=3.1.0 (from scikit-learn>=1.3.0->-r ml_backend/requirements.txt (line 5))
+2025-10-10T13:56:57.5529565Z   Downloading threadpoolctl-3.6.0-py3-none-any.whl.metadata (13 kB)
+2025-10-10T13:56:57.5831038Z Collecting python-dateutil>=2.8.2 (from pandas>=2.0.0->-r ml_backend/requirements.txt (line 7))
+2025-10-10T13:56:57.5887225Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2025-10-10T13:56:57.6322430Z Collecting pytz>=2020.1 (from pandas>=2.0.0->-r ml_backend/requirements.txt (line 7))
+2025-10-10T13:56:57.6366648Z   Downloading pytz-2025.2-py2.py3-none-any.whl.metadata (22 kB)
+2025-10-10T13:56:57.6591048Z Collecting tzdata>=2022.7 (from pandas>=2.0.0->-r ml_backend/requirements.txt (line 7))
+2025-10-10T13:56:57.6632706Z   Downloading tzdata-2025.2-py2.py3-none-any.whl.metadata (1.4 kB)
+2025-10-10T13:56:57.7027641Z Collecting click (from nltk>=3.8->-r ml_backend/requirements.txt (line 15))
+2025-10-10T13:56:57.7078170Z   Downloading click-8.1.8-py3-none-any.whl.metadata (2.3 kB)
+2025-10-10T13:56:57.7581281Z Collecting spacy-legacy<3.1.0,>=3.0.11 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:57.7681031Z   Downloading spacy_legacy-3.0.12-py2.py3-none-any.whl.metadata (2.8 kB)
+2025-10-10T13:56:57.7807285Z Collecting spacy-loggers<2.0.0,>=1.0.0 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:57.7846175Z   Downloading spacy_loggers-1.0.5-py3-none-any.whl.metadata (23 kB)
+2025-10-10T13:56:57.8264840Z Collecting murmurhash<1.1.0,>=0.28.0 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:57.8336674Z   Downloading murmurhash-1.0.13-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.2 kB)
+2025-10-10T13:56:57.8742023Z Collecting cymem<2.1.0,>=2.0.2 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:57.8794059Z   Downloading cymem-2.0.11-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (8.5 kB)
+2025-10-10T13:56:57.9172419Z Collecting preshed<3.1.0,>=3.0.2 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:57.9267777Z   Downloading preshed-3.0.10-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.4 kB)
+2025-10-10T13:56:58.0928459Z Collecting thinc<8.4.0,>=8.3.4 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:58.0978986Z   Downloading thinc-8.3.6-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (15 kB)
+2025-10-10T13:56:58.1485250Z Collecting wasabi<1.2.0,>=0.9.1 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:58.1529948Z   Downloading wasabi-1.1.3-py3-none-any.whl.metadata (28 kB)
+2025-10-10T13:56:58.2276408Z Collecting srsly<3.0.0,>=2.4.3 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:58.2328117Z   Downloading srsly-2.5.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (19 kB)
+2025-10-10T13:56:58.2501266Z Collecting catalogue<2.1.0,>=2.0.6 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:58.2542724Z   Downloading catalogue-2.0.10-py3-none-any.whl.metadata (14 kB)
+2025-10-10T13:56:58.2697391Z Collecting weasel<0.5.0,>=0.1.0 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:58.2736061Z   Downloading weasel-0.4.1-py3-none-any.whl.metadata (4.6 kB)
+2025-10-10T13:56:58.3085903Z Collecting typer<1.0.0,>=0.3.0 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:58.3125776Z   Downloading typer-0.19.2-py3-none-any.whl.metadata (16 kB)
+2025-10-10T13:56:58.3925236Z Collecting langcodes<4.0.0,>=3.2.0 (from spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:58.3969863Z   Downloading langcodes-3.5.0-py3-none-any.whl.metadata (29 kB)
+2025-10-10T13:56:58.4159587Z Collecting annotated-types>=0.6.0 (from pydantic>=2.0.0->-r ml_backend/requirements.txt (line 39))
+2025-10-10T13:56:58.4204087Z   Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+2025-10-10T13:56:59.3714723Z Collecting pydantic-core==2.41.1 (from pydantic>=2.0.0->-r ml_backend/requirements.txt (line 39))
+2025-10-10T13:56:59.3762355Z   Downloading pydantic_core-2.41.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.3 kB)
+2025-10-10T13:56:59.3929761Z Collecting typing-inspection>=0.4.2 (from pydantic>=2.0.0->-r ml_backend/requirements.txt (line 39))
+2025-10-10T13:56:59.3988035Z   Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+2025-10-10T13:56:59.5012585Z Collecting charset_normalizer<4,>=2 (from requests>=2.31.0->-r ml_backend/requirements.txt (line 40))
+2025-10-10T13:56:59.5061820Z   Downloading charset_normalizer-3.4.3-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (36 kB)
+2025-10-10T13:56:59.5237037Z Collecting idna<4,>=2.5 (from requests>=2.31.0->-r ml_backend/requirements.txt (line 40))
+2025-10-10T13:56:59.5285122Z   Downloading idna-3.10-py3-none-any.whl.metadata (10 kB)
+2025-10-10T13:56:59.5628009Z Collecting urllib3<3,>=1.21.1 (from requests>=2.31.0->-r ml_backend/requirements.txt (line 40))
+2025-10-10T13:56:59.5674314Z   Downloading urllib3-2.5.0-py3-none-any.whl.metadata (6.5 kB)
+2025-10-10T13:56:59.5939305Z Collecting certifi>=2017.4.17 (from requests>=2.31.0->-r ml_backend/requirements.txt (line 40))
+2025-10-10T13:56:59.5982268Z   Downloading certifi-2025.10.5-py3-none-any.whl.metadata (2.5 kB)
+2025-10-10T13:56:59.6206745Z Collecting language-data>=1.2 (from langcodes<4.0.0,>=3.2.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:59.6246800Z   Downloading language_data-1.3.0-py3-none-any.whl.metadata (4.3 kB)
+2025-10-10T13:56:59.7091759Z Collecting blis<1.4.0,>=1.3.0 (from thinc<8.4.0,>=8.3.4->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:56:59.7198352Z   Downloading blis-1.3.0.tar.gz (2.5 MB)
+2025-10-10T13:56:59.7396577Z      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.5/2.5 MB 137.4 MB/s  0:00:00
+2025-10-10T13:57:00.3043527Z   Installing build dependencies: started
+2025-10-10T13:57:02.3862653Z   Installing build dependencies: finished with status 'done'
+2025-10-10T13:57:02.3872808Z   Getting requirements to build wheel: started
+2025-10-10T13:57:06.0419785Z   Getting requirements to build wheel: finished with status 'done'
+2025-10-10T13:57:06.0445001Z   Preparing metadata (pyproject.toml): started
+2025-10-10T13:57:06.6173026Z   Preparing metadata (pyproject.toml): finished with status 'done'
+2025-10-10T13:57:06.6518608Z Collecting confection<1.0.0,>=0.0.1 (from thinc<8.4.0,>=8.3.4->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:57:06.6562497Z   Downloading confection-0.1.5-py3-none-any.whl.metadata (19 kB)
+2025-10-10T13:57:06.6968093Z Collecting shellingham>=1.3.0 (from typer<1.0.0,>=0.3.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:57:06.7010589Z   Downloading shellingham-1.5.4-py2.py3-none-any.whl.metadata (3.5 kB)
+2025-10-10T13:57:06.7505233Z Collecting rich>=10.11.0 (from typer<1.0.0,>=0.3.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:57:06.7548851Z   Downloading rich-14.2.0-py3-none-any.whl.metadata (18 kB)
+2025-10-10T13:57:06.7860838Z Collecting cloudpathlib<1.0.0,>=0.7.0 (from weasel<0.5.0,>=0.1.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:57:06.7905922Z   Downloading cloudpathlib-0.23.0-py3-none-any.whl.metadata (16 kB)
+2025-10-10T13:57:06.8138437Z Collecting smart-open<8.0.0,>=5.2.1 (from weasel<0.5.0,>=0.1.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:57:06.8182904Z   Downloading smart_open-7.3.1-py3-none-any.whl.metadata (24 kB)
+2025-10-10T13:57:06.9787337Z Collecting wrapt (from smart-open<8.0.0,>=5.2.1->weasel<0.5.0,>=0.1.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:57:06.9835894Z   Downloading wrapt-1.17.3-cp39-cp39-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.4 kB)
+2025-10-10T13:57:06.9986763Z INFO: pip is looking at multiple versions of gensim to determine which version is compatible with other requirements. This could take a while.
+2025-10-10T13:57:06.9993892Z Collecting gensim>=4.3.0 (from -r ml_backend/requirements.txt (line 17))
+2025-10-10T13:57:07.0283832Z   Downloading gensim-4.3.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (8.5 kB)
+2025-10-10T13:57:07.0754403Z Collecting blinker>=1.9.0 (from flask>=2.3.0->-r ml_backend/requirements.txt (line 20))
+2025-10-10T13:57:07.0796627Z   Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+2025-10-10T13:57:07.1118772Z Collecting itsdangerous>=2.2.0 (from flask>=2.3.0->-r ml_backend/requirements.txt (line 20))
+2025-10-10T13:57:07.1161409Z   Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+2025-10-10T13:57:07.1879374Z Collecting markupsafe>=2.1.1 (from flask>=2.3.0->-r ml_backend/requirements.txt (line 20))
+2025-10-10T13:57:07.1928461Z   Downloading markupsafe-3.0.3-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+2025-10-10T13:57:07.2178726Z Collecting werkzeug>=3.1.0 (from flask>=2.3.0->-r ml_backend/requirements.txt (line 20))
+2025-10-10T13:57:07.2218264Z   Downloading werkzeug-3.1.3-py3-none-any.whl.metadata (3.7 kB)
+2025-10-10T13:57:07.2610755Z Collecting backports-datetime-fromisoformat (from marshmallow>=3.19.0->-r ml_backend/requirements.txt (line 23))
+2025-10-10T13:57:07.2666009Z   Downloading backports_datetime_fromisoformat-2.0.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.3 kB)
+2025-10-10T13:57:07.4596418Z Collecting mlflow-skinny==3.1.4 (from mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:07.4658205Z   Downloading mlflow_skinny-3.1.4-py3-none-any.whl.metadata (30 kB)
+2025-10-10T13:57:07.5192469Z Collecting alembic!=1.10.0,<2 (from mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:07.5238797Z   Downloading alembic-1.16.5-py3-none-any.whl.metadata (7.3 kB)
+2025-10-10T13:57:07.5488256Z Collecting docker<8,>=4.0.0 (from mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:07.5543886Z   Downloading docker-7.1.0-py3-none-any.whl.metadata (3.8 kB)
+2025-10-10T13:57:07.5791070Z Collecting graphene<4 (from mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:07.5837722Z   Downloading graphene-3.4.3-py2.py3-none-any.whl.metadata (6.9 kB)
+2025-10-10T13:57:07.7638443Z Collecting matplotlib<4 (from mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:07.7757692Z   Downloading matplotlib-3.9.4-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (11 kB)
+2025-10-10T13:57:07.8931688Z Collecting pyarrow<21,>=4.0.0 (from mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:07.9034212Z   Downloading pyarrow-20.0.0-cp39-cp39-manylinux_2_28_x86_64.whl.metadata (3.3 kB)
+2025-10-10T13:57:07.9719791Z Collecting cachetools<7,>=5.0.0 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:07.9760567Z   Downloading cachetools-6.2.0-py3-none-any.whl.metadata (5.4 kB)
+2025-10-10T13:57:08.0003273Z Collecting cloudpickle<4 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:08.0048327Z   Downloading cloudpickle-3.1.1-py3-none-any.whl.metadata (7.1 kB)
+2025-10-10T13:57:08.0489785Z Collecting databricks-sdk<1,>=0.20.0 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:08.0534374Z   Downloading databricks_sdk-0.67.0-py3-none-any.whl.metadata (39 kB)
+2025-10-10T13:57:08.1258832Z Collecting fastapi<1 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:08.1301603Z   Downloading fastapi-0.118.3-py3-none-any.whl.metadata (28 kB)
+2025-10-10T13:57:08.1649272Z Collecting gitpython<4,>=3.1.9 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:08.1690342Z   Downloading gitpython-3.1.45-py3-none-any.whl.metadata (13 kB)
+2025-10-10T13:57:08.2216244Z Collecting opentelemetry-api<3,>=1.9.0 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:08.2255824Z   Downloading opentelemetry_api-1.37.0-py3-none-any.whl.metadata (1.5 kB)
+2025-10-10T13:57:08.2516454Z Collecting opentelemetry-sdk<3,>=1.9.0 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:08.2563650Z   Downloading opentelemetry_sdk-1.37.0-py3-none-any.whl.metadata (1.5 kB)
+2025-10-10T13:57:08.4754055Z Collecting protobuf<7,>=3.12.0 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:08.4797068Z   Downloading protobuf-6.32.1-cp39-abi3-manylinux2014_x86_64.whl.metadata (593 bytes)
+2025-10-10T13:57:08.5431115Z Collecting sqlparse<1,>=0.4.0 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:08.5500733Z   Downloading sqlparse-0.5.3-py3-none-any.whl.metadata (3.9 kB)
+2025-10-10T13:57:08.5921126Z Collecting uvicorn<1 (from mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:08.5964900Z   Downloading uvicorn-0.37.0-py3-none-any.whl.metadata (6.6 kB)
+2025-10-10T13:57:08.7592793Z Collecting greenlet>=1 (from sqlalchemy>=2.0.0->-r ml_backend/requirements.txt (line 31))
+2025-10-10T13:57:08.7637127Z   Downloading greenlet-3.2.4-cp39-cp39-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (4.1 kB)
+2025-10-10T13:57:08.7938207Z Collecting Mako (from alembic!=1.10.0,<2->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:08.7978166Z   Downloading mako-1.3.10-py3-none-any.whl.metadata (2.9 kB)
+2025-10-10T13:57:08.8242600Z Collecting tomli (from alembic!=1.10.0,<2->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:08.8281930Z   Downloading tomli-2.3.0-py3-none-any.whl.metadata (10 kB)
+2025-10-10T13:57:08.9038135Z Collecting google-auth~=2.0 (from databricks-sdk<1,>=0.20.0->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:08.9085524Z   Downloading google_auth-2.41.1-py2.py3-none-any.whl.metadata (6.6 kB)
+2025-10-10T13:57:08.9767626Z Collecting starlette<0.49.0,>=0.40.0 (from fastapi<1->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:08.9810973Z   Downloading starlette-0.48.0-py3-none-any.whl.metadata (6.3 kB)
+2025-10-10T13:57:09.0447990Z Collecting gitdb<5,>=4.0.1 (from gitpython<4,>=3.1.9->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:09.0489433Z   Downloading gitdb-4.0.12-py3-none-any.whl.metadata (1.2 kB)
+2025-10-10T13:57:09.0728513Z Collecting smmap<6,>=3.0.1 (from gitdb<5,>=4.0.1->gitpython<4,>=3.1.9->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:09.0778840Z   Downloading smmap-5.0.2-py3-none-any.whl.metadata (4.3 kB)
+2025-10-10T13:57:09.1140955Z Collecting pyasn1-modules>=0.2.1 (from google-auth~=2.0->databricks-sdk<1,>=0.20.0->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:09.1184741Z   Downloading pyasn1_modules-0.4.2-py3-none-any.whl.metadata (3.5 kB)
+2025-10-10T13:57:09.1388205Z Collecting rsa<5,>=3.1.4 (from google-auth~=2.0->databricks-sdk<1,>=0.20.0->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:09.1428046Z   Downloading rsa-4.9.1-py3-none-any.whl.metadata (5.6 kB)
+2025-10-10T13:57:09.1690339Z Collecting graphql-core<3.3,>=3.1 (from graphene<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:09.1732062Z   Downloading graphql_core-3.2.6-py3-none-any.whl.metadata (11 kB)
+2025-10-10T13:57:09.1873930Z Collecting graphql-relay<3.3,>=3.1 (from graphene<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:09.1916656Z   Downloading graphql_relay-3.2.0-py3-none-any.whl.metadata (12 kB)
+2025-10-10T13:57:09.2388506Z Collecting zipp>=3.20 (from importlib-metadata->triton==3.4.0->torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:57:09.2433531Z   Downloading zipp-3.23.0-py3-none-any.whl.metadata (3.6 kB)
+2025-10-10T13:57:09.3373966Z Collecting contourpy>=1.0.1 (from matplotlib<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:09.3423533Z   Downloading contourpy-1.3.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.4 kB)
+2025-10-10T13:57:09.3570278Z Collecting cycler>=0.10 (from matplotlib<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:09.3608392Z   Downloading cycler-0.12.1-py3-none-any.whl.metadata (3.8 kB)
+2025-10-10T13:57:09.5564383Z Collecting fonttools>=4.22.0 (from matplotlib<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:09.5609263Z   Downloading fonttools-4.60.1-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (112 kB)
+2025-10-10T13:57:09.8299240Z Collecting kiwisolver>=1.3.1 (from matplotlib<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:09.8344367Z   Downloading kiwisolver-1.4.7-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl.metadata (6.3 kB)
+2025-10-10T13:57:09.8830315Z Collecting pyparsing>=2.3.1 (from matplotlib<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:09.8871659Z   Downloading pyparsing-3.2.5-py3-none-any.whl.metadata (5.0 kB)
+2025-10-10T13:57:09.9271182Z Collecting importlib-resources>=3.2.0 (from matplotlib<4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:09.9316053Z   Downloading importlib_resources-6.5.2-py3-none-any.whl.metadata (3.9 kB)
+2025-10-10T13:57:09.9833947Z Collecting opentelemetry-semantic-conventions==0.58b0 (from opentelemetry-sdk<3,>=1.9.0->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:09.9872335Z   Downloading opentelemetry_semantic_conventions-0.58b0-py3-none-any.whl.metadata (2.4 kB)
+2025-10-10T13:57:10.0195011Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas>=2.0.0->-r ml_backend/requirements.txt (line 7))
+2025-10-10T13:57:10.0294759Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2025-10-10T13:57:10.0613503Z Collecting pyasn1>=0.1.3 (from rsa<5,>=3.1.4->google-auth~=2.0->databricks-sdk<1,>=0.20.0->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:10.0655586Z   Downloading pyasn1-0.6.1-py3-none-any.whl.metadata (8.4 kB)
+2025-10-10T13:57:10.1196792Z Collecting anyio<5,>=3.6.2 (from starlette<0.49.0,>=0.40.0->fastapi<1->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:10.1238844Z   Downloading anyio-4.11.0-py3-none-any.whl.metadata (4.1 kB)
+2025-10-10T13:57:10.1447667Z Collecting exceptiongroup>=1.0.2 (from anyio<5,>=3.6.2->starlette<0.49.0,>=0.40.0->fastapi<1->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:10.1578692Z   Downloading exceptiongroup-1.3.0-py3-none-any.whl.metadata (6.7 kB)
+2025-10-10T13:57:10.1737381Z Collecting sniffio>=1.1 (from anyio<5,>=3.6.2->starlette<0.49.0,>=0.40.0->fastapi<1->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:10.1781576Z   Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+2025-10-10T13:57:10.1994837Z Collecting h11>=0.8 (from uvicorn<1->mlflow-skinny==3.1.4->mlflow>=2.5.0->-r ml_backend/requirements.txt (line 26))
+2025-10-10T13:57:10.2034417Z   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+2025-10-10T13:57:10.2242356Z Collecting async-timeout>=4.0.3 (from redis>=4.6.0->-r ml_backend/requirements.txt (line 30))
+2025-10-10T13:57:10.2282744Z   Downloading async_timeout-5.0.1-py3-none-any.whl.metadata (5.1 kB)
+2025-10-10T13:57:10.2562858Z Collecting iniconfig>=1 (from pytest>=7.4.0->-r ml_backend/requirements.txt (line 44))
+2025-10-10T13:57:10.2604492Z   Downloading iniconfig-2.1.0-py3-none-any.whl.metadata (2.7 kB)
+2025-10-10T13:57:10.2783321Z Collecting pluggy<2,>=1.5 (from pytest>=7.4.0->-r ml_backend/requirements.txt (line 44))
+2025-10-10T13:57:10.2858172Z   Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+2025-10-10T13:57:10.3131486Z Collecting pygments>=2.7.2 (from pytest>=7.4.0->-r ml_backend/requirements.txt (line 44))
+2025-10-10T13:57:10.3170035Z   Downloading pygments-2.19.2-py3-none-any.whl.metadata (2.5 kB)
+2025-10-10T13:57:10.7361990Z Collecting coverage>=7.10.6 (from coverage[toml]>=7.10.6->pytest-cov>=4.1.0->-r ml_backend/requirements.txt (line 45))
+2025-10-10T13:57:10.7410779Z   Downloading coverage-7.10.7-cp39-cp39-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (8.9 kB)
+2025-10-10T13:57:10.7732898Z Collecting mypy-extensions>=0.4.3 (from black>=23.0.0->-r ml_backend/requirements.txt (line 46))
+2025-10-10T13:57:10.7781947Z   Downloading mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+2025-10-10T13:57:10.7980120Z Collecting pathspec>=0.9.0 (from black>=23.0.0->-r ml_backend/requirements.txt (line 46))
+2025-10-10T13:57:10.8020244Z   Downloading pathspec-0.12.1-py3-none-any.whl.metadata (21 kB)
+2025-10-10T13:57:10.8250985Z Collecting platformdirs>=2 (from black>=23.0.0->-r ml_backend/requirements.txt (line 46))
+2025-10-10T13:57:10.8289492Z   Downloading platformdirs-4.4.0-py3-none-any.whl.metadata (12 kB)
+2025-10-10T13:57:10.8430765Z Collecting pytokens>=0.1.10 (from black>=23.0.0->-r ml_backend/requirements.txt (line 46))
+2025-10-10T13:57:10.8471721Z   Downloading pytokens-0.1.10-py3-none-any.whl.metadata (2.0 kB)
+2025-10-10T13:57:10.8764330Z Collecting mccabe<0.8.0,>=0.7.0 (from flake8>=6.0.0->-r ml_backend/requirements.txt (line 47))
+2025-10-10T13:57:10.8806487Z   Downloading mccabe-0.7.0-py2.py3-none-any.whl.metadata (5.0 kB)
+2025-10-10T13:57:10.8953194Z Collecting pycodestyle<2.15.0,>=2.14.0 (from flake8>=6.0.0->-r ml_backend/requirements.txt (line 47))
+2025-10-10T13:57:10.8995260Z   Downloading pycodestyle-2.14.0-py2.py3-none-any.whl.metadata (4.5 kB)
+2025-10-10T13:57:10.9200020Z Collecting pyflakes<3.5.0,>=3.4.0 (from flake8>=6.0.0->-r ml_backend/requirements.txt (line 47))
+2025-10-10T13:57:10.9242452Z   Downloading pyflakes-3.4.0-py2.py3-none-any.whl.metadata (3.5 kB)
+2025-10-10T13:57:11.0970599Z Collecting marisa-trie>=1.1.0 (from language-data>=1.2->langcodes<4.0.0,>=3.2.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:57:11.1068910Z   Downloading marisa_trie-1.3.1-cp39-cp39-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (10 kB)
+2025-10-10T13:57:11.1787903Z Collecting markdown-it-py>=2.2.0 (from rich>=10.11.0->typer<1.0.0,>=0.3.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:57:11.1830799Z   Downloading markdown_it_py-3.0.0-py3-none-any.whl.metadata (6.9 kB)
+2025-10-10T13:57:11.2111604Z Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich>=10.11.0->typer<1.0.0,>=0.3.0->spacy>=3.6.0->-r ml_backend/requirements.txt (line 16))
+2025-10-10T13:57:11.2156798Z   Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+2025-10-10T13:57:11.2646570Z Collecting mpmath<1.4,>=1.1.0 (from sympy>=1.13.3->torch>=2.0.0->-r ml_backend/requirements.txt (line 2))
+2025-10-10T13:57:11.2687642Z   Downloading mpmath-1.3.0-py3-none-any.whl.metadata (8.6 kB)
+2025-10-10T13:57:11.3409233Z Downloading torch-2.8.0-cp39-cp39-manylinux_2_28_x86_64.whl (888.0 MB)
+2025-10-10T13:57:31.7149035Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 888.0/888.0 MB 23.7 MB/s  0:00:20
+2025-10-10T13:57:31.7218539Z Downloading nvidia_cublas_cu12-12.8.4.1-py3-none-manylinux_2_27_x86_64.whl (594.3 MB)
+2025-10-10T13:57:39.9653559Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 594.3/594.3 MB 36.8 MB/s  0:00:08
+2025-10-10T13:57:39.9707679Z Downloading nvidia_cuda_cupti_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (10.2 MB)
+2025-10-10T13:57:40.0188564Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.2/10.2 MB 223.4 MB/s  0:00:00
+2025-10-10T13:57:40.0244618Z Downloading nvidia_cuda_nvrtc_cu12-12.8.93-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl (88.0 MB)
+2025-10-10T13:57:40.5672456Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 88.0/88.0 MB 163.1 MB/s  0:00:00
+2025-10-10T13:57:40.5720048Z Downloading nvidia_cuda_runtime_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (954 kB)
+2025-10-10T13:57:40.5803573Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 954.8/954.8 kB 129.8 MB/s  0:00:00
+2025-10-10T13:57:40.5861505Z Downloading nvidia_cudnn_cu12-9.10.2.21-py3-none-manylinux_2_27_x86_64.whl (706.8 MB)
+2025-10-10T13:57:51.2881101Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 706.8/706.8 MB 27.9 MB/s  0:00:10
+2025-10-10T13:57:51.2934010Z Downloading nvidia_cufft_cu12-11.3.3.83-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (193.1 MB)
+2025-10-10T13:57:53.2883539Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 193.1/193.1 MB 96.8 MB/s  0:00:01
+2025-10-10T13:57:53.2937206Z Downloading nvidia_cufile_cu12-1.13.1.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (1.2 MB)
+2025-10-10T13:57:53.3043063Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 143.6 MB/s  0:00:00
+2025-10-10T13:57:53.3141739Z Downloading nvidia_curand_cu12-10.3.9.90-py3-none-manylinux_2_27_x86_64.whl (63.6 MB)
+2025-10-10T13:57:53.6111914Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 63.6/63.6 MB 216.6 MB/s  0:00:00
+2025-10-10T13:57:53.6166469Z Downloading nvidia_cusolver_cu12-11.7.3.90-py3-none-manylinux_2_27_x86_64.whl (267.5 MB)
+2025-10-10T13:57:57.3067265Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 267.5/267.5 MB 71.4 MB/s  0:00:03
+2025-10-10T13:57:57.3147706Z Downloading nvidia_cusparse_cu12-12.5.8.93-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (288.2 MB)
+2025-10-10T13:58:01.0506719Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 288.2/288.2 MB 71.8 MB/s  0:00:03
+2025-10-10T13:58:01.0565475Z Downloading nvidia_cusparselt_cu12-0.7.1-py3-none-manylinux2014_x86_64.whl (287.2 MB)
+2025-10-10T13:58:05.0675087Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 287.2/287.2 MB 66.9 MB/s  0:00:04
+2025-10-10T13:58:05.0728237Z Downloading nvidia_nccl_cu12-2.27.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (322.4 MB)
+2025-10-10T13:58:09.6153060Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 322.4/322.4 MB 60.4 MB/s  0:00:04
+2025-10-10T13:58:09.6210429Z Downloading nvidia_nvjitlink_cu12-12.8.93-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl (39.3 MB)
+2025-10-10T13:58:09.7991540Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 39.3/39.3 MB 225.4 MB/s  0:00:00
+2025-10-10T13:58:09.8037725Z Downloading nvidia_nvtx_cu12-12.8.90-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (89 kB)
+2025-10-10T13:58:09.8117359Z Downloading triton-3.4.0-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (155.4 MB)
+2025-10-10T13:58:11.5236415Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 155.4/155.4 MB 90.8 MB/s  0:00:01
+2025-10-10T13:58:11.5300927Z Downloading transformers-4.57.0-py3-none-any.whl (12.0 MB)
+2025-10-10T13:58:11.5890885Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.0/12.0 MB 215.9 MB/s  0:00:00
+2025-10-10T13:58:11.5945113Z Downloading huggingface_hub-0.35.3-py3-none-any.whl (564 kB)
+2025-10-10T13:58:11.6016120Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 564.3/564.3 kB 79.2 MB/s  0:00:00
+2025-10-10T13:58:11.6073570Z Downloading hf_xet-1.1.10-cp37-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.2 MB)
+2025-10-10T13:58:11.6262231Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.2/3.2 MB 208.7 MB/s  0:00:00
+2025-10-10T13:58:11.6321520Z Downloading tokenizers-0.22.1-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.3 MB)
+2025-10-10T13:58:11.6510745Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 207.7 MB/s  0:00:00
+2025-10-10T13:58:11.6563379Z Downloading sentence_transformers-5.1.1-py3-none-any.whl (486 kB)
+2025-10-10T13:58:11.6694314Z Downloading scikit_learn-1.6.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (13.5 MB)
+2025-10-10T13:58:11.7602511Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.5/13.5 MB 152.6 MB/s  0:00:00
+2025-10-10T13:58:11.7627726Z Using cached numpy-2.0.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (19.5 MB)
+2025-10-10T13:58:11.7962463Z Downloading pandas-2.3.3-cp39-cp39-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.8 MB)
+2025-10-10T13:58:11.8641668Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.8/12.8 MB 194.6 MB/s  0:00:00
+2025-10-10T13:58:11.8712296Z Downloading faiss_cpu-1.12.0-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (31.4 MB)
+2025-10-10T13:58:12.1199080Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 31.4/31.4 MB 127.3 MB/s  0:00:00
+2025-10-10T13:58:12.1244900Z Downloading nltk-3.9.2-py3-none-any.whl (1.5 MB)
+2025-10-10T13:58:12.1398743Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.5/1.5 MB 104.4 MB/s  0:00:00
+2025-10-10T13:58:12.1454523Z Downloading spacy-3.8.7-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (31.4 MB)
+2025-10-10T13:58:13.3277853Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 31.4/31.4 MB 26.4 MB/s  0:00:01
+2025-10-10T13:58:13.3330960Z Downloading pydantic-2.12.0-py3-none-any.whl (459 kB)
+2025-10-10T13:58:13.3419805Z Downloading pydantic_core-2.41.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+2025-10-10T13:58:13.3560088Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 196.3 MB/s  0:00:00
+2025-10-10T13:58:13.3599140Z Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+2025-10-10T13:58:13.3774667Z Downloading tqdm-4.67.1-py3-none-any.whl (78 kB)
+2025-10-10T13:58:13.3845695Z Downloading catalogue-2.0.10-py3-none-any.whl (17 kB)
+2025-10-10T13:58:13.3916150Z Downloading charset_normalizer-3.4.3-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (152 kB)
+2025-10-10T13:58:13.4013756Z Downloading cymem-2.0.11-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (208 kB)
+2025-10-10T13:58:13.4159729Z Downloading idna-3.10-py3-none-any.whl (70 kB)
+2025-10-10T13:58:13.4225299Z Downloading langcodes-3.5.0-py3-none-any.whl (182 kB)
+2025-10-10T13:58:13.4313191Z Downloading murmurhash-1.0.13-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (116 kB)
+2025-10-10T13:58:13.4421510Z Downloading preshed-3.0.10-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (794 kB)
+2025-10-10T13:58:13.4495452Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 794.1/794.1 kB 120.2 MB/s  0:00:00
+2025-10-10T13:58:13.4540152Z Downloading spacy_legacy-3.0.12-py2.py3-none-any.whl (29 kB)
+2025-10-10T13:58:13.4603818Z Downloading spacy_loggers-1.0.5-py3-none-any.whl (22 kB)
+2025-10-10T13:58:13.4714663Z Downloading srsly-2.5.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.1 MB)
+2025-10-10T13:58:13.4805881Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 145.1 MB/s  0:00:00
+2025-10-10T13:58:13.4879245Z Downloading thinc-8.3.6-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (4.1 MB)
+2025-10-10T13:58:13.5105295Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.1/4.1 MB 198.5 MB/s  0:00:00
+2025-10-10T13:58:13.5148275Z Downloading confection-0.1.5-py3-none-any.whl (35 kB)
+2025-10-10T13:58:13.5213258Z Downloading typer-0.19.2-py3-none-any.whl (46 kB)
+2025-10-10T13:58:13.5275165Z Downloading urllib3-2.5.0-py3-none-any.whl (129 kB)
+2025-10-10T13:58:13.5339847Z Downloading wasabi-1.1.3-py3-none-any.whl (27 kB)
+2025-10-10T13:58:13.5404164Z Downloading weasel-0.4.1-py3-none-any.whl (50 kB)
+2025-10-10T13:58:13.5470169Z Downloading cloudpathlib-0.23.0-py3-none-any.whl (62 kB)
+2025-10-10T13:58:13.5535486Z Downloading smart_open-7.3.1-py3-none-any.whl (61 kB)
+2025-10-10T13:58:13.5611151Z Downloading gensim-4.3.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (26.6 MB)
+2025-10-10T13:58:13.7497316Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 26.6/26.6 MB 142.3 MB/s  0:00:00
+2025-10-10T13:58:13.7544383Z Downloading flask-3.1.2-py3-none-any.whl (103 kB)
+2025-10-10T13:58:13.7618644Z Downloading flask_cors-6.0.1-py3-none-any.whl (13 kB)
+2025-10-10T13:58:13.7681672Z Downloading gunicorn-23.0.0-py3-none-any.whl (85 kB)
+2025-10-10T13:58:13.7742939Z Downloading marshmallow-4.0.1-py3-none-any.whl (48 kB)
+2025-10-10T13:58:13.7854454Z Downloading mlflow-3.1.4-py3-none-any.whl (24.7 MB)
+2025-10-10T13:58:13.9360783Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 24.7/24.7 MB 165.8 MB/s  0:00:00
+2025-10-10T13:58:13.9455234Z Downloading mlflow_skinny-3.1.4-py3-none-any.whl (1.9 MB)
+2025-10-10T13:58:13.9581792Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.9/1.9 MB 172.6 MB/s  0:00:00
+2025-10-10T13:58:13.9690565Z Downloading sqlalchemy-2.0.43-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.2 MB)
+2025-10-10T13:58:13.9909474Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.2/3.2 MB 157.4 MB/s  0:00:00
+2025-10-10T13:58:14.0018262Z Downloading alembic-1.16.5-py3-none-any.whl (247 kB)
+2025-10-10T13:58:14.0092704Z Downloading cachetools-6.2.0-py3-none-any.whl (11 kB)
+2025-10-10T13:58:14.0157121Z Downloading click-8.1.8-py3-none-any.whl (98 kB)
+2025-10-10T13:58:14.0231166Z Downloading cloudpickle-3.1.1-py3-none-any.whl (20 kB)
+2025-10-10T13:58:14.0301663Z Downloading databricks_sdk-0.67.0-py3-none-any.whl (718 kB)
+2025-10-10T13:58:14.0373526Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 718.4/718.4 kB 106.8 MB/s  0:00:00
+2025-10-10T13:58:14.0416483Z Downloading docker-7.1.0-py3-none-any.whl (147 kB)
+2025-10-10T13:58:14.0487753Z Downloading fastapi-0.118.3-py3-none-any.whl (97 kB)
+2025-10-10T13:58:14.0552300Z Downloading gitpython-3.1.45-py3-none-any.whl (208 kB)
+2025-10-10T13:58:14.0629540Z Downloading gitdb-4.0.12-py3-none-any.whl (62 kB)
+2025-10-10T13:58:14.0693504Z Downloading google_auth-2.41.1-py2.py3-none-any.whl (221 kB)
+2025-10-10T13:58:14.0762801Z Downloading graphene-3.4.3-py2.py3-none-any.whl (114 kB)
+2025-10-10T13:58:14.0830722Z Downloading graphql_core-3.2.6-py3-none-any.whl (203 kB)
+2025-10-10T13:58:14.0903081Z Downloading graphql_relay-3.2.0-py3-none-any.whl (16 kB)
+2025-10-10T13:58:14.0964884Z Downloading importlib_metadata-8.7.0-py3-none-any.whl (27 kB)
+2025-10-10T13:58:14.1085580Z Downloading matplotlib-3.9.4-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (8.3 MB)
+2025-10-10T13:58:14.1577187Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 8.3/8.3 MB 175.6 MB/s  0:00:00
+2025-10-10T13:58:14.1621686Z Downloading opentelemetry_api-1.37.0-py3-none-any.whl (65 kB)
+2025-10-10T13:58:14.1686468Z Downloading opentelemetry_sdk-1.37.0-py3-none-any.whl (131 kB)
+2025-10-10T13:58:14.1755301Z Downloading opentelemetry_semantic_conventions-0.58b0-py3-none-any.whl (207 kB)
+2025-10-10T13:58:14.1831894Z Downloading packaging-25.0-py3-none-any.whl (66 kB)
+2025-10-10T13:58:14.1911642Z Downloading protobuf-6.32.1-cp39-abi3-manylinux2014_x86_64.whl (322 kB)
+2025-10-10T13:58:14.2016740Z Downloading pyarrow-20.0.0-cp39-cp39-manylinux_2_28_x86_64.whl (42.3 MB)
+2025-10-10T13:58:14.4380148Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 42.3/42.3 MB 180.8 MB/s  0:00:00
+2025-10-10T13:58:14.4433386Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2025-10-10T13:58:14.4510572Z Downloading pyyaml-6.0.3-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (750 kB)
+2025-10-10T13:58:14.4583746Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 750.8/750.8 kB 112.9 MB/s  0:00:00
+2025-10-10T13:58:14.4626406Z Downloading rsa-4.9.1-py3-none-any.whl (34 kB)
+2025-10-10T13:58:14.4698103Z Downloading scipy-1.13.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (38.6 MB)
+2025-10-10T13:58:14.7021009Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 38.6/38.6 MB 167.1 MB/s  0:00:00
+2025-10-10T13:58:14.7064654Z Downloading smmap-5.0.2-py3-none-any.whl (24 kB)
+2025-10-10T13:58:14.7127806Z Downloading sqlparse-0.5.3-py3-none-any.whl (44 kB)
+2025-10-10T13:58:14.7190646Z Downloading starlette-0.48.0-py3-none-any.whl (73 kB)
+2025-10-10T13:58:14.7259275Z Downloading anyio-4.11.0-py3-none-any.whl (109 kB)
+2025-10-10T13:58:14.7324969Z Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+2025-10-10T13:58:14.7386472Z Downloading uvicorn-0.37.0-py3-none-any.whl (67 kB)
+2025-10-10T13:58:14.7498950Z Downloading psycopg2_binary-2.9.11-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.2 MB)
+2025-10-10T13:58:14.7793089Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.2/4.2 MB 150.0 MB/s  0:00:00
+2025-10-10T13:58:14.7850052Z Downloading redis-6.4.0-py3-none-any.whl (279 kB)
+2025-10-10T13:58:14.7927715Z Downloading pillow-11.3.0-cp39-cp39-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (6.6 MB)
+2025-10-10T13:58:14.8278709Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.6/6.6 MB 203.8 MB/s  0:00:00
+2025-10-10T13:58:14.8325891Z Downloading opencv_python-4.12.0.88-cp37-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (67.0 MB)
+2025-10-10T13:58:16.1098689Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 67.0/67.0 MB 52.4 MB/s  0:00:01
+2025-10-10T13:58:16.1149714Z Downloading python_dotenv-1.1.1-py3-none-any.whl (20 kB)
+2025-10-10T13:58:16.1216255Z Downloading pytest-8.4.2-py3-none-any.whl (365 kB)
+2025-10-10T13:58:16.1295728Z Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+2025-10-10T13:58:16.1357209Z Downloading pytest_cov-7.0.0-py3-none-any.whl (22 kB)
+2025-10-10T13:58:16.1497849Z Downloading black-25.9.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl (1.6 MB)
+2025-10-10T13:58:16.1602797Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.6/1.6 MB 170.5 MB/s  0:00:00
+2025-10-10T13:58:16.1655441Z Downloading flake8-7.3.0-py2.py3-none-any.whl (57 kB)
+2025-10-10T13:58:16.1723128Z Downloading mccabe-0.7.0-py2.py3-none-any.whl (7.3 kB)
+2025-10-10T13:58:16.1798831Z Downloading pycodestyle-2.14.0-py2.py3-none-any.whl (31 kB)
+2025-10-10T13:58:16.1858846Z Downloading pyflakes-3.4.0-py2.py3-none-any.whl (63 kB)
+2025-10-10T13:58:16.1961248Z Downloading mypy-1.18.2-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (13.2 MB)
+2025-10-10T13:58:16.2770436Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.2/13.2 MB 167.6 MB/s  0:00:00
+2025-10-10T13:58:16.2813647Z Downloading prometheus_client-0.23.1-py3-none-any.whl (61 kB)
+2025-10-10T13:58:16.2904386Z Downloading structlog-25.4.0-py3-none-any.whl (68 kB)
+2025-10-10T13:58:16.2968184Z Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+2025-10-10T13:58:16.3028660Z Downloading async_timeout-5.0.1-py3-none-any.whl (6.2 kB)
+2025-10-10T13:58:16.3086885Z Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+2025-10-10T13:58:16.3147042Z Downloading certifi-2025.10.5-py3-none-any.whl (163 kB)
+2025-10-10T13:58:16.3235175Z Downloading contourpy-1.3.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (321 kB)
+2025-10-10T13:58:16.3315285Z Downloading coverage-7.10.7-cp39-cp39-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (246 kB)
+2025-10-10T13:58:16.3384728Z Downloading cycler-0.12.1-py3-none-any.whl (8.3 kB)
+2025-10-10T13:58:16.3445914Z Downloading exceptiongroup-1.3.0-py3-none-any.whl (16 kB)
+2025-10-10T13:58:16.3553117Z Downloading fonttools-4.60.1-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.8 MB)
+2025-10-10T13:58:16.3819272Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.8/4.8 MB 192.1 MB/s  0:00:00
+2025-10-10T13:58:16.3863507Z Downloading fsspec-2025.9.0-py3-none-any.whl (199 kB)
+2025-10-10T13:58:16.3946601Z Downloading greenlet-3.2.4-cp39-cp39-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (582 kB)
+2025-10-10T13:58:16.4018714Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 582.8/582.8 kB 87.4 MB/s  0:00:00
+2025-10-10T13:58:16.4064163Z Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+2025-10-10T13:58:16.4127094Z Downloading importlib_resources-6.5.2-py3-none-any.whl (37 kB)
+2025-10-10T13:58:16.4190588Z Downloading iniconfig-2.1.0-py3-none-any.whl (6.0 kB)
+2025-10-10T13:58:16.4281853Z Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+2025-10-10T13:58:16.4344984Z Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+2025-10-10T13:58:16.4416068Z Downloading joblib-1.5.2-py3-none-any.whl (308 kB)
+2025-10-10T13:58:16.4568307Z Downloading kiwisolver-1.4.7-cp39-cp39-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (1.6 MB)
+2025-10-10T13:58:16.4681217Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.6/1.6 MB 172.9 MB/s  0:00:00
+2025-10-10T13:58:16.4741171Z Downloading language_data-1.3.0-py3-none-any.whl (5.4 MB)
+2025-10-10T13:58:16.5038207Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 5.4/5.4 MB 208.2 MB/s  0:00:00
+2025-10-10T13:58:16.5133870Z Downloading marisa_trie-1.3.1-cp39-cp39-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (1.2 MB)
+2025-10-10T13:58:16.5239862Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 142.5 MB/s  0:00:00
+2025-10-10T13:58:16.5288949Z Downloading markupsafe-3.0.3-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (20 kB)
+2025-10-10T13:58:16.5355298Z Downloading mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+2025-10-10T13:58:16.5417293Z Downloading pathspec-0.12.1-py3-none-any.whl (31 kB)
+2025-10-10T13:58:16.5499350Z Downloading platformdirs-4.4.0-py3-none-any.whl (18 kB)
+2025-10-10T13:58:16.5567149Z Downloading pyasn1-0.6.1-py3-none-any.whl (83 kB)
+2025-10-10T13:58:16.5635156Z Downloading pyasn1_modules-0.4.2-py3-none-any.whl (181 kB)
+2025-10-10T13:58:16.5729482Z Downloading pygments-2.19.2-py3-none-any.whl (1.2 MB)
+2025-10-10T13:58:16.5823752Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 151.2 MB/s  0:00:00
+2025-10-10T13:58:16.5869770Z Downloading pyparsing-3.2.5-py3-none-any.whl (113 kB)
+2025-10-10T13:58:16.5942143Z Downloading pytokens-0.1.10-py3-none-any.whl (12 kB)
+2025-10-10T13:58:16.6007943Z Downloading pytz-2025.2-py2.py3-none-any.whl (509 kB)
+2025-10-10T13:58:16.6121513Z Downloading regex-2025.9.18-cp39-cp39-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (789 kB)
+2025-10-10T13:58:16.6200453Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 789.5/789.5 kB 111.5 MB/s  0:00:00
+2025-10-10T13:58:16.6243286Z Downloading rich-14.2.0-py3-none-any.whl (243 kB)
+2025-10-10T13:58:16.6338871Z Downloading markdown_it_py-3.0.0-py3-none-any.whl (87 kB)
+2025-10-10T13:58:16.6405997Z Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+2025-10-10T13:58:16.6468228Z Downloading safetensors-0.6.2-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (485 kB)
+2025-10-10T13:58:16.6556036Z Downloading shellingham-1.5.4-py2.py3-none-any.whl (9.8 kB)
+2025-10-10T13:58:16.6619270Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2025-10-10T13:58:16.6682319Z Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+2025-10-10T13:58:16.6746955Z Downloading sympy-1.14.0-py3-none-any.whl (6.3 MB)
+2025-10-10T13:58:16.7061245Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.3/6.3 MB 216.7 MB/s  0:00:00
+2025-10-10T13:58:16.7115691Z Downloading mpmath-1.3.0-py3-none-any.whl (536 kB)
+2025-10-10T13:58:16.7185192Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 536.2/536.2 kB 68.6 MB/s  0:00:00
+2025-10-10T13:58:16.7230375Z Downloading threadpoolctl-3.6.0-py3-none-any.whl (18 kB)
+2025-10-10T13:58:16.7292036Z Downloading tomli-2.3.0-py3-none-any.whl (14 kB)
+2025-10-10T13:58:16.7353458Z Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+2025-10-10T13:58:16.7421888Z Downloading tzdata-2025.2-py2.py3-none-any.whl (347 kB)
+2025-10-10T13:58:16.7506715Z Downloading werkzeug-3.1.3-py3-none-any.whl (224 kB)
+2025-10-10T13:58:16.7600383Z Downloading zipp-3.23.0-py3-none-any.whl (10 kB)
+2025-10-10T13:58:16.7696875Z Downloading backports_datetime_fromisoformat-2.0.3-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (52 kB)
+2025-10-10T13:58:16.7760605Z Downloading filelock-3.19.1-py3-none-any.whl (15 kB)
+2025-10-10T13:58:16.7824265Z Downloading mako-1.3.10-py3-none-any.whl (78 kB)
+2025-10-10T13:58:16.7893143Z Downloading networkx-3.2.1-py3-none-any.whl (1.6 MB)
+2025-10-10T13:58:16.8029273Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.6/1.6 MB 155.3 MB/s  0:00:00
+2025-10-10T13:58:16.8077156Z Downloading wrapt-1.17.3-cp39-cp39-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (81 kB)
+2025-10-10T13:58:32.7341353Z Building wheels for collected packages: annoy, hnswlib, blis
+2025-10-10T13:58:32.7353512Z   Building wheel for annoy (pyproject.toml): started
+2025-10-10T13:58:40.3676249Z   Building wheel for annoy (pyproject.toml): finished with status 'done'
+2025-10-10T13:58:40.3693004Z   Created wheel for annoy: filename=annoy-1.17.3-cp39-cp39-linux_x86_64.whl size=523054 sha256=28b121aa72bc098675fb63690bbd097bc321d47fbe25ab17d45e6d6c120cee1a
+2025-10-10T13:58:40.3695157Z   Stored in directory: /home/runner/.cache/pip/wheels/09/a9/54/37478e65995fe712f7da465749da9ddb21db6b1a599d591ac7
+2025-10-10T13:58:40.3733949Z   Building wheel for hnswlib (pyproject.toml): started
+2025-10-10T13:58:59.8918758Z   Building wheel for hnswlib (pyproject.toml): finished with status 'done'
+2025-10-10T13:58:59.8956909Z   Created wheel for hnswlib: filename=hnswlib-0.8.0-cp39-cp39-linux_x86_64.whl size=2357395 sha256=df3dece0f68de77e784e034348091b45a8be1ab1a9ab69e82111495d3b7672ac
+2025-10-10T13:58:59.8959665Z   Stored in directory: /home/runner/.cache/pip/wheels/81/b3/1d/920a1ed1f9ede20be60d1108445e5789eef54c5144c9d746f6
+2025-10-10T13:58:59.8989934Z   Building wheel for blis (pyproject.toml): started
+2025-10-10T14:00:01.9371659Z   Building wheel for blis (pyproject.toml): still running...
+2025-10-10T14:01:04.5271741Z   Building wheel for blis (pyproject.toml): still running...
+2025-10-10T14:02:15.7432178Z   Building wheel for blis (pyproject.toml): still running...
+2025-10-10T14:03:19.2506381Z   Building wheel for blis (pyproject.toml): still running...
+2025-10-10T14:04:20.3842253Z   Building wheel for blis (pyproject.toml): still running...
+2025-10-10T14:05:23.7795371Z   Building wheel for blis (pyproject.toml): still running...
+2025-10-10T14:06:25.8704267Z   Building wheel for blis (pyproject.toml): still running...
+2025-10-10T14:07:19.3138064Z   Building wheel for blis (pyproject.toml): finished with status 'done'
+2025-10-10T14:07:19.3255600Z   Created wheel for blis: filename=blis-1.3.0-cp39-cp39-linux_x86_64.whl size=14635554 sha256=23ad5d0aa3ff652003e44981467b64ccd7fed3465161969f267b623d32ad32b7
+2025-10-10T14:07:19.3258664Z   Stored in directory: /home/runner/.cache/pip/wheels/2b/75/f4/e540f5b1ef1d2610200886c45092f5be21cfe8309ccc48c577
+2025-10-10T14:07:19.3279983Z Successfully built annoy hnswlib blis
+2025-10-10T14:07:20.2667772Z Installing collected packages: pytz, nvidia-cusparselt-cu12, mpmath, cymem, annoy, zipp, wrapt, wasabi, urllib3, tzdata, typing-extensions, tqdm, tomli, threadpoolctl, sympy, sqlparse, spacy-loggers, spacy-legacy, sniffio, smmap, six, shellingham, safetensors, regex, pyyaml, pytokens, python-dotenv, pyparsing, pygments, pyflakes, pycodestyle, pyasn1, pyarrow, psycopg2-binary, protobuf, prometheus-client, pluggy, platformdirs, pillow, pathspec, packaging, nvidia-nvtx-cu12, nvidia-nvjitlink-cu12, nvidia-nccl-cu12, nvidia-curand-cu12, nvidia-cufile-cu12, nvidia-cuda-runtime-cu12, nvidia-cuda-nvrtc-cu12, nvidia-cuda-cupti-cu12, nvidia-cublas-cu12, numpy, networkx, mypy-extensions, murmurhash, mdurl, mccabe, markupsafe, marisa-trie, kiwisolver, joblib, itsdangerous, iniconfig, idna, hf-xet, h11, greenlet, fsspec, fonttools, filelock, cycler, coverage, cloudpickle, click, charset_normalizer, certifi, catalogue, cachetools, blinker, backports-datetime-fromisoformat, async-timeout, annotated-types, werkzeug, uvicorn, typing-inspection, structlog, srsly, sqlalchemy, smart-open, scipy, rsa, requests, redis, python-dateutil, pydantic-core, pyasn1-modules, preshed, opencv-python, nvidia-cusparse-cu12, nvidia-cufft-cu12, nvidia-cudnn-cu12, nltk, mypy, marshmallow, markdown-it-py, Mako, language-data, jinja2, importlib-resources, importlib-metadata, hnswlib, gunicorn, graphql-core, gitdb, flake8, faiss-cpu, exceptiongroup, contourpy, cloudpathlib, blis, black, triton, scikit-learn, rich, pytest, pydantic, pandas, opentelemetry-api, nvidia-cusolver-cu12, matplotlib, langcodes, huggingface-hub, graphql-relay, google-auth, gitpython, gensim, flask, docker, anyio, alembic, typer, torch, tokenizers, starlette, pytest-cov, opentelemetry-semantic-conventions, graphene, flask-cors, databricks-sdk, confection, weasel, transformers, thinc, opentelemetry-sdk, fastapi, spacy, sentence-transformers, mlflow-skinny, mlflow
+2025-10-10T14:08:58.5801773Z 
+2025-10-10T14:08:58.6069597Z Successfully installed Mako-1.3.10 alembic-1.16.5 annotated-types-0.7.0 annoy-1.17.3 anyio-4.11.0 async-timeout-5.0.1 backports-datetime-fromisoformat-2.0.3 black-25.9.0 blinker-1.9.0 blis-1.3.0 cachetools-6.2.0 catalogue-2.0.10 certifi-2025.10.5 charset_normalizer-3.4.3 click-8.1.8 cloudpathlib-0.23.0 cloudpickle-3.1.1 confection-0.1.5 contourpy-1.3.0 coverage-7.10.7 cycler-0.12.1 cymem-2.0.11 databricks-sdk-0.67.0 docker-7.1.0 exceptiongroup-1.3.0 faiss-cpu-1.12.0 fastapi-0.118.3 filelock-3.19.1 flake8-7.3.0 flask-3.1.2 flask-cors-6.0.1 fonttools-4.60.1 fsspec-2025.9.0 gensim-4.3.2 gitdb-4.0.12 gitpython-3.1.45 google-auth-2.41.1 graphene-3.4.3 graphql-core-3.2.6 graphql-relay-3.2.0 greenlet-3.2.4 gunicorn-23.0.0 h11-0.16.0 hf-xet-1.1.10 hnswlib-0.8.0 huggingface-hub-0.35.3 idna-3.10 importlib-metadata-8.7.0 importlib-resources-6.5.2 iniconfig-2.1.0 itsdangerous-2.2.0 jinja2-3.1.6 joblib-1.5.2 kiwisolver-1.4.7 langcodes-3.5.0 language-data-1.3.0 marisa-trie-1.3.1 markdown-it-py-3.0.0 markupsafe-3.0.3 marshmallow-4.0.1 matplotlib-3.9.4 mccabe-0.7.0 mdurl-0.1.2 mlflow-3.1.4 mlflow-skinny-3.1.4 mpmath-1.3.0 murmurhash-1.0.13 mypy-1.18.2 mypy-extensions-1.1.0 networkx-3.2.1 nltk-3.9.2 numpy-2.0.2 nvidia-cublas-cu12-12.8.4.1 nvidia-cuda-cupti-cu12-12.8.90 nvidia-cuda-nvrtc-cu12-12.8.93 nvidia-cuda-runtime-cu12-12.8.90 nvidia-cudnn-cu12-9.10.2.21 nvidia-cufft-cu12-11.3.3.83 nvidia-cufile-cu12-1.13.1.3 nvidia-curand-cu12-10.3.9.90 nvidia-cusolver-cu12-11.7.3.90 nvidia-cusparse-cu12-12.5.8.93 nvidia-cusparselt-cu12-0.7.1 nvidia-nccl-cu12-2.27.3 nvidia-nvjitlink-cu12-12.8.93 nvidia-nvtx-cu12-12.8.90 opencv-python-4.12.0.88 opentelemetry-api-1.37.0 opentelemetry-sdk-1.37.0 opentelemetry-semantic-conventions-0.58b0 packaging-25.0 pandas-2.3.3 pathspec-0.12.1 pillow-11.3.0 platformdirs-4.4.0 pluggy-1.6.0 preshed-3.0.10 prometheus-client-0.23.1 protobuf-6.32.1 psycopg2-binary-2.9.11 pyarrow-20.0.0 pyasn1-0.6.1 pyasn1-modules-0.4.2 pycodestyle-2.14.0 pydantic-2.12.0 pydantic-core-2.41.1 pyflakes-3.4.0 pygments-2.19.2 pyparsing-3.2.5 pytest-8.4.2 pytest-cov-7.0.0 python-dateutil-2.9.0.post0 python-dotenv-1.1.1 pytokens-0.1.10 pytz-2025.2 pyyaml-6.0.3 redis-6.4.0 regex-2025.9.18 requests-2.32.5 rich-14.2.0 rsa-4.9.1 safetensors-0.6.2 scikit-learn-1.6.1 scipy-1.13.1 sentence-transformers-5.1.1 shellingham-1.5.4 six-1.17.0 smart-open-7.3.1 smmap-5.0.2 sniffio-1.3.1 spacy-3.8.7 spacy-legacy-3.0.12 spacy-loggers-1.0.5 sqlalchemy-2.0.43 sqlparse-0.5.3 srsly-2.5.1 starlette-0.48.0 structlog-25.4.0 sympy-1.14.0 thinc-8.3.6 threadpoolctl-3.6.0 tokenizers-0.22.1 tomli-2.3.0 torch-2.8.0 tqdm-4.67.1 transformers-4.57.0 triton-3.4.0 typer-0.19.2 typing-extensions-4.15.0 typing-inspection-0.4.2 tzdata-2025.2 urllib3-2.5.0 uvicorn-0.37.0 wasabi-1.1.3 weasel-0.4.1 werkzeug-3.1.3 wrapt-1.17.3 zipp-3.23.0
+2025-10-10T14:09:00.6432014Z ##[group]Run npm test
+2025-10-10T14:09:00.6432278Z [36;1mnpm test[0m
+2025-10-10T14:09:00.7895823Z shell: /usr/bin/bash -e {0}
+2025-10-10T14:09:00.7896159Z env:
+2025-10-10T14:09:00.7896396Z   REGISTRY: ghcr.io
+2025-10-10T14:09:00.7896733Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T14:09:00.7897231Z   pythonLocation: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:00.7898159Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib/pkgconfig
+2025-10-10T14:09:00.7898728Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:00.7899204Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:00.7899675Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:00.7900147Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib
+2025-10-10T14:09:00.7900543Z ##[endgroup]
+2025-10-10T14:09:01.4641462Z 
+2025-10-10T14:09:01.4672011Z > trae-project@0.0.0 test
+2025-10-10T14:09:01.4672659Z > npm run lint && npm run check
+2025-10-10T14:09:01.4672935Z 
+2025-10-10T14:09:01.4672963Z 
+2025-10-10T14:09:01.4673147Z > trae-project@0.0.0 lint
+2025-10-10T14:09:01.4673513Z > eslint .
+2025-10-10T14:09:01.4673688Z 
+2025-10-10T14:09:03.9139096Z 
+2025-10-10T14:09:03.9139630Z > trae-project@0.0.0 check
+2025-10-10T14:09:03.9140125Z > tsc --noEmit
+2025-10-10T14:09:03.9140323Z 
+2025-10-10T14:09:09.1369686Z ##[group]Run cd ml_backend
+2025-10-10T14:09:09.1370072Z [36;1mcd ml_backend[0m
+2025-10-10T14:09:09.1370617Z [36;1mpython -c "print('Backend tests placeholder - no tests directory found')"[0m
+2025-10-10T14:09:09.1413430Z shell: /usr/bin/bash -e {0}
+2025-10-10T14:09:09.1413763Z env:
+2025-10-10T14:09:09.1414012Z   REGISTRY: ghcr.io
+2025-10-10T14:09:09.1414374Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T14:09:09.1414911Z   pythonLocation: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:09.1415541Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib/pkgconfig
+2025-10-10T14:09:09.1416155Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:09.1416912Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:09.1417609Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:09.1418177Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib
+2025-10-10T14:09:09.1418670Z ##[endgroup]
+2025-10-10T14:09:09.1630386Z Backend tests placeholder - no tests directory found
+2025-10-10T14:09:09.1699529Z ##[group]Run npm run check
+2025-10-10T14:09:09.1699891Z [36;1mnpm run check[0m
+2025-10-10T14:09:09.1739770Z shell: /usr/bin/bash -e {0}
+2025-10-10T14:09:09.1740103Z env:
+2025-10-10T14:09:09.1740342Z   REGISTRY: ghcr.io
+2025-10-10T14:09:09.1740698Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T14:09:09.1741233Z   pythonLocation: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:09.1741856Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib/pkgconfig
+2025-10-10T14:09:09.1742464Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:09.1743026Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:09.1743610Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:09.1744166Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib
+2025-10-10T14:09:09.1744629Z ##[endgroup]
+2025-10-10T14:09:09.3318748Z 
+2025-10-10T14:09:09.3328356Z > trae-project@0.0.0 check
+2025-10-10T14:09:09.3329154Z > tsc --noEmit
+2025-10-10T14:09:09.3334682Z 
+2025-10-10T14:09:15.8005419Z ##[group]Run npm run lint
+2025-10-10T14:09:15.8005807Z [36;1mnpm run lint[0m
+2025-10-10T14:09:15.8006114Z [36;1mcd ml_backend[0m
+2025-10-10T14:09:15.8006553Z [36;1mflake8 . --max-line-length=88 --extend-ignore=E203,W503[0m
+2025-10-10T14:09:15.8054462Z shell: /usr/bin/bash -e {0}
+2025-10-10T14:09:15.8054807Z env:
+2025-10-10T14:09:15.8055055Z   REGISTRY: ghcr.io
+2025-10-10T14:09:15.8055412Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T14:09:15.8055961Z   pythonLocation: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:15.8056586Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib/pkgconfig
+2025-10-10T14:09:15.8057216Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:15.8057901Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:15.8058447Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.9.23/x64
+2025-10-10T14:09:15.8059000Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.9.23/x64/lib
+2025-10-10T14:09:15.8060812Z ##[endgroup]
+2025-10-10T14:09:15.9802654Z 
+2025-10-10T14:09:15.9807155Z > trae-project@0.0.0 lint
+2025-10-10T14:09:15.9828306Z > eslint .
+2025-10-10T14:09:15.9828807Z 
+2025-10-10T14:09:19.3634304Z ./app.py:127:1: W391 blank line at end of file
+2025-10-10T14:09:19.3638373Z ./ml/__init__.py:1:46: W292 no newline at end of file
+2025-10-10T14:09:19.3639158Z ./ml/custom_embeddings.py:7:1: F401 'numpy as np' imported but unused
+2025-10-10T14:09:19.3640242Z ./ml/custom_embeddings.py:11:1: F401 'sklearn.metrics.pairwise.cosine_similarity' imported but unused
+2025-10-10T14:09:19.3641327Z ./ml/custom_embeddings.py:12:1: F401 'typing.Union' imported but unused
+2025-10-10T14:09:19.3642176Z ./ml/custom_embeddings.py:12:1: F401 'typing.Any' imported but unused
+2025-10-10T14:09:19.3643158Z ./ml/custom_embeddings.py:172:41: F821 undefined name 'SentenceTransformer'
+2025-10-10T14:09:19.3644284Z ./ml/custom_embeddings.py:243:17: F811 redefinition of unused 'cosine_similarity' from line 11
+2025-10-10T14:09:19.3645366Z ./ml/data_preprocessing.py:6:1: F401 'pandas as pd' imported but unused
+2025-10-10T14:09:19.3646262Z ./ml/data_preprocessing.py:17:1: F401 'torch' imported but unused
+2025-10-10T14:09:19.3647189Z ./ml/data_preprocessing.py:48:89: E501 line too long (97 > 88 characters)
+2025-10-10T14:09:19.3649416Z ./ml/data_preprocessing.py:50:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3650325Z ./ml/data_preprocessing.py:85:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3651229Z ./ml/data_preprocessing.py:99:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3652580Z ./ml/data_preprocessing.py:104:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3653486Z ./ml/data_preprocessing.py:107:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3654384Z ./ml/data_preprocessing.py:110:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3655271Z ./ml/data_preprocessing.py:115:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3656159Z ./ml/data_preprocessing.py:117:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3657043Z ./ml/data_preprocessing.py:126:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3670729Z ./ml/data_preprocessing.py:129:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3671783Z ./ml/data_preprocessing.py:132:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3672714Z ./ml/data_preprocessing.py:141:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3673616Z ./ml/data_preprocessing.py:146:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3674559Z ./ml/data_preprocessing.py:152:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3677845Z ./ml/data_preprocessing.py:156:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3678822Z ./ml/data_preprocessing.py:163:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3679727Z ./ml/data_preprocessing.py:167:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3680976Z ./ml/data_preprocessing.py:170:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3681949Z ./ml/data_preprocessing.py:173:89: E501 line too long (95 > 88 characters)
+2025-10-10T14:09:19.3682887Z ./ml/data_preprocessing.py:174:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3683775Z ./ml/data_preprocessing.py:176:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3685858Z ./ml/data_preprocessing.py:177:89: E501 line too long (123 > 88 characters)
+2025-10-10T14:09:19.3686797Z ./ml/data_preprocessing.py:181:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3687855Z ./ml/data_preprocessing.py:184:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3688771Z ./ml/data_preprocessing.py:188:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3689656Z ./ml/data_preprocessing.py:196:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3690529Z ./ml/data_preprocessing.py:206:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3691464Z ./ml/data_preprocessing.py:207:89: E501 line too long (105 > 88 characters)
+2025-10-10T14:09:19.3693809Z ./ml/data_preprocessing.py:215:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3694722Z ./ml/data_preprocessing.py:218:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3695622Z ./ml/data_preprocessing.py:223:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3696521Z ./ml/data_preprocessing.py:227:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3697718Z ./ml/data_preprocessing.py:229:89: E501 line too long (89 > 88 characters)
+2025-10-10T14:09:19.3698659Z ./ml/data_preprocessing.py:230:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3699548Z ./ml/data_preprocessing.py:232:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3700445Z ./ml/data_preprocessing.py:233:89: E501 line too long (94 > 88 characters)
+2025-10-10T14:09:19.3701349Z ./ml/data_preprocessing.py:237:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3702238Z ./ml/data_preprocessing.py:240:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3703130Z ./ml/data_preprocessing.py:245:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3704009Z ./ml/data_preprocessing.py:250:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3704873Z ./ml/data_preprocessing.py:262:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3705753Z ./ml/data_preprocessing.py:267:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3706652Z ./ml/data_preprocessing.py:270:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3707719Z ./ml/data_preprocessing.py:274:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3708613Z ./ml/data_preprocessing.py:283:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3709778Z ./ml/data_preprocessing.py:290:89: E501 line too long (96 > 88 characters)
+2025-10-10T14:09:19.3710807Z ./ml/data_preprocessing.py:299:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3711708Z ./ml/data_preprocessing.py:304:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3712607Z ./ml/data_preprocessing.py:311:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3713423Z ./ml/data_preprocessing.py:315:35: W291 trailing whitespace
+2025-10-10T14:09:19.3714184Z ./ml/data_preprocessing.py:316:53: W291 trailing whitespace
+2025-10-10T14:09:19.3715034Z ./ml/data_preprocessing.py:319:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3715940Z ./ml/data_preprocessing.py:325:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3716860Z ./ml/data_preprocessing.py:327:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3718034Z ./ml/data_preprocessing.py:331:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3719054Z ./ml/data_preprocessing.py:334:89: E501 line too long (108 > 88 characters)
+2025-10-10T14:09:19.3719992Z ./ml/data_preprocessing.py:340:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3720883Z ./ml/data_preprocessing.py:344:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3721772Z ./ml/data_preprocessing.py:346:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3722865Z ./ml/data_preprocessing.py:350:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3723725Z ./ml/data_preprocessing.py:355:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3724538Z ./ml/data_preprocessing.py:357:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3725400Z ./ml/data_preprocessing.py:361:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3726259Z ./ml/data_preprocessing.py:365:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3727059Z ./ml/data_preprocessing.py:370:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3729725Z ./ml/data_preprocessing.py:374:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3730558Z ./ml/data_preprocessing.py:376:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3731536Z ./ml/data_preprocessing.py:377:89: E501 line too long (119 > 88 characters)
+2025-10-10T14:09:19.3732504Z ./ml/data_preprocessing.py:381:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3733484Z ./ml/data_preprocessing.py:383:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3734556Z ./ml/data_preprocessing.py:387:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3735500Z ./ml/data_preprocessing.py:398:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3736403Z ./ml/data_preprocessing.py:400:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3737389Z ./ml/data_preprocessing.py:402:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3741021Z ./ml/data_preprocessing.py:403:89: E501 line too long (128 > 88 characters)
+2025-10-10T14:09:19.3756507Z ./ml/data_preprocessing.py:407:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3757390Z ./ml/data_preprocessing.py:412:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3761148Z ./ml/data_preprocessing.py:417:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3761920Z ./ml/data_preprocessing.py:420:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3762695Z ./ml/data_preprocessing.py:424:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3763463Z ./ml/data_preprocessing.py:428:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3764200Z ./ml/data_preprocessing.py:429:44: W291 trailing whitespace
+2025-10-10T14:09:19.3765103Z ./ml/data_preprocessing.py:430:36: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3765951Z ./ml/data_preprocessing.py:430:67: W291 trailing whitespace
+2025-10-10T14:09:19.3766832Z ./ml/data_preprocessing.py:431:36: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3768132Z ./ml/data_preprocessing.py:432:36: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3769419Z ./ml/data_preprocessing.py:433:36: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3770436Z ./ml/data_preprocessing.py:434:36: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3771516Z ./ml/data_preprocessing.py:435:36: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3772481Z ./ml/data_preprocessing.py:437:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3773298Z ./ml/data_preprocessing.py:441:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3774116Z ./ml/data_preprocessing.py:444:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3774853Z ./ml/data_preprocessing.py:447:45: W291 trailing whitespace
+2025-10-10T14:09:19.3775620Z ./ml/data_preprocessing.py:453:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3776434Z ./ml/data_preprocessing.py:459:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3777254Z ./ml/data_preprocessing.py:464:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3778242Z ./ml/data_preprocessing.py:481:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3779187Z ./ml/data_preprocessing.py:483:33: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3780468Z ./ml/data_preprocessing.py:484:33: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3781432Z ./ml/data_preprocessing.py:485:33: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3782205Z ./ml/data_preprocessing.py:487:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3782915Z ./ml/data_preprocessing.py:491:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3783741Z ./ml/data_preprocessing.py:493:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3784525Z ./ml/data_preprocessing.py:500:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3785310Z ./ml/data_preprocessing.py:504:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3786084Z ./ml/data_preprocessing.py:506:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3786897Z ./ml/data_preprocessing.py:514:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3787978Z ./ml/data_preprocessing.py:517:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3788764Z ./ml/data_preprocessing.py:519:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3789608Z ./ml/data_preprocessing.py:524:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3790499Z ./ml/data_preprocessing.py:530:89: E501 line too long (106 > 88 characters)
+2025-10-10T14:09:19.3791396Z ./ml/data_preprocessing.py:532:89: E501 line too long (104 > 88 characters)
+2025-10-10T14:09:19.3792282Z ./ml/data_preprocessing.py:533:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3793167Z ./ml/data_preprocessing.py:535:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3794047Z ./ml/data_preprocessing.py:540:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3794921Z ./ml/data_preprocessing.py:542:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3795792Z ./ml/data_preprocessing.py:546:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3796671Z ./ml/data_preprocessing.py:550:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3797766Z ./ml/data_preprocessing.py:553:89: E501 line too long (93 > 88 characters)
+2025-10-10T14:09:19.3798672Z ./ml/data_preprocessing.py:555:89: E501 line too long (91 > 88 characters)
+2025-10-10T14:09:19.3799514Z ./ml/data_preprocessing.py:556:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3800337Z ./ml/data_preprocessing.py:564:23: W292 no newline at end of file
+2025-10-10T14:09:19.3801136Z ./ml/fine_tuning.py:8:1: F401 'torch.optim' imported but unused
+2025-10-10T14:09:19.3801939Z ./ml/fine_tuning.py:16:1: F401 'pandas as pd' imported but unused
+2025-10-10T14:09:19.3802824Z ./ml/fine_tuning.py:17:1: F401 'sklearn.metrics.confusion_matrix' imported but unused
+2025-10-10T14:09:19.3803885Z ./ml/fine_tuning.py:17:89: E501 line too long (93 > 88 characters)
+2025-10-10T14:09:19.3804544Z ./ml/fine_tuning.py:23:1: F401 'json' imported but unused
+2025-10-10T14:09:19.3805179Z ./ml/fine_tuning.py:27:1: F401 'seaborn as sns' imported but unused
+2025-10-10T14:09:19.3805846Z ./ml/fine_tuning.py:55:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3806559Z ./ml/fine_tuning.py:64:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3807291Z ./ml/fine_tuning.py:71:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3808214Z ./ml/fine_tuning.py:75:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3808913Z ./ml/fine_tuning.py:85:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3809552Z ./ml/fine_tuning.py:88:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3810218Z ./ml/fine_tuning.py:92:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3810936Z ./ml/fine_tuning.py:101:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3811701Z ./ml/fine_tuning.py:109:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3812485Z ./ml/fine_tuning.py:118:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3813260Z ./ml/fine_tuning.py:122:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3813963Z ./ml/fine_tuning.py:123:23: W291 trailing whitespace
+2025-10-10T14:09:19.3814685Z ./ml/fine_tuning.py:129:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3815590Z ./ml/fine_tuning.py:132:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3816277Z ./ml/fine_tuning.py:136:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3816893Z ./ml/fine_tuning.py:141:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3817659Z ./ml/fine_tuning.py:145:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3818258Z ./ml/fine_tuning.py:148:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3818945Z ./ml/fine_tuning.py:153:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3819621Z ./ml/fine_tuning.py:160:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3820326Z ./ml/fine_tuning.py:163:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3821030Z ./ml/fine_tuning.py:167:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3821731Z ./ml/fine_tuning.py:170:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3822565Z ./ml/fine_tuning.py:174:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3823270Z ./ml/fine_tuning.py:180:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3823978Z ./ml/fine_tuning.py:182:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3824697Z ./ml/fine_tuning.py:186:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3825399Z ./ml/fine_tuning.py:191:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3826125Z ./ml/fine_tuning.py:195:89: E501 line too long (92 > 88 characters)
+2025-10-10T14:09:19.3826870Z ./ml/fine_tuning.py:204:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3831375Z ./ml/fine_tuning.py:207:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3832144Z ./ml/fine_tuning.py:214:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3832887Z ./ml/fine_tuning.py:219:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3833628Z ./ml/fine_tuning.py:223:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3834334Z ./ml/fine_tuning.py:227:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3835064Z ./ml/fine_tuning.py:232:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3835776Z ./ml/fine_tuning.py:235:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3836479Z ./ml/fine_tuning.py:238:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3837181Z ./ml/fine_tuning.py:241:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3838053Z ./ml/fine_tuning.py:245:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3838769Z ./ml/fine_tuning.py:252:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3839478Z ./ml/fine_tuning.py:256:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3840386Z ./ml/fine_tuning.py:258:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3841220Z ./ml/fine_tuning.py:260:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3842139Z ./ml/fine_tuning.py:261:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3843078Z ./ml/fine_tuning.py:262:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3843980Z ./ml/fine_tuning.py:263:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3844897Z ./ml/fine_tuning.py:264:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3845815Z ./ml/fine_tuning.py:265:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3846604Z ./ml/fine_tuning.py:269:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3847314Z ./ml/fine_tuning.py:272:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3848190Z ./ml/fine_tuning.py:275:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3848901Z ./ml/fine_tuning.py:283:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3849546Z ./ml/fine_tuning.py:286:31: W291 trailing whitespace
+2025-10-10T14:09:19.3850179Z ./ml/fine_tuning.py:287:49: W291 trailing whitespace
+2025-10-10T14:09:19.3850769Z ./ml/fine_tuning.py:292:29: W291 trailing whitespace
+2025-10-10T14:09:19.3851527Z ./ml/fine_tuning.py:293:49: W291 trailing whitespace
+2025-10-10T14:09:19.3852214Z ./ml/fine_tuning.py:297:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3852924Z ./ml/fine_tuning.py:305:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3853620Z ./ml/fine_tuning.py:312:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3854308Z ./ml/fine_tuning.py:319:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3855002Z ./ml/fine_tuning.py:322:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3855674Z ./ml/fine_tuning.py:331:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3856387Z ./ml/fine_tuning.py:334:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3857074Z ./ml/fine_tuning.py:339:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3858059Z ./ml/fine_tuning.py:344:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3858767Z ./ml/fine_tuning.py:352:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3859464Z ./ml/fine_tuning.py:358:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3860150Z ./ml/fine_tuning.py:364:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3860847Z ./ml/fine_tuning.py:367:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3861532Z ./ml/fine_tuning.py:371:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3862236Z ./ml/fine_tuning.py:374:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3862931Z ./ml/fine_tuning.py:377:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3863642Z ./ml/fine_tuning.py:384:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3864476Z ./ml/fine_tuning.py:386:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3865398Z ./ml/fine_tuning.py:387:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3866274Z ./ml/fine_tuning.py:388:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3867114Z ./ml/fine_tuning.py:389:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3868187Z ./ml/fine_tuning.py:390:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.3869023Z ./ml/fine_tuning.py:394:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3869741Z ./ml/fine_tuning.py:396:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3870440Z ./ml/fine_tuning.py:399:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3871211Z ./ml/fine_tuning.py:407:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3871868Z ./ml/fine_tuning.py:410:31: W291 trailing whitespace
+2025-10-10T14:09:19.3872467Z ./ml/fine_tuning.py:411:49: W291 trailing whitespace
+2025-10-10T14:09:19.3873304Z ./ml/fine_tuning.py:416:29: W291 trailing whitespace
+2025-10-10T14:09:19.3873921Z ./ml/fine_tuning.py:417:49: W291 trailing whitespace
+2025-10-10T14:09:19.3874605Z ./ml/fine_tuning.py:421:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3875341Z ./ml/fine_tuning.py:428:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3876069Z ./ml/fine_tuning.py:435:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3876806Z ./ml/fine_tuning.py:442:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3877820Z ./ml/fine_tuning.py:445:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3878547Z ./ml/fine_tuning.py:453:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3879308Z ./ml/fine_tuning.py:456:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3880066Z ./ml/fine_tuning.py:461:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3880816Z ./ml/fine_tuning.py:466:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3881570Z ./ml/fine_tuning.py:473:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3882243Z ./ml/fine_tuning.py:478:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3882956Z ./ml/fine_tuning.py:484:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3883746Z ./ml/fine_tuning.py:486:89: E501 line too long (96 > 88 characters)
+2025-10-10T14:09:19.3884678Z ./ml/fine_tuning.py:487:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3885423Z ./ml/fine_tuning.py:490:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3886152Z ./ml/fine_tuning.py:496:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3886870Z ./ml/fine_tuning.py:503:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3887761Z ./ml/fine_tuning.py:505:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3888502Z ./ml/fine_tuning.py:511:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3889197Z ./ml/fine_tuning.py:516:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3889912Z ./ml/fine_tuning.py:522:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3890641Z ./ml/fine_tuning.py:527:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3891312Z ./ml/fine_tuning.py:529:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3891982Z ./ml/fine_tuning.py:535:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3892664Z ./ml/fine_tuning.py:538:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3893333Z ./ml/fine_tuning.py:540:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3893998Z ./ml/fine_tuning.py:547:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3894671Z ./ml/fine_tuning.py:554:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3895337Z ./ml/fine_tuning.py:558:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3896023Z ./ml/fine_tuning.py:563:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3896697Z ./ml/fine_tuning.py:565:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3897396Z ./ml/fine_tuning.py:568:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3898291Z ./ml/fine_tuning.py:570:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3899005Z ./ml/fine_tuning.py:571:89: E501 line too long (92 > 88 characters)
+2025-10-10T14:09:19.3899710Z ./ml/fine_tuning.py:575:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3900425Z ./ml/fine_tuning.py:577:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3901102Z ./ml/fine_tuning.py:585:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3901725Z ./ml/fine_tuning.py:589:47: W291 trailing whitespace
+2025-10-10T14:09:19.3902363Z ./ml/fine_tuning.py:593:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3903035Z ./ml/fine_tuning.py:599:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3903722Z ./ml/fine_tuning.py:601:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3904409Z ./ml/fine_tuning.py:604:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3905308Z ./ml/fine_tuning.py:607:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3906014Z ./ml/fine_tuning.py:614:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3906739Z ./ml/fine_tuning.py:623:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3907539Z ./ml/fine_tuning.py:630:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3908479Z ./ml/fine_tuning.py:632:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3909208Z ./ml/fine_tuning.py:636:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3909906Z ./ml/fine_tuning.py:638:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3910572Z ./ml/fine_tuning.py:643:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3911241Z ./ml/fine_tuning.py:645:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3911975Z ./ml/fine_tuning.py:651:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3912711Z ./ml/fine_tuning.py:656:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3913435Z ./ml/fine_tuning.py:660:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3914173Z ./ml/fine_tuning.py:663:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3914884Z ./ml/fine_tuning.py:669:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3915548Z ./ml/fine_tuning.py:676:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3916381Z ./ml/fine_tuning.py:683:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3917094Z ./ml/fine_tuning.py:687:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3917981Z ./ml/fine_tuning.py:696:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3918674Z ./ml/fine_tuning.py:706:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3919349Z ./ml/fine_tuning.py:712:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3920008Z ./ml/fine_tuning.py:723:6: W292 no newline at end of file
+2025-10-10T14:09:19.3920737Z ./ml/model_training.py:16:1: F401 'pandas as pd' imported but unused
+2025-10-10T14:09:19.3921741Z ./ml/model_training.py:17:1: F401 'sklearn.model_selection.train_test_split' imported but unused
+2025-10-10T14:09:19.3923469Z ./ml/model_training.py:18:1: F401 'sklearn.metrics.confusion_matrix' imported but unused
+2025-10-10T14:09:19.3924459Z ./ml/model_training.py:18:89: E501 line too long (93 > 88 characters)
+2025-10-10T14:09:19.3925289Z ./ml/model_training.py:22:1: F401 'typing.Optional' imported but unused
+2025-10-10T14:09:19.3926087Z ./ml/model_training.py:24:1: F401 'json' imported but unused
+2025-10-10T14:09:19.3926809Z ./ml/model_training.py:25:1: F401 'os' imported but unused
+2025-10-10T14:09:19.3927880Z ./ml/model_training.py:27:1: F401 'time' imported but unused
+2025-10-10T14:09:19.3928404Z ./ml/model_training.py:51:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3928886Z ./ml/model_training.py:58:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3929332Z ./ml/model_training.py:62:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3929801Z ./ml/model_training.py:63:89: E501 line too long (97 > 88 characters)
+2025-10-10T14:09:19.3930279Z ./ml/model_training.py:67:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3930737Z ./ml/model_training.py:73:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3931184Z ./ml/model_training.py:76:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3931609Z ./ml/model_training.py:79:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3932043Z ./ml/model_training.py:88:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3932492Z ./ml/model_training.py:95:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3932930Z ./ml/model_training.py:99:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3933394Z ./ml/model_training.py:100:89: E501 line too long (99 > 88 characters)
+2025-10-10T14:09:19.3933853Z ./ml/model_training.py:104:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3934284Z ./ml/model_training.py:107:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3934714Z ./ml/model_training.py:110:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3935345Z ./ml/model_training.py:119:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3935767Z ./ml/model_training.py:127:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3936202Z ./ml/model_training.py:136:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3936635Z ./ml/model_training.py:140:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3937069Z ./ml/model_training.py:144:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3937757Z ./ml/model_training.py:148:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3938193Z ./ml/model_training.py:152:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3938624Z ./ml/model_training.py:155:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3939052Z ./ml/model_training.py:160:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3939479Z ./ml/model_training.py:168:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3939914Z ./ml/model_training.py:173:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3940344Z ./ml/model_training.py:178:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3940776Z ./ml/model_training.py:185:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3941213Z ./ml/model_training.py:189:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3941777Z ./ml/model_training.py:193:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3942219Z ./ml/model_training.py:196:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3942651Z ./ml/model_training.py:208:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3943104Z ./ml/model_training.py:209:89: E501 line too long (107 > 88 characters)
+2025-10-10T14:09:19.3943555Z ./ml/model_training.py:213:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3944003Z ./ml/model_training.py:217:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3944438Z ./ml/model_training.py:221:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3944875Z ./ml/model_training.py:224:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3945303Z ./ml/model_training.py:229:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3945735Z ./ml/model_training.py:237:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3946181Z ./ml/model_training.py:241:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3946634Z ./ml/model_training.py:245:89: E501 line too long (90 > 88 characters)
+2025-10-10T14:09:19.3947083Z ./ml/model_training.py:249:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3947781Z ./ml/model_training.py:259:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3948264Z ./ml/model_training.py:260:89: E501 line too long (100 > 88 characters)
+2025-10-10T14:09:19.3948719Z ./ml/model_training.py:263:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3949149Z ./ml/model_training.py:266:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3949581Z ./ml/model_training.py:270:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3950017Z ./ml/model_training.py:273:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3950441Z ./ml/model_training.py:283:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3950872Z ./ml/model_training.py:289:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3951297Z ./ml/model_training.py:291:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3951751Z ./ml/model_training.py:292:89: E501 line too long (94 > 88 characters)
+2025-10-10T14:09:19.3952195Z ./ml/model_training.py:295:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3952620Z ./ml/model_training.py:301:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3953048Z ./ml/model_training.py:305:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3953475Z ./ml/model_training.py:307:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3953896Z ./ml/model_training.py:312:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3954319Z ./ml/model_training.py:315:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3954888Z ./ml/model_training.py:318:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3955310Z ./ml/model_training.py:320:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3955736Z ./ml/model_training.py:322:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3956173Z ./ml/model_training.py:325:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3956599Z ./ml/model_training.py:329:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3957028Z ./ml/model_training.py:333:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3957757Z ./ml/model_training.py:336:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3958229Z ./ml/model_training.py:339:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3958662Z ./ml/model_training.py:341:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3959111Z ./ml/model_training.py:342:89: E501 line too long (104 > 88 characters)
+2025-10-10T14:09:19.3959562Z ./ml/model_training.py:344:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3960015Z ./ml/model_training.py:345:89: E501 line too long (101 > 88 characters)
+2025-10-10T14:09:19.3960450Z ./ml/model_training.py:348:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3960882Z ./ml/model_training.py:352:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3961452Z ./ml/model_training.py:354:89: E501 line too long (94 > 88 characters)
+2025-10-10T14:09:19.3961897Z ./ml/model_training.py:355:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3962343Z ./ml/model_training.py:359:89: E501 line too long (107 > 88 characters)
+2025-10-10T14:09:19.3962784Z ./ml/model_training.py:360:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3963210Z ./ml/model_training.py:366:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3963638Z ./ml/model_training.py:387:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3964083Z ./ml/model_training.py:395:89: E501 line too long (114 > 88 characters)
+2025-10-10T14:09:19.3964525Z ./ml/model_training.py:397:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3964952Z ./ml/model_training.py:401:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3965374Z ./ml/model_training.py:404:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3965814Z ./ml/model_training.py:412:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3966244Z ./ml/model_training.py:417:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3966665Z ./ml/model_training.py:420:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3967095Z ./ml/model_training.py:422:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3967784Z ./ml/model_training.py:430:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3968227Z ./ml/model_training.py:435:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3968675Z ./ml/model_training.py:436:89: E501 line too long (102 > 88 characters)
+2025-10-10T14:09:19.3969123Z ./ml/model_training.py:438:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3969560Z ./ml/model_training.py:439:89: E501 line too long (97 > 88 characters)
+2025-10-10T14:09:19.3970002Z ./ml/model_training.py:442:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3970426Z ./ml/model_training.py:446:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3970873Z ./ml/model_training.py:448:89: E501 line too long (102 > 88 characters)
+2025-10-10T14:09:19.3971362Z ./ml/model_training.py:449:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3971805Z ./ml/model_training.py:453:89: E501 line too long (107 > 88 characters)
+2025-10-10T14:09:19.3972246Z ./ml/model_training.py:454:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3972689Z ./ml/model_training.py:456:89: E501 line too long (105 > 88 characters)
+2025-10-10T14:09:19.3973137Z ./ml/model_training.py:457:89: E501 line too long (102 > 88 characters)
+2025-10-10T14:09:19.3973579Z ./ml/model_training.py:458:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3974157Z ./ml/model_training.py:461:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3974598Z ./ml/model_training.py:463:89: E501 line too long (128 > 88 characters)
+2025-10-10T14:09:19.3975036Z ./ml/model_training.py:464:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3975469Z ./ml/model_training.py:469:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3975900Z ./ml/model_training.py:474:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3976345Z ./ml/model_training.py:478:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3976773Z ./ml/model_training.py:482:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3977206Z ./ml/model_training.py:487:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3977818Z ./ml/model_training.py:489:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3978267Z ./ml/model_training.py:492:89: E501 line too long (128 > 88 characters)
+2025-10-10T14:09:19.3978714Z ./ml/model_training.py:493:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3979146Z ./ml/model_training.py:499:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3979567Z ./ml/model_training.py:504:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3980023Z ./ml/model_training.py:506:89: E501 line too long (93 > 88 characters)
+2025-10-10T14:09:19.3980588Z ./ml/model_training.py:508:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3981020Z ./ml/model_training.py:512:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3981444Z ./ml/model_training.py:517:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3981868Z ./ml/model_training.py:525:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3982310Z ./ml/model_training.py:526:89: E501 line too long (131 > 88 characters)
+2025-10-10T14:09:19.3982752Z ./ml/model_training.py:527:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3983172Z ./ml/model_training.py:532:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3983623Z ./ml/model_training.py:535:89: E501 line too long (89 > 88 characters)
+2025-10-10T14:09:19.3984062Z ./ml/model_training.py:542:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3984484Z ./ml/model_training.py:545:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3984989Z ./ml/model_training.py:547:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3985414Z ./ml/model_training.py:554:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3985847Z ./ml/model_training.py:559:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3986273Z ./ml/model_training.py:564:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3986713Z ./ml/model_training.py:566:89: E501 line too long (107 > 88 characters)
+2025-10-10T14:09:19.3987152Z ./ml/model_training.py:567:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3987862Z ./ml/model_training.py:574:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3988305Z ./ml/model_training.py:577:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3988766Z ./ml/model_training.py:578:89: E501 line too long (103 > 88 characters)
+2025-10-10T14:09:19.3989206Z ./ml/model_training.py:581:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3989654Z ./ml/model_training.py:584:89: E501 line too long (101 > 88 characters)
+2025-10-10T14:09:19.3990096Z ./ml/model_training.py:585:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3990523Z ./ml/model_training.py:588:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3990951Z ./ml/model_training.py:592:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3991395Z ./ml/model_training.py:595:89: E501 line too long (90 > 88 characters)
+2025-10-10T14:09:19.3991832Z ./ml/model_training.py:596:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3992281Z ./ml/model_training.py:597:89: E501 line too long (96 > 88 characters)
+2025-10-10T14:09:19.3992717Z ./ml/model_training.py:598:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3993275Z ./ml/model_training.py:600:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3993710Z ./ml/model_training.py:605:1: E302 expected 2 blank lines, found 1
+2025-10-10T14:09:19.3994137Z ./ml/model_training.py:609:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3994560Z ./ml/model_training.py:610:39: W292 no newline at end of file
+2025-10-10T14:09:19.3994954Z ./models.py:223:10: W292 no newline at end of file
+2025-10-10T14:09:19.3995333Z ./routes/__init__.py:11:69: W292 no newline at end of file
+2025-10-10T14:09:19.3995847Z ./routes/auth.py:10:1: F401 'werkzeug.security.check_password_hash' imported but unused
+2025-10-10T14:09:19.3996343Z ./routes/auth.py:29:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3996750Z ./routes/auth.py:35:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3997140Z ./routes/auth.py:39:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3997822Z ./routes/auth.py:42:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3998226Z ./routes/auth.py:49:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3998618Z ./routes/auth.py:52:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3999002Z ./routes/auth.py:54:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3999390Z ./routes/auth.py:59:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.3999771Z ./routes/auth.py:71:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4000287Z ./routes/auth.py:75:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4000688Z ./routes/auth.py:78:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4001080Z ./routes/auth.py:81:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4001475Z ./routes/auth.py:91:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4001856Z ./routes/auth.py:93:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4002254Z ./routes/auth.py:100:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4002655Z ./routes/auth.py:113:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4003057Z ./routes/auth.py:116:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4003453Z ./routes/auth.py:122:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4003846Z ./routes/auth.py:127:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4004232Z ./routes/auth.py:140:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4004627Z ./routes/auth.py:143:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4005019Z ./routes/auth.py:146:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4005412Z ./routes/auth.py:148:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4005804Z ./routes/auth.py:161:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4006196Z ./routes/auth.py:164:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4006614Z ./routes/auth.py:167:89: E501 line too long (92 > 88 characters)
+2025-10-10T14:09:19.4007025Z ./routes/auth.py:169:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4007589Z ./routes/auth.py:182:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4008038Z ./routes/auth.py:185:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4008435Z ./routes/auth.py:187:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4008820Z ./routes/auth.py:195:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4009213Z ./routes/auth.py:197:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4009606Z ./routes/auth.py:199:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4009996Z ./routes/auth.py:204:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4010389Z ./routes/auth.py:218:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4010776Z ./routes/auth.py:221:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4011166Z ./routes/auth.py:223:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4011559Z ./routes/auth.py:227:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4011947Z ./routes/auth.py:231:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4012475Z ./routes/auth.py:235:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4012866Z ./routes/auth.py:237:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4013255Z ./routes/auth.py:239:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4013634Z ./routes/auth.py:252:1: W391 blank line at end of file
+2025-10-10T14:09:19.4014062Z ./routes/chat.py:5:1: F401 'flask.stream_template' imported but unused
+2025-10-10T14:09:19.4014476Z ./routes/chat.py:8:1: F401 'json' imported but unused
+2025-10-10T14:09:19.4014862Z ./routes/chat.py:44:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4015251Z ./routes/chat.py:48:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4015645Z ./routes/chat.py:61:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4016063Z ./routes/chat.py:64:89: E501 line too long (102 > 88 characters)
+2025-10-10T14:09:19.4016465Z ./routes/chat.py:66:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4016852Z ./routes/chat.py:69:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4017261Z ./routes/chat.py:70:89: E501 line too long (89 > 88 characters)
+2025-10-10T14:09:19.4017770Z ./routes/chat.py:71:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4018159Z ./routes/chat.py:76:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4018514Z ./routes/chat.py:90:27: W291 trailing whitespace
+2025-10-10T14:09:19.4018994Z ./routes/chat.py:93:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4019390Z ./routes/chat.py:96:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4019778Z ./routes/chat.py:100:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4020173Z ./routes/chat.py:105:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4020536Z ./routes/chat.py:118:27: W291 trailing whitespace
+2025-10-10T14:09:19.4020901Z ./routes/chat.py:121:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4021291Z ./routes/chat.py:124:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4021693Z ./routes/chat.py:127:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4022079Z ./routes/chat.py:129:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4022470Z ./routes/chat.py:131:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4022854Z ./routes/chat.py:145:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4023217Z ./routes/chat.py:148:27: W291 trailing whitespace
+2025-10-10T14:09:19.4023591Z ./routes/chat.py:151:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4023979Z ./routes/chat.py:154:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4024369Z ./routes/chat.py:157:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4024763Z ./routes/chat.py:159:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4025150Z ./routes/chat.py:167:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4025539Z ./routes/chat.py:179:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4025936Z ./routes/chat.py:187:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4026353Z ./routes/chat.py:188:89: E501 line too long (128 > 88 characters)
+2025-10-10T14:09:19.4026764Z ./routes/chat.py:194:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4027170Z ./routes/chat.py:197:89: E501 line too long (125 > 88 characters)
+2025-10-10T14:09:19.4027702Z ./routes/chat.py:199:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4028101Z ./routes/chat.py:208:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4028488Z ./routes/chat.py:211:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4028880Z ./routes/chat.py:213:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4029269Z ./routes/chat.py:215:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4029651Z ./routes/chat.py:220:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4030059Z ./routes/chat.py:227:89: E501 line too long (90 > 88 characters)
+2025-10-10T14:09:19.4030466Z ./routes/chat.py:233:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4030947Z ./routes/chat.py:236:27: W291 trailing whitespace
+2025-10-10T14:09:19.4031317Z ./routes/chat.py:239:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4031705Z ./routes/chat.py:242:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4032068Z ./routes/chat.py:244:27: W291 trailing whitespace
+2025-10-10T14:09:19.4032435Z ./routes/chat.py:247:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4032828Z ./routes/chat.py:250:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4033220Z ./routes/chat.py:253:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4033611Z ./routes/chat.py:255:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4033999Z ./routes/chat.py:257:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4034393Z ./routes/chat.py:271:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4034782Z ./routes/chat.py:274:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4035169Z ./routes/chat.py:286:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4035564Z ./routes/chat.py:294:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4035946Z ./routes/chat.py:301:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4036356Z ./routes/chat.py:305:89: E501 line too long (122 > 88 characters)
+2025-10-10T14:09:19.4036760Z ./routes/chat.py:308:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4037265Z ./routes/chat.py:324:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4037783Z ./routes/chat.py:330:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4038178Z ./routes/chat.py:338:1: W391 blank line at end of file
+2025-10-10T14:09:19.4038622Z ./routes/health_profile.py:21:89: E501 line too long (91 > 88 characters)
+2025-10-10T14:09:19.4039114Z ./routes/health_profile.py:40:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4039586Z ./routes/health_profile.py:43:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4040042Z ./routes/health_profile.py:45:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4040506Z ./routes/health_profile.py:48:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4040969Z ./routes/health_profile.py:64:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4041424Z ./routes/health_profile.py:77:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4041889Z ./routes/health_profile.py:80:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4042348Z ./routes/health_profile.py:82:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4042810Z ./routes/health_profile.py:86:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4043268Z ./routes/health_profile.py:89:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4043739Z ./routes/health_profile.py:96:89: E501 line too long (93 > 88 characters)
+2025-10-10T14:09:19.4044227Z ./routes/health_profile.py:97:89: E501 line too long (90 > 88 characters)
+2025-10-10T14:09:19.4044710Z ./routes/health_profile.py:98:89: E501 line too long (117 > 88 characters)
+2025-10-10T14:09:19.4045198Z ./routes/health_profile.py:99:89: E501 line too long (120 > 88 characters)
+2025-10-10T14:09:19.4045703Z ./routes/health_profile.py:100:89: E501 line too long (114 > 88 characters)
+2025-10-10T14:09:19.4046198Z ./routes/health_profile.py:101:89: E501 line too long (108 > 88 characters)
+2025-10-10T14:09:19.4046677Z ./routes/health_profile.py:103:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4047156Z ./routes/health_profile.py:105:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4047725Z ./routes/health_profile.py:125:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4048191Z ./routes/health_profile.py:128:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4048658Z ./routes/health_profile.py:133:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4049115Z ./routes/health_profile.py:150:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4049580Z ./routes/health_profile.py:153:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4050046Z ./routes/health_profile.py:155:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4050631Z ./routes/health_profile.py:158:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4051114Z ./routes/health_profile.py:166:89: E501 line too long (109 > 88 characters)
+2025-10-10T14:09:19.4051610Z ./routes/health_profile.py:167:89: E501 line too long (112 > 88 characters)
+2025-10-10T14:09:19.4052097Z ./routes/health_profile.py:168:89: E501 line too long (106 > 88 characters)
+2025-10-10T14:09:19.4052587Z ./routes/health_profile.py:169:89: E501 line too long (100 > 88 characters)
+2025-10-10T14:09:19.4053067Z ./routes/health_profile.py:171:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4053530Z ./routes/health_profile.py:173:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4053995Z ./routes/health_profile.py:175:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4054458Z ./routes/health_profile.py:192:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4054919Z ./routes/health_profile.py:195:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4055385Z ./routes/health_profile.py:198:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4055848Z ./routes/health_profile.py:200:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4056312Z ./routes/health_profile.py:217:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4056885Z ./routes/health_profile.py:220:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4057346Z ./routes/health_profile.py:223:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4057935Z ./routes/health_profile.py:228:89: E501 line too long (123 > 88 characters)
+2025-10-10T14:09:19.4058426Z ./routes/health_profile.py:229:89: E501 line too long (126 > 88 characters)
+2025-10-10T14:09:19.4058910Z ./routes/health_profile.py:230:89: E501 line too long (96 > 88 characters)
+2025-10-10T14:09:19.4059386Z ./routes/health_profile.py:232:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4059852Z ./routes/health_profile.py:236:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4060316Z ./routes/health_profile.py:241:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4060782Z ./routes/health_profile.py:254:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4061248Z ./routes/health_profile.py:257:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4061733Z ./routes/health_profile.py:259:89: E501 line too long (92 > 88 characters)
+2025-10-10T14:09:19.4062213Z ./routes/health_profile.py:260:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4062680Z ./routes/health_profile.py:264:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4063143Z ./routes/health_profile.py:274:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4063608Z ./routes/health_profile.py:281:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4064061Z ./routes/health_profile.py:296:1: W391 blank line at end of file
+2025-10-10T14:09:19.4064531Z ./routes/medicine.py:11:1: F401 'datetime.timedelta' imported but unused
+2025-10-10T14:09:19.4064997Z ./routes/medicine.py:40:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4065423Z ./routes/medicine.py:43:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4065845Z ./routes/medicine.py:45:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4066289Z ./routes/medicine.py:53:89: E501 line too long (95 > 88 characters)
+2025-10-10T14:09:19.4066738Z ./routes/medicine.py:54:89: E501 line too long (89 > 88 characters)
+2025-10-10T14:09:19.4067172Z ./routes/medicine.py:60:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4067695Z ./routes/medicine.py:65:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4068110Z ./routes/medicine.py:78:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4068531Z ./routes/medicine.py:81:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4068951Z ./routes/medicine.py:83:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4069366Z ./routes/medicine.py:87:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4069912Z ./routes/medicine.py:91:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4070340Z ./routes/medicine.py:94:89: E501 line too long (94 > 88 characters)
+2025-10-10T14:09:19.4070770Z ./routes/medicine.py:97:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4071249Z ./routes/medicine.py:100:89: E501 line too long (90 > 88 characters)
+2025-10-10T14:09:19.4071693Z ./routes/medicine.py:103:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4072126Z ./routes/medicine.py:115:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4072551Z ./routes/medicine.py:118:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4072968Z ./routes/medicine.py:123:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4073362Z ./routes/medicine.py:140:28: W291 trailing whitespace
+2025-10-10T14:09:19.4073762Z ./routes/medicine.py:143:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4074181Z ./routes/medicine.py:146:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4074625Z ./routes/medicine.py:152:89: E501 line too long (91 > 88 characters)
+2025-10-10T14:09:19.4075062Z ./routes/medicine.py:159:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4075449Z ./routes/medicine.py:172:28: W291 trailing whitespace
+2025-10-10T14:09:19.4075850Z ./routes/medicine.py:175:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4076422Z ./routes/medicine.py:178:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4076855Z ./routes/medicine.py:180:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4077283Z ./routes/medicine.py:183:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4077804Z ./routes/medicine.py:190:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4078231Z ./routes/medicine.py:202:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4078660Z ./routes/medicine.py:213:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4079079Z ./routes/medicine.py:215:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4079506Z ./routes/medicine.py:217:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4079928Z ./routes/medicine.py:219:1: W293 blank line contains whitespace
+2025-10-10T14:09:19.4080331Z ./routes/medicine.py:336:1: W391 blank line at end of file
+2025-10-10T14:09:19.4080863Z ./scripts/prepare_medical_data.py:18:1: F401 'nltk.tokenize.sent_tokenize' imported but unused
+2025-10-10T14:09:19.4081513Z ./scripts/prepare_medical_data.py:181:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4082162Z ./scripts/prepare_medical_data.py:182:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4082808Z ./scripts/prepare_medical_data.py:183:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4083443Z ./scripts/prepare_medical_data.py:186:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4084082Z ./scripts/prepare_medical_data.py:192:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4084724Z ./scripts/prepare_medical_data.py:193:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4085361Z ./scripts/prepare_medical_data.py:196:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4085998Z ./scripts/prepare_medical_data.py:202:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4086636Z ./scripts/prepare_medical_data.py:203:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4087265Z ./scripts/prepare_medical_data.py:206:28: E128 continuation line under-indented for visual indent
+2025-10-10T14:09:19.4087953Z ./scripts/prepare_medical_data.py:363:1: W391 blank line at end of file
+2025-10-10T14:09:19.4099183Z ##[error]Process completed with exit code 1.
+2025-10-10T14:09:19.4195428Z Post job cleanup.
+2025-10-10T14:09:19.6722405Z [command]/usr/bin/git version
+2025-10-10T14:09:19.6811874Z git version 2.51.0
+2025-10-10T14:09:19.6894788Z Temporarily overriding HOME='/home/runner/work/_temp/9d6d1c06-359c-43b9-86b8-ab3b4cc6fffa' before making global git config changes
+2025-10-10T14:09:19.6896518Z Adding repository directory to the temporary git global config as a safe directory
+2025-10-10T14:09:19.6899019Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/RAG-Medical-Assistant/RAG-Medical-Assistant
+2025-10-10T14:09:19.6988042Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-10-10T14:09:19.7054520Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-10-10T14:09:19.7408773Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-10-10T14:09:19.7434240Z http.https://github.com/.extraheader
+2025-10-10T14:09:19.7451241Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2025-10-10T14:09:19.7488761Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-10-10T14:09:19.7881342Z Cleaning up orphan processes

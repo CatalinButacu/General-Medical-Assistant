@@ -1,4 +1,4 @@
-﻿"""
+"""
 Flask ML Backend for RAG Medical Assistant
 Custom ML-powered backend with BioBERT, FAISS, and custom RAG pipeline
 """
@@ -120,8 +120,3 @@ if __name__ == '__main__':
         port=int(os.getenv('PORT', 5000)),
         debug=debug_mode
     )
-
-
-
-
-

@@ -1,0 +1,24 @@
+﻿2025-10-10T13:56:20.5021568Z ##[group]Run actions/upload-artifact@v4
+2025-10-10T13:56:20.5021851Z with:
+2025-10-10T13:56:20.5022071Z   name: security-scan-results
+2025-10-10T13:56:20.5022312Z   path: trivy-results.txt
+2025-10-10T13:56:20.5022529Z   retention-days: 30
+2025-10-10T13:56:20.5022734Z   if-no-files-found: warn
+2025-10-10T13:56:20.5022948Z   compression-level: 6
+2025-10-10T13:56:20.5023151Z   overwrite: false
+2025-10-10T13:56:20.5023346Z   include-hidden-files: false
+2025-10-10T13:56:20.5023560Z env:
+2025-10-10T13:56:20.5023728Z   REGISTRY: ghcr.io
+2025-10-10T13:56:20.5023967Z   IMAGE_NAME: CatalinButacu/RAG-Medical-Assistant
+2025-10-10T13:56:20.5024241Z ##[endgroup]
+2025-10-10T13:56:20.7398959Z With the provided path, there will be 1 file uploaded
+2025-10-10T13:56:20.7405247Z Artifact name is valid!
+2025-10-10T13:56:20.7405894Z Root directory input is valid!
+2025-10-10T13:56:20.9138999Z Beginning upload of artifact content to blob storage
+2025-10-10T13:56:21.1240823Z Uploaded bytes 1194
+2025-10-10T13:56:21.1795100Z Finished uploading artifact content to blob storage!
+2025-10-10T13:56:21.1809795Z SHA256 digest of uploaded artifact zip is a86790f53884cd2c1f86ba7d1935bcb7031e515e81d055e42b755ba115c90bd8
+2025-10-10T13:56:21.1810806Z Finalizing artifact upload
+2025-10-10T13:56:21.3197514Z Artifact security-scan-results.zip successfully finalized. Artifact ID 4237782267
+2025-10-10T13:56:21.3200246Z Artifact security-scan-results has been successfully uploaded! Final size is 1194 bytes. Artifact ID is 4237782267
+2025-10-10T13:56:21.3204608Z Artifact download URL: https://github.com/CatalinButacu/RAG-Medical-Assistant/actions/runs/18408697728/artifacts/4237782267
