@@ -13,18 +13,13 @@ from transformers import (
     TrainingArguments, Trainer, EarlyStoppingCallback
 )
 import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support, confusion_matrix
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 import mlflow
 import mlflow.pytorch
 import logging
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Dict, Any, Tuple
 from dataclasses import dataclass
-import json
-import os
 from pathlib import Path
-import time
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -489,7 +484,7 @@ class MedicalModelTrainer:
 
                         # Log progress
                         if batch_idx % self.config.logging_steps == 0:
-                            logger.info(f"Epoch {epoch+1}/{self.config.num_epochs}, Batch {batch_idx}, Loss: {loss.item():.4f}")
+                            logger.info(f"Epoch {epoch + 1}/{self.config.num_epochs}, Batch {batch_idx}, Loss: {loss.item():.4f}")
 
                     # Validation phase
                     model.eval()
@@ -523,7 +518,7 @@ class MedicalModelTrainer:
                         f"val_mae_epoch_{epoch}": mae
                     }, step=epoch)
 
-                    logger.info(f"Epoch {epoch+1}: Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}, MSE: {mse:.4f}")
+                    logger.info(f"Epoch {epoch + 1}: Train Loss: {avg_train_loss:.4f}, Val Loss: {avg_val_loss:.4f}, MSE: {mse:.4f}")
 
                     # Early stopping
                     if avg_val_loss < best_val_loss:
@@ -537,7 +532,7 @@ class MedicalModelTrainer:
                     else:
                         patience_counter += 1
                         if patience_counter >= self.config.early_stopping_patience:
-                            logger.info(f"Early stopping at epoch {epoch+1}")
+                            logger.info(f"Early stopping at epoch {epoch + 1}")
                             break
 
                 # Log final model

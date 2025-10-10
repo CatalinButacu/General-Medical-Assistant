@@ -5,7 +5,6 @@ Custom implementation for fine-tuning BioBERT on medical datasets
 
 import torch
 import torch.nn as nn
-import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from transformers import (
     AutoTokenizer, AutoModel, AutoConfig,
@@ -13,18 +12,15 @@ from transformers import (
     AdamW
 )
 import numpy as np
-import pandas as pd
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support, confusion_matrix
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from typing import Dict, List, Tuple, Optional, Any
 import logging
 import mlflow
 import mlflow.pytorch
 from pathlib import Path
-import json
-import time
 from tqdm import tqdm
+import time
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 from .data_preprocessing import MedicalTextPreprocessor, MedicalDatasetBuilder
 

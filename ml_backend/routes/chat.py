@@ -2,10 +2,9 @@
 Chat routes for RAG-powered medical assistance
 """
 
-from flask import Blueprint, request, jsonify, stream_template
+from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import logging
-import json
 from datetime import datetime
 
 from ..models import db, User, ChatSession, ChatMessage

@@ -99,7 +99,7 @@ class MedicalKnowledgeBase:
         """Check drug interactions"""
         interactions = []
         for i, med1 in enumerate(medicines):
-            for med2 in medicines[i+1:]:
+            for med2 in medicines[i + 1:]:
                 interaction_key = f"{med1.lower()}_{med2.lower()}"
                 reverse_key = f"{med2.lower()}_{med1.lower()}"
 

@@ -7,7 +7,6 @@ from flask_jwt_extended import (
     create_access_token, create_refresh_token, jwt_required,
     get_jwt_identity, get_jwt
 )
-from werkzeug.security import check_password_hash
 from datetime import timedelta
 import logging
 
@@ -164,8 +163,10 @@ def get_profile():
 
         return jsonify({
             'user': user.to_dict(),
-            'health_profile': (user.health_profile.to_dict() 
-                             if user.health_profile else None)
+            'health_profile': (
+                user.health_profile.to_dict()
+                if user.health_profile else None
+            )
         }), 200
 
     except Exception as e:

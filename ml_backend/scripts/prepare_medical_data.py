@@ -325,9 +325,9 @@ class MedicalDataPreprocessor:
             logger.info("Medical data preparation completed successfully!")
 
             # Print summary
-            print("\n" + "="*50)
+            print("\n" + "=" * 50)
             print("MEDICAL DATA PREPARATION SUMMARY")
-            print("="*50)
+            print("=" * 50)
             print(f"Classification categories: "
                   f"{len(classification_data['categories'])}")
             print(f"Training examples: "
@@ -335,7 +335,7 @@ class MedicalDataPreprocessor:
             print(f"Medical documents: {len(similarity_data['documents'])}")
             print(f"Q&A pairs: {len(qa_pairs)}")
             print(f"Data directory: {self.data_dir.absolute()}")
-            print("="*50)
+            print("=" * 50)
 
         except Exception as e:
             logger.error(f"Error during data preparation: {str(e)}")

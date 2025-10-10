@@ -1,5 +1,0 @@
-2025-10-10T12:53:06.3780000Z Requested labels: ubuntu-latest
-2025-10-10T12:53:06.3780000Z Job defined at: CatalinButacu/RAG-Medical-Assistant/.github/workflows/deploy.yml@refs/heads/main
-2025-10-10T12:53:06.3780000Z Waiting for a runner to pick up this job...
-2025-10-10T12:53:06.8850000Z Job is waiting for a hosted runner to come online.
-2025-10-10T12:53:06.8860000Z Job is about to start running on the hosted runner: GitHub Actions 1000000030
