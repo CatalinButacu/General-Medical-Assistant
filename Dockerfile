@@ -38,13 +38,10 @@ WORKDIR /app
 COPY ml_backend/requirements.txt ./
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && mkdir -p ./models ./data ./logs
 
 # Copy ML backend code
 COPY ml_backend/ ./ml_backend/
-
-# Create necessary directories
-RUN mkdir -p ./models ./data ./logs
 
 # Stage 3: Production Runtime
 FROM python:3.9-slim AS production
@@ -56,9 +53,14 @@ RUN apt-get update && apt-get install -y \
     curl \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p ./models ./data ./logs /var/log/supervisor
 
 WORKDIR /app
+
+# Copy package files and install Node.js dependencies
+COPY package*.json ./
+RUN npm ci --only=production
 
 # Copy Python dependencies and ML backend
 COPY --from=ml-backend /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
@@ -70,20 +72,15 @@ COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 # Copy Node.js backend
 COPY api/ ./api/
-COPY package*.json ./
-RUN npm ci --only=production
 
 # Copy configuration files
 COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY gunicorn.conf.py ./gunicorn.conf.py
 
-# Create necessary directories
-RUN mkdir -p ./models ./data ./logs /var/log/supervisor
-
 # Set permissions
-RUN chown -R www-data:www-data /app
-RUN chmod +x ./ml_backend/app.py
+RUN chown -R www-data:www-data /app \
+    && chmod +x ./ml_backend/app.py
 
 # Expose ports
 EXPOSE 80 3001 5000
