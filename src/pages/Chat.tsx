@@ -7,9 +7,10 @@ import {
   User,
   Loader2,
   AlertTriangle,
-  MessageCircle,
   Zap,
-  ExternalLink
+  ExternalLink,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -20,78 +21,28 @@ interface Message {
   timestamp: Date;
 }
 
-// Simple offline medicine database for demo
-const MEDICINE_RESPONSES: Record<string, string> = {
-  'ibuprofen': `**Ibuprofen (Nurofen, Advil)**
+// Hugging Face API URL from environment variables
+const HF_API_BASE_URL = import.meta.env.VITE_HF_API_URL || "https://catalinbutacu-rag-pharma-assistant.hf.space/api/";
+const HF_API_PREDICT_URL = HF_API_BASE_URL.endsWith('/') ? `${HF_API_BASE_URL}predict` : `${HF_API_BASE_URL}/predict`;
 
-📋 **Ce este:** Antiinflamator nesteroidian (AINS)
+async function callHuggingFaceAPI(query: string): Promise<string> {
+  const response = await fetch(HF_API_PREDICT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data: [query] }),
+  });
 
-💊 **Utilizări:** Durere, febră, inflamație
-
-⚠️ **Efecte secundare:**
-- Dureri de stomac, greață
-- Risc de ulcer la utilizare prelungită
-- Poate afecta rinichii
-
-🚫 **Contraindicații:**
-- Ulcer gastric activ
-- Insuficiență renală
-- Sarcină (trimestrul 3)
-
-💡 **Sfat:** Luați cu mâncare pentru a proteja stomacul.`,
-
-  'paracetamol': `**Paracetamol (Tylenol, Panadol)**
-
-📋 **Ce este:** Analgezic și antipiretic
-
-💊 **Utilizări:** Durere ușoară-moderată, febră
-
-⚠️ **Efecte secundare:** Rare la doze normale
-
-🚫 **Contraindicații:**
-- Afecțiuni hepatice severe
-- Nu depășiți 4g/zi
-
-💡 **Sfat:** Sigur în sarcină. Nu consumați alcool!`,
-
-  'default': `Mulțumesc pentru întrebare! 
-
-Aceasta este o versiune **demo** fără conexiune la backend.
-
-🌐 Pentru recomandări complete bazate pe **1200+ medicamente**, vizitați:
-**[RAG Pharma Assistant pe HuggingFace](https://huggingface.co/spaces)**
-
-Sau întrebați despre:
-- Ibuprofen
-- Paracetamol
-- Durere de cap
-- Febră`
-};
-
-function getAIResponse(message: string): string {
-  const lowerMsg = message.toLowerCase();
-
-  if (lowerMsg.includes('ibuprofen') || lowerMsg.includes('nurofen') || lowerMsg.includes('advil')) {
-    return MEDICINE_RESPONSES['ibuprofen'];
-  }
-  if (lowerMsg.includes('paracetamol') || lowerMsg.includes('tylenol') || lowerMsg.includes('panadol')) {
-    return MEDICINE_RESPONSES['paracetamol'];
-  }
-  if (lowerMsg.includes('durere') || lowerMsg.includes('cap') || lowerMsg.includes('febr')) {
-    return `**Pentru durere și febră:**
-
-💊 **Opțiuni fără rețetă:**
-- **Paracetamol 500mg** - Sigur pentru majoritatea persoanelor
-- **Ibuprofen 200-400mg** - Pentru durere + inflamație
-
-⚠️ **Important:** 
-- Nu combinați mai multe analgezice
-- Consultați medicul dacă simptomele persistă >3 zile
-
-🌐 Pentru mai multe recomandări: vizitați HuggingFace Space`;
+  if (!response.ok) {
+    throw new Error(`Backend Error: ${response.status}`);
   }
 
-  return MEDICINE_RESPONSES['default'];
+  const result = await response.json();
+
+  if (result.data && result.data.length > 0) {
+    return result.data[0];
+  }
+
+  throw new Error("Invalid response format from backend.");
 }
 
 export default function Chat() {
@@ -103,19 +54,14 @@ export default function Chat() {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
 
   useEffect(() => {
-    // Add welcome message on mount
     const welcomeMessage: Message = {
       id: Date.now().toString(),
-      content: `👋 Bună! Sunt asistentul tău medical AI.
-
-🔬 **Mode:** Demo Offline
-💊 **Bază de date:** 1200+ medicamente
-
-Pot răspunde la întrebări despre medicamente comune. Pentru versiunea completă, vizitați **HuggingFace Space**.
-
-Întrebați-mă despre ibuprofen, paracetamol, sau simptome generale!`,
+      content: `System ready. Connected to RAG Backend.
+      
+Ask about symptoms or medicines for accurate results from the database.`,
       sender: 'ai',
       timestamp: new Date()
     };
@@ -141,21 +87,34 @@ Pot răspunde la întrebări despre medicamente comune. Pentru versiunea complet
     setIsLoading(true);
     setIsTyping(true);
 
-    // Simulate AI thinking
-    await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 700));
+    try {
+      const aiResponse = await callHuggingFaceAPI(userMessage.content);
 
-    const aiResponse = getAIResponse(userMessage.content);
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: aiResponse,
+        sender: 'ai',
+        timestamp: new Date()
+      };
 
-    const aiMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      content: aiResponse,
-      sender: 'ai',
-      timestamp: new Date()
-    };
+      setMessages(prev => [...prev, aiMessage]);
+      setIsOnline(true);
+    } catch (error) {
+      console.error("API Error:", error);
+      setIsOnline(false);
+      toast.error("Backend unavailable. Please try again later.");
 
-    setMessages(prev => [...prev, aiMessage]);
-    setIsLoading(false);
-    setIsTyping(false);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        content: "Error: Could not reach the backend system. Please ensure the Hugging Face Space is running.",
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+      setIsTyping(false);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -165,21 +124,20 @@ Pot răspunde la întrebări despre medicamente comune. Pentru versiunea complet
     }
   };
 
-  const quickQuestions = [
-    "Ce efecte secundare are ibuprofenul?",
-    "Paracetamol pentru febră?",
-    "Am durere de cap, ce iau?",
-    "Ce medicamente pentru răceală?"
+  const quickSearches = [
+    "headache",
+    "fever",
+    "cold",
+    "Ibuprofen"
   ];
 
-  const handleQuickQuestion = (question: string) => {
-    setInputMessage(question);
+  const handleQuickSearch = (query: string) => {
+    setInputMessage(query);
     inputRef.current?.focus();
   };
 
   const openHuggingFace = () => {
-    window.open('https://huggingface.co/spaces', '_blank');
-    toast.info('Se deschide HuggingFace Space...');
+    window.open('https://huggingface.co/spaces/catalinbutacu/rag-pharma-assistant', '_blank');
   };
 
   return (
@@ -195,35 +153,32 @@ Pot răspunde la întrebări despre medicamente comune. Pentru versiunea complet
               <X size={20} />
             </button>
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
                 <Bot className="text-white" size={16} />
               </div>
               <div>
-                <h1 className="text-lg font-semibold">AI Assistant</h1>
-                <p className="text-xs text-gray-600">Demo Mode</p>
+                <h1 className="text-lg font-semibold">Pharma RAG</h1>
+                <div className="flex items-center space-x-1">
+                  {isOnline ? (
+                    <span className="text-xs text-green-600 flex items-center">
+                      <Wifi size={12} className="mr-1" /> Online
+                    </span>
+                  ) : (
+                    <span className="text-xs text-red-600 flex items-center">
+                      <WifiOff size={12} className="mr-1" /> Offline
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
             <button
               onClick={openHuggingFace}
-              className="p-2 hover:bg-gray-100 rounded-lg text-purple-600"
-              title="Open Full Version"
+              className="p-2 hover:bg-gray-100 rounded-lg text-gray-600"
+              title="Open Space"
             >
               <ExternalLink size={20} />
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* HuggingFace Banner */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-500 text-white">
-        <div className="max-w-md mx-auto px-4 py-3">
-          <button
-            onClick={openHuggingFace}
-            className="w-full flex items-center justify-between"
-          >
-            <span className="text-sm font-medium">🚀 Versiunea completă pe HuggingFace</span>
-            <ExternalLink size={16} />
-          </button>
         </div>
       </div>
 
@@ -239,8 +194,8 @@ Pot răspunde la întrebări despre medicamente comune. Pentru versiunea complet
                 <div className={`flex items-start space-x-2 max-w-[85%] ${message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''
                   }`}>
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${message.sender === 'user'
-                      ? 'bg-blue-600'
-                      : 'bg-gradient-to-r from-purple-500 to-pink-500'
+                    ? 'bg-blue-600'
+                    : 'bg-gray-700'
                     }`}>
                     {message.sender === 'user' ? (
                       <User className="text-white" size={16} />
@@ -250,13 +205,13 @@ Pot răspunde la întrebări despre medicamente comune. Pentru versiunea complet
                   </div>
 
                   <div className={`rounded-2xl px-4 py-3 ${message.sender === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white border border-gray-200 text-gray-800'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white border border-gray-200 text-gray-800 shadow-sm'
                     }`}>
                     <p className="text-sm leading-relaxed whitespace-pre-wrap">
                       {message.content}
                     </p>
-                    <p className={`text-xs mt-2 ${message.sender === 'user' ? 'text-blue-100' : 'text-gray-500'
+                    <p className={`text-[10px] mt-2 opacity-50 ${message.sender === 'user' ? 'text-white' : 'text-gray-500'
                       }`}>
                       {message.timestamp.toLocaleTimeString([], {
                         hour: '2-digit',
@@ -270,17 +225,11 @@ Pot răspunde la întrebări despre medicamente comune. Pentru versiunea complet
 
             {isTyping && (
               <div className="flex justify-start">
-                <div className="flex items-start space-x-2 max-w-[85%]">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-r from-purple-500 to-pink-500">
-                    <Bot className="text-white" size={16} />
+                <div className="flex items-start space-x-2 max-w-[85%] text-gray-400">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-gray-200">
+                    <Loader2 className="animate-spin" size={16} />
                   </div>
-                  <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    </div>
-                  </div>
+                  <span className="text-xs pt-2 italic">Querying RAG system...</span>
                 </div>
               </div>
             )}
@@ -288,20 +237,20 @@ Pot răspunde la întrebări despre medicamente comune. Pentru versiunea complet
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Questions */}
+          {/* Quick Search */}
           {messages.length <= 1 && (
             <div className="mt-8">
-              <h3 className="text-sm font-semibold text-gray-700 mb-3">Întrebări rapide</h3>
-              <div className="grid grid-cols-1 gap-2">
-                {quickQuestions.map((question, index) => (
+              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Quick Search</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {quickSearches.map((query, index) => (
                   <button
                     key={index}
-                    onClick={() => handleQuickQuestion(question)}
-                    className="text-left p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-purple-300 transition-colors"
+                    onClick={() => handleQuickSearch(query)}
+                    className="text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors shadow-sm"
                   >
                     <div className="flex items-center">
-                      <Zap className="text-purple-500 mr-2 flex-shrink-0" size={16} />
-                      <span className="text-sm text-gray-700">{question}</span>
+                      <Zap className="text-gray-400 mr-2 flex-shrink-0" size={14} />
+                      <span className="text-sm text-gray-600">{query}</span>
                     </div>
                   </button>
                 ))}
@@ -311,38 +260,43 @@ Pot răspunde la întrebări despre medicamente comune. Pentru versiunea complet
         </div>
       </div>
 
-      {/* Safety Warning */}
-      <div className="bg-amber-50 border-t border-amber-200">
-        <div className="max-w-md mx-auto px-4 py-3">
-          <div className="flex items-center">
-            <AlertTriangle className="text-amber-600 mr-2 flex-shrink-0" size={16} />
-            <p className="text-xs text-amber-700">
-              Demo mode. Pentru recomandări complete, vizitați versiunea HuggingFace.
+      {/* Warning */}
+      <div className="bg-gray-100 border-t border-gray-200">
+        <div className="max-w-md mx-auto px-4 py-2">
+          <div className="flex items-center justify-center">
+            <AlertTriangle className="text-gray-400 mr-1" size={12} />
+            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">
+              Medical accuracy provided by RAG backend
             </p>
           </div>
         </div>
       </div>
 
       {/* Input Area */}
-      <div className="bg-white border-t border-gray-200">
+      <div className="bg-white border-t border-gray-200 pb-safe">
         <div className="max-w-md mx-auto px-4 py-4">
-          <div className="flex items-end space-x-3">
+          <div className="flex items-end space-x-2">
             <div className="flex-1">
-              <input
-                ref={inputRef}
-                type="text"
+              <textarea
+                ref={inputRef as any}
+                rows={1}
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Întreabă despre medicamente..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                  }
+                }}
+                placeholder="Search database..."
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-1 focus:ring-gray-400 focus:border-transparent outline-none text-sm resize-none"
                 disabled={isLoading}
               />
             </div>
             <button
               onClick={sendMessage}
               disabled={!inputMessage.trim() || isLoading}
-              className="bg-purple-600 text-white p-3 rounded-2xl hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="bg-gray-800 text-white p-3 rounded-2xl hover:bg-black disabled:opacity-30 transition-all shadow-md"
             >
               {isLoading ? (
                 <Loader2 className="animate-spin" size={20} />

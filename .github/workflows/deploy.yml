@@ -27,6 +27,8 @@ jobs:
       continue-on-error: true
     
     - name: Build frontend
+      env:
+        VITE_HF_API_URL: ${{ secrets.HF_API_URL }}
       run: npm run build
     
     - name: Upload build artifact
