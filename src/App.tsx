@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import Home from './pages/Home';
 import CameraScanner from './pages/CameraScanner';
@@ -20,9 +20,9 @@ function App() {
           <Route path="/chat" element={<Chat />} />
         </Routes>
         <MobileNavigation />
-        <Toaster 
-          position="top-center" 
-          richColors 
+        <Toaster
+          position="top-center"
+          richColors
           closeButton
           toastOptions={{
             style: {

@@ -19,7 +19,7 @@ export default function CameraScanner() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [isStreaming, setIsStreaming] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -36,7 +36,7 @@ export default function CameraScanner() {
           height: { ideal: 720 }
         }
       });
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         setIsStreaming(true);
@@ -101,31 +101,30 @@ export default function CameraScanner() {
     setMedicineResult(null);
 
     try {
-      // Convert base64 to blob
-      const response = await fetch(capturedImage);
-      const blob = await response.blob();
-      
-      const formData = new FormData();
-      formData.append('image', blob, 'medicine.jpg');
+      // Simulate analysis delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      const apiResponse = await fetch('/api/medicine/identify', {
-        method: 'POST',
-        body: formData,
+      // Demo result - in production, this would call HuggingFace API
+      const demoResult: MedicineResult = {
+        id: 'demo-' + Date.now(),
+        name: 'Paracetamol 500mg',
+        genericName: 'Acetaminofen',
+        dosage: '500mg',
+        type: 'Analgezic / Antipiretic',
+        description: 'Paracetamolul este un medicament folosit pentru ameliorarea durerii ușoare până la moderată și pentru reducerea febrei. Este disponibil fără rețetă.',
+        confidence: 0.85,
+        warnings: [
+          'Nu depășiți doza recomandată',
+          'Evitați consumul de alcool',
+          'Consultați medicul dacă simptomele persistă'
+        ]
+      };
+
+      setMedicineResult(demoResult);
+      toast.success('Medicament identificat! (Demo mode)');
+      toast.info('Pentru identificare reală, accesați chatbot-ul de pe HuggingFace', {
+        duration: 5000
       });
-
-      if (!apiResponse.ok) {
-        throw new Error('Failed to analyze medicine');
-      }
-
-      const result = await apiResponse.json();
-      
-      if (result.success && result.medicine) {
-        setMedicineResult(result.medicine);
-        toast.success('Medicine identified successfully!');
-      } else {
-        setError(result.message || 'Could not identify the medicine');
-        toast.error('Medicine not recognized');
-      }
     } catch (err) {
       console.error('Error analyzing medicine:', err);
       setError('Failed to analyze the image. Please try again.');
@@ -145,10 +144,10 @@ export default function CameraScanner() {
   const handleSafetyCheck = useCallback(() => {
     if (medicineResult) {
       // Navigate to safety check with medicine data
-      navigate('/profile', { 
-        state: { 
-          medicineForSafetyCheck: medicineResult 
-        } 
+      navigate('/profile', {
+        state: {
+          medicineForSafetyCheck: medicineResult
+        }
       });
     }
   }, [medicineResult, navigate]);
@@ -181,7 +180,7 @@ export default function CameraScanner() {
                 muted
                 className="w-full h-full object-cover"
               />
-              
+
               {/* Scan Frame Overlay */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-80 h-80 border-2 border-white/50 rounded-2xl relative">
@@ -214,7 +213,7 @@ export default function CameraScanner() {
               <p className="text-gray-300 text-center mb-8">
                 Take a clear photo of your medicine for instant identification
               </p>
-              
+
               <div className="space-y-4 w-full max-w-sm">
                 <button
                   onClick={startCamera}
@@ -222,7 +221,7 @@ export default function CameraScanner() {
                 >
                   Open Camera
                 </button>
-                
+
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="w-full bg-gray-700 hover:bg-gray-600 text-white py-4 px-6 rounded-xl font-semibold transition-colors"
@@ -252,7 +251,7 @@ export default function CameraScanner() {
             alt="Captured medicine"
             className="w-full h-full object-cover"
           />
-          
+
           {/* Action Buttons */}
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-4">
             <button
@@ -262,7 +261,7 @@ export default function CameraScanner() {
             >
               <RotateCcw className="text-white" size={24} />
             </button>
-            
+
             <button
               onClick={analyzeMedicine}
               disabled={isAnalyzing}
@@ -346,14 +345,14 @@ export default function CameraScanner() {
               >
                 Check Safety for Me
               </button>
-              
+
               <button
                 onClick={() => navigate('/cabinet', { state: { addMedicine: medicineResult } })}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-xl font-semibold transition-colors"
               >
                 Add to Medicine Cabinet
               </button>
-              
+
               <button
                 onClick={retakePhoto}
                 className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-4 px-6 rounded-xl font-semibold transition-colors"
