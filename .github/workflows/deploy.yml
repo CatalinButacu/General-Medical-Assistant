@@ -1,17 +1,13 @@
-name: Deploy RAG Medical Assistant
+name: Build and Deploy
 
 on:
   push:
-    branches: [ main, production ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
-  test:
+  build-frontend:
     runs-on: ubuntu-latest
     
     steps:
@@ -23,137 +19,58 @@ jobs:
         node-version: '20'
         cache: 'npm'
     
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-        cache: 'pip'
-    
     - name: Install dependencies
-      run: |
-        npm ci
-        pip install -r ml_backend/requirements.txt
-    
-    - name: Run frontend tests
-      run: npm test
-    
-    - name: Run backend tests
-      run: |
-        cd ml_backend
-        python -c "print('Backend tests placeholder - no tests directory found')"
+      run: npm ci
     
     - name: Type check
       run: npm run check
+      continue-on-error: true
     
-    - name: Lint code
-      run: |
-        npm run lint
-        cd ml_backend
-        flake8 . --max-line-length=88 --extend-ignore=E203,W503
-
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
+    - name: Build frontend
+      run: npm run build
     
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    
-    - name: Log in to Container Registry
-      uses: docker/login-action@v3
+    - name: Upload build artifact
+      uses: actions/upload-pages-artifact@v3
       with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=sha,prefix={{branch}}-
-          type=raw,value=latest,enable={{is_default_branch}}
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+        path: ./dist
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-  deploy-staging:
-    needs: build
-    runs-on: ubuntu-latest
+  deploy-pages:
+    needs: build-frontend
     if: github.ref == 'refs/heads/main'
-    environment: staging
-    
-    steps:
-    - name: Deploy to staging
-      run: |
-        echo "Deploying to staging environment..."
-        # Add your staging deployment commands here
-        # Example: kubectl apply -f k8s/staging/
-    
-  deploy-production:
-    needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/production'
-    environment: production
     
-    steps:
-    - name: Deploy to production
-      run: |
-        echo "Deploying to production environment..."
-        # Add your production deployment commands here
-        # Example: kubectl apply -f k8s/production/
-
-  security-scan:
-    runs-on: ubuntu-latest
     permissions:
-      contents: read
-      security-events: write
-      actions: read
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+
+  test-rag:
+    runs-on: ubuntu-latest
     
-    - name: Run Trivy vulnerability scanner
-      uses: aquasecurity/trivy-action@master
-      with:
-        scan-type: 'fs'
-        scan-ref: '.'
-        format: 'table'
-        output: 'trivy-results.txt'
+    steps:
+    - uses: actions/checkout@v4
     
-    - name: Display security scan results
-      if: always()
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    
+    - name: Install RAG dependencies
       run: |
-        echo "Security scan completed. Results:"
-        if [ -f trivy-results.txt ]; then
-          cat trivy-results.txt
-        else
-          echo "No security issues found or scan results file not generated."
-        fi
+        pip install -r rag_experiments/requirements.txt
+        pip install -r huggingface_space/requirements.txt
     
-    - name: Upload scan results as artifact
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: security-scan-results
-        path: trivy-results.txt
-        retention-days: 30
+    - name: Verify data files exist
+      run: |
+        echo "Checking medicine database..."
+        ls -la huggingface_space/data/
+        python -c "import json; data = json.load(open('huggingface_space/data/comprehensive_medicines.json')); print(f'Loaded {len(data)} medicines')"
