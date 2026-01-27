@@ -1,0 +1,102 @@
+[
+  {
+    "content": "# Paracetamol (Acetaminophen)\n\n## Overview\nActive substance: Paracetamol\nTherapeutic area: Pain and fever\nRoute of administration: Oral, rectal, intravenous\nMarketing authorization holder: Various\nAuthorization status: Authorized\n\n## Indication\nRelief of mild to moderate pain and fever reduction\n\n## Dosage\nAdults: 500-1000mg every 4-6 hours, max 4g/day\n\n## Side Effects\n- Rare allergic reactions\n- Liver damage at high doses\n- Skin reactions (very rare)\n\n## Contraindications\n- Severe hepatic impairment\n- Known hypersensitivity to paracetamol\n\n## Drug Interactions\n- Warfarin: may enhance anticoagulant effect\n- Alcohol: increased hepatotoxicity risk\n- Carbamazepine: may increase hepatotoxicity risk\n",
+    "title": "Paracetamol (Acetaminophen) - Drug Information",
+    "source": "EU Common Medicines",
+    "metadata": {
+      "active_substance": "Paracetamol",
+      "therapeutic_area": "Pain and fever",
+      "authorization_status": "Authorized"
+    }
+  },
+  {
+    "content": "# Ibuprofen\n\n## Overview\nActive substance: Ibuprofen\nTherapeutic area: Pain and inflammation\nRoute of administration: Oral, topical\nMarketing authorization holder: Various\nAuthorization status: Authorized\n\n## Indication\nTreatment of mild to moderate pain, fever, and inflammatory conditions\n\n## Dosage\nAdults: 200-400mg every 4-6 hours, max 1200mg/day (OTC) or 2400mg/day (prescription)\n\n## Side Effects\n- Gastrointestinal irritation and ulcers\n- Increased cardiovascular risk with prolonged use\n- Renal impairment\n- Allergic reactions\n\n## Contraindications\n- History of GI bleeding or peptic ulcer\n- Severe heart failure\n- Third trimester of pregnancy\n- Severe renal or hepatic impairment\n\n## Drug Interactions\n- Aspirin: reduced cardioprotective effect\n- ACE inhibitors: reduced antihypertensive effect\n- Lithium: increased lithium levels\n- Methotrexate: increased toxicity\n",
+    "title": "Ibuprofen - Drug Information",
+    "source": "EU Common Medicines",
+    "metadata": {
+      "active_substance": "Ibuprofen",
+      "therapeutic_area": "Pain and inflammation",
+      "authorization_status": "Authorized"
+    }
+  },
+  {
+    "content": "# Omeprazole\n\n## Overview\nActive substance: Omeprazole\nTherapeutic area: Gastroenterology\nRoute of administration: Oral\nMarketing authorization holder: Various (Losec by AstraZeneca)\nAuthorization status: Authorized\n\n## Indication\nTreatment of gastric and duodenal ulcers, GERD, and Zollinger-Ellison syndrome\n\n## Dosage\n20-40mg once daily, typically before breakfast\n\n## Side Effects\n- Headache\n- Nausea and diarrhea\n- Vitamin B12 deficiency (long-term)\n- Increased fracture risk (long-term)\n- Hypomagnesemia\n\n## Contraindications\n- Known hypersensitivity to proton pump inhibitors\n\n## Drug Interactions\n- Clopidogrel: reduced antiplatelet effect\n- Methotrexate: increased methotrexate levels\n- Ketoconazole: reduced absorption\n",
+    "title": "Omeprazole - Drug Information",
+    "source": "EU Common Medicines",
+    "metadata": {
+      "active_substance": "Omeprazole",
+      "therapeutic_area": "Gastroenterology",
+      "authorization_status": "Authorized"
+    }
+  },
+  {
+    "content": "# Amoxicillin\n\n## Overview\nActive substance: Amoxicillin\nTherapeutic area: Antibiotics\nRoute of administration: Oral\nMarketing authorization holder: Various\nAuthorization status: Authorized\n\n## Indication\nBacterial infections including respiratory, urinary, and skin infections\n\n## Dosage\nAdults: 250-500mg every 8 hours or 500-875mg every 12 hours\n\n## Side Effects\n- Diarrhea\n- Nausea and vomiting\n- Skin rash\n- Allergic reactions (including anaphylaxis)\n\n## Contraindications\n- Penicillin allergy\n- History of amoxicillin-associated jaundice\n\n## Drug Interactions\n- Methotrexate: increased toxicity\n- Warfarin: enhanced anticoagulant effect\n- Oral contraceptives: potentially reduced efficacy\n",
+    "title": "Amoxicillin - Drug Information",
+    "source": "EU Common Medicines",
+    "metadata": {
+      "active_substance": "Amoxicillin",
+      "therapeutic_area": "Antibiotics",
+      "authorization_status": "Authorized"
+    }
+  },
+  {
+    "content": "# Atorvastatin\n\n## Overview\nActive substance: Atorvastatin\nTherapeutic area: Cardiovascular\nRoute of administration: Oral\nMarketing authorization holder: Pfizer (Lipitor) and generics\nAuthorization status: Authorized\n\n## Indication\nHypercholesterolemia and prevention of cardiovascular events\n\n## Dosage\n10-80mg once daily, can be taken at any time\n\n## Side Effects\n- Muscle pain and weakness (myalgia)\n- Elevated liver enzymes\n- Headache\n- Gastrointestinal disturbances\n- Rhabdomyolysis (rare)\n\n## Contraindications\n- Active liver disease\n- Pregnancy and breastfeeding\n- Unexplained persistent transaminase elevation\n\n## Drug Interactions\n- Cyclosporine: increased statin levels\n- Gemfibrozil: increased myopathy risk\n- CYP3A4 inhibitors (clarithromycin, itraconazole): increased toxicity\n- Grapefruit juice: increased statin levels\n",
+    "title": "Atorvastatin - Drug Information",
+    "source": "EU Common Medicines",
+    "metadata": {
+      "active_substance": "Atorvastatin",
+      "therapeutic_area": "Cardiovascular",
+      "authorization_status": "Authorized"
+    }
+  },
+  {
+    "content": "# Metformin\n\n## Overview\nActive substance: Metformin hydrochloride\nTherapeutic area: Diabetes\nRoute of administration: Oral\nMarketing authorization holder: Various (Glucophage by Merck)\nAuthorization status: Authorized\n\n## Indication\nType 2 diabetes mellitus, particularly in overweight patients\n\n## Dosage\nStarting: 500mg once or twice daily with meals. Max: 2000-3000mg/day in divided doses\n\n## Side Effects\n- Gastrointestinal upset (nausea, diarrhea, abdominal pain)\n- Metallic taste\n- Vitamin B12 deficiency (long-term)\n- Lactic acidosis (rare but serious)\n\n## Contraindications\n- Severe renal impairment (eGFR <30)\n- Acute conditions with risk of tissue hypoxia\n- Diabetic ketoacidosis\n- Before contrast imaging procedures\n\n## Drug Interactions\n- Alcohol: increased lactic acidosis risk\n- Iodinated contrast agents: acute kidney injury risk\n- ACE inhibitors: may enhance hypoglycemic effect\n",
+    "title": "Metformin - Drug Information",
+    "source": "EU Common Medicines",
+    "metadata": {
+      "active_substance": "Metformin hydrochloride",
+      "therapeutic_area": "Diabetes",
+      "authorization_status": "Authorized"
+    }
+  },
+  {
+    "content": "# Losartan\n\n## Overview\nActive substance: Losartan potassium\nTherapeutic area: Cardiovascular\nRoute of administration: Oral\nMarketing authorization holder: MSD (Cozaar) and generics\nAuthorization status: Authorized\n\n## Indication\nHypertension, heart failure, diabetic nephropathy protection\n\n## Dosage\n50mg once daily, may increase to 100mg. Take consistently with or without food\n\n## Side Effects\n- Dizziness\n- Hypotension\n- Hyperkalemia\n- Fatigue\n\n## Contraindications\n- Pregnancy (especially 2nd and 3rd trimester)\n- Bilateral renal artery stenosis\n- Co-administration with aliskiren in diabetics\n\n## Drug Interactions\n- NSAIDs: reduced antihypertensive effect\n- Potassium supplements: hyperkalemia risk\n- Lithium: increased lithium levels\n",
+    "title": "Losartan - Drug Information",
+    "source": "EU Common Medicines",
+    "metadata": {
+      "active_substance": "Losartan potassium",
+      "therapeutic_area": "Cardiovascular",
+      "authorization_status": "Authorized"
+    }
+  },
+  {
+    "content": "# Salbutamol (Albuterol)\n\n## Overview\nActive substance: Salbutamol\nTherapeutic area: Respiratory\nRoute of administration: Inhalation, oral, intravenous\nMarketing authorization holder: Various (Ventolin by GSK)\nAuthorization status: Authorized\n\n## Indication\nRelief and prevention of bronchospasm in asthma and COPD\n\n## Dosage\nInhalation: 100-200mcg (1-2 puffs) as needed, max 8 puffs/day\n\n## Side Effects\n- Tremor\n- Tachycardia\n- Headache\n- Hypokalemia (with high doses)\n\n## Contraindications\n- Hypersensitivity to salbutamol\n\n## Drug Interactions\n- Beta-blockers: mutual antagonism\n- Diuretics: enhanced hypokalemia\n- MAO inhibitors: enhanced cardiovascular effects\n",
+    "title": "Salbutamol (Albuterol) - Drug Information",
+    "source": "EU Common Medicines",
+    "metadata": {
+      "active_substance": "Salbutamol",
+      "therapeutic_area": "Respiratory",
+      "authorization_status": "Authorized"
+    }
+  },
+  {
+    "content": "# Sertraline\n\n## Overview\nActive substance: Sertraline hydrochloride\nTherapeutic area: Mental health\nRoute of administration: Oral\nMarketing authorization holder: Pfizer (Zoloft) and generics\nAuthorization status: Authorized\n\n## Indication\nDepression, panic disorder, OCD, PTSD, social anxiety disorder\n\n## Dosage\nStarting: 50mg/day. May increase by 50mg increments weekly. Max: 200mg/day\n\n## Side Effects\n- Nausea\n- Diarrhea\n- Insomnia\n- Sexual dysfunction\n- Headache\n- Serotonin syndrome (rare)\n\n## Contraindications\n- Concurrent MAO inhibitor use\n- Concurrent pimozide use\n- Known hypersensitivity\n\n## Drug Interactions\n- MAO inhibitors: serotonin syndrome risk (14-day washout required)\n- Warfarin: increased bleeding risk\n- Tramadol: seizure risk\n- Alcohol: enhanced CNS depression\n",
+    "title": "Sertraline - Drug Information",
+    "source": "EU Common Medicines",
+    "metadata": {
+      "active_substance": "Sertraline hydrochloride",
+      "therapeutic_area": "Mental health",
+      "authorization_status": "Authorized"
+    }
+  },
+  {
+    "content": "# Levothyroxine\n\n## Overview\nActive substance: Levothyroxine sodium\nTherapeutic area: Endocrinology\nRoute of administration: Oral\nMarketing authorization holder: Various\nAuthorization status: Authorized\n\n## Indication\nHypothyroidism, thyroid hormone replacement\n\n## Dosage\n25-50mcg daily initially, increase every 4-6 weeks. Typical maintenance: 100-200mcg/day. Take on empty stomach\n\n## Side Effects\n- Symptoms of hyperthyroidism if overdosed (tachycardia, tremor, weight loss)\n- Headache\n- Insomnia\n- Bone density reduction (with excess doses)\n\n## Contraindications\n- Untreated adrenal insufficiency\n- Acute myocardial infarction\n- Thyrotoxicosis\n\n## Drug Interactions\n- Calcium/iron supplements: reduced absorption (separate by 4 hours)\n- Warfarin: enhanced anticoagulant effect\n- Antacids: reduced absorption\n- Carbamazepine: increased levothyroxine metabolism\n",
+    "title": "Levothyroxine - Drug Information",
+    "source": "EU Common Medicines",
+    "metadata": {
+      "active_substance": "Levothyroxine sodium",
+      "therapeutic_area": "Endocrinology",
+      "authorization_status": "Authorized"
+    }
+  }
+]

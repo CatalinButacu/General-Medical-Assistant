@@ -1,0 +1,15 @@
+# RAG Experiments Dependencies (Local Models)
+
+# Core ML
+torch>=2.0.0
+transformers>=4.36.0
+sentence-transformers>=2.2.0
+accelerate>=0.25.0
+
+# Utilities
+numpy>=1.24.0
+python-dotenv>=1.0.0
+
+# Optional: For better performance on GPU
+# bitsandbytes>=0.41.0  # 8-bit quantization
+# flash-attn>=2.0.0     # Flash attention
