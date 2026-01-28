@@ -22,10 +22,16 @@ interface Message {
 }
 
 // Hugging Face API URL from environment variables
-const HF_API_BASE_URL = import.meta.env.VITE_HF_API_URL || "https://catalinbutacu-rag-pharma-assistant.hf.space/api/";
-const HF_API_PREDICT_URL = HF_API_BASE_URL.endsWith('/') ? `${HF_API_BASE_URL}predict` : `${HF_API_BASE_URL}/predict`;
+const HF_API_BASE_URL = import.meta.env.VITE_HF_API_URL || "";
+const HF_API_PREDICT_URL = HF_API_BASE_URL
+  ? (HF_API_BASE_URL.endsWith('/') ? `${HF_API_BASE_URL}predict` : `${HF_API_BASE_URL}/predict`)
+  : "";
 
 async function callHuggingFaceAPI(query: string): Promise<string> {
+  if (!HF_API_PREDICT_URL) {
+    throw new Error("API URL is not configured. Please check VITE_HF_API_URL.");
+  }
+
   const response = await fetch(HF_API_PREDICT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
