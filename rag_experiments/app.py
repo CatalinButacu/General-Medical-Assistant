@@ -1,9 +1,14 @@
 import gradio as gr
 import json
 from pathlib import Path
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+import logging
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Data paths relative to this file
 DATA_PATH = Path("data/comprehensive_medicines.json")
@@ -68,26 +73,42 @@ def search_medicines(query):
 # Create FastAPI app
 app = FastAPI()
 
-# Add CORS middleware to allow GitHub Pages to call this API
+# VERY permissive CORS configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.post("/search")
+@app.get("/api/health")
+@app.get("/health")
+async def health():
+    return {"status": "ok", "medicines_loaded": len(medicines)}
+
+# Handle a unique path to avoid Gradio's internal /api/ conflicts
+@app.post("/pharma-rag-search")
+@app.post("/api/pharma-rag-search")
 async def api_search(request: Request):
-    data = await request.json()
-    # Handle Gradio-style payload {"data": ["query"]} or direct {"query": "query"}
-    query = ""
-    if "data" in data and isinstance(data["data"], list) and len(data["data"]) > 0:
-        query = data["data"][0]
-    elif "query" in data:
-        query = data["query"]
-    
-    result = search_medicines(query)
-    return {"data": [result]}
+    logger.info(f"Received search request from {request.client.host}")
+    try:
+        data = await request.json()
+        logger.info(f"Request data: {data}")
+        query = ""
+        # Handle various payload formats
+        if "data" in data and isinstance(data["data"], list) and len(data["data"]) > 0:
+            query = data["data"][0]
+        elif "query" in data:
+            query = data["query"]
+        elif isinstance(data, list) and len(data) > 0:
+            query = data[0]
+            
+        result = search_medicines(query)
+        return {"data": [result]}
+    except Exception as e:
+        logger.error(f"Search error: {str(e)}")
+        return {"error": str(e), "data": ["Internal error processing search."]}
 
 # Create Gradio UI
 io = gr.Interface(
@@ -98,7 +119,9 @@ io = gr.Interface(
 )
 
 # Mount Gradio onto FastAPI
+# This allows the Gradio UI and the FastAPI REST API to coexist
 app = gr.mount_gradio_app(app, io, path="/")
 
 if __name__ == "__main__":
+    # Hugging Face expected port is 7860
     uvicorn.run(app, host="0.0.0.0", port=7860)

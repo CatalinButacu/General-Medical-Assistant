@@ -22,10 +22,10 @@ interface Message {
 }
 
 // Hugging Face API URL from environment variables
-const HF_API_BASE_URL = import.meta.env.VITE_HF_API_URL || "";
-const HF_API_PREDICT_URL = HF_API_BASE_URL
-  ? (HF_API_BASE_URL.endsWith('/') ? `${HF_API_BASE_URL}search` : `${HF_API_BASE_URL}/search`)
-  : "";
+const rawBaseUrl = import.meta.env.VITE_HF_API_URL || "";
+// Sanitize URL: remove trailing slashes and /api prefix if present to avoid Gradio conflicts
+const HF_API_BASE_URL = rawBaseUrl.replace(/\/api\/?$/, "").replace(/\/$/, "");
+const HF_API_PREDICT_URL = HF_API_BASE_URL ? `${HF_API_BASE_URL}/pharma-rag-search` : "";
 
 async function callHuggingFaceAPI(query: string): Promise<string> {
   if (!HF_API_PREDICT_URL) {
