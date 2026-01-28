@@ -23,7 +23,7 @@ def search_medicines(query):
 
     results = []
     
-    # 1. Check symptom index (matches common symptoms)
+    # 1. Check symptom index
     for symptom, meds in symptom_index.items():
         if query in symptom.lower():
             results.extend(meds)
@@ -35,9 +35,7 @@ def search_medicines(query):
         active = metadata.get("active_substance", "").lower()
         content = med.get("content", "").lower()
         
-        # Match if query is in title, active substance, or the detailed pharmaceutical content
         if query in title or query in active or query in content:
-            # Normalize the result structure
             results.append({
                 "name": med.get("title", "Unknown Medicine").replace(" - Prospect Complet", ""),
                 "price": metadata.get("price", "N/A"),
@@ -48,14 +46,12 @@ def search_medicines(query):
     if not results:
         return f"No results found for '{query}'. Try searching for symptoms like 'febra' or 'tuse', or active substances like 'Paracetamol'."
 
-    # Remove duplicates based on name
     unique_results = {}
     for res in results:
         name = res["name"]
         if name not in unique_results:
             unique_results[name] = res
 
-    # Format the top 5 results
     output = f"Search results for: {query}\n\n"
     for item in list(unique_results.values())[:5]:
         prescription = "Requires Prescription" if item.get("rx") else "OTC (No prescription)"
@@ -66,18 +62,14 @@ def search_medicines(query):
     
     return output
 
-# Define interface
-with gr.Blocks() as interface:
-    gr.Markdown("# Pharma RAG Assistant")
-    query_input = gr.Textbox(label="Enter symptoms or medicine brand/name")
-    results_output = gr.Markdown(label="Search Results")
-    search_button = gr.Button("Search")
-    
-    search_button.click(
-        fn=search_medicines,
-        inputs=query_input,
-        outputs=results_output
-    )
+# Using gr.Interface to automatically expose the /api/predict endpoint correctly
+interface = gr.Interface(
+    fn=search_medicines,
+    inputs=gr.Textbox(label="Enter symptoms or medicine brand/name"),
+    outputs=gr.Markdown(label="Search Results"),
+    title="Pharma RAG Assistant",
+    description="Search through a database of 1200+ medicines."
+)
 
 if __name__ == "__main__":
     interface.launch()
