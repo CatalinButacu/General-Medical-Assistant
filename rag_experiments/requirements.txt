@@ -10,6 +10,9 @@ accelerate>=0.25.0
 numpy>=1.24.0
 python-dotenv>=1.0.0
 gradio>=4.0.0
+fastapi
+uvicorn
+python-multipart
 
 # Optional: For better performance on GPU
 # bitsandbytes>=0.41.0  # 8-bit quantization

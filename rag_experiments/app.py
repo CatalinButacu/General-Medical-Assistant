@@ -1,6 +1,9 @@
 import gradio as gr
 import json
 from pathlib import Path
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
 
 # Data paths relative to this file
 DATA_PATH = Path("data/comprehensive_medicines.json")
@@ -17,7 +20,7 @@ medicines = load_json_data(DATA_PATH)
 symptom_index = load_json_data(INDEX_PATH)
 
 def search_medicines(query):
-    query = query.lower().strip()
+    query = (query or "").lower().strip()
     if not query:
         return "Please enter a symptom or medicine name."
 
@@ -62,14 +65,40 @@ def search_medicines(query):
     
     return output
 
-# Using gr.Interface to automatically expose the /api/predict endpoint correctly
-interface = gr.Interface(
+# Create FastAPI app
+app = FastAPI()
+
+# Add CORS middleware to allow GitHub Pages to call this API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.post("/search")
+async def api_search(request: Request):
+    data = await request.json()
+    # Handle Gradio-style payload {"data": ["query"]} or direct {"query": "query"}
+    query = ""
+    if "data" in data and isinstance(data["data"], list) and len(data["data"]) > 0:
+        query = data["data"][0]
+    elif "query" in data:
+        query = data["query"]
+    
+    result = search_medicines(query)
+    return {"data": [result]}
+
+# Create Gradio UI
+io = gr.Interface(
     fn=search_medicines,
     inputs=gr.Textbox(label="Enter symptoms or medicine brand/name"),
     outputs=gr.Markdown(label="Search Results"),
-    title="Pharma RAG Assistant",
-    description="Search through a database of 1200+ medicines."
+    title="Pharma RAG Assistant"
 )
 
+# Mount Gradio onto FastAPI
+app = gr.mount_gradio_app(app, io, path="/")
+
 if __name__ == "__main__":
-    interface.launch()
+    uvicorn.run(app, host="0.0.0.0", port=7860)
