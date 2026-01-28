@@ -105,14 +105,13 @@ Ask about symptoms or medicines for accurate results from the database.`,
 
       setMessages(prev => [...prev, aiMessage]);
       setIsOnline(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error("API Error:", error);
       setIsOnline(false);
-      toast.error("Backend unavailable. Please try again later.");
 
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: "Error: Could not reach the backend system. Please ensure the Hugging Face Space is running.",
+        content: `Error: ${error.message || "Could not reach the backend system."}\nPlease ensure the Hugging Face Space is running and the API URL is correct.`,
         sender: 'ai',
         timestamp: new Date()
       };
