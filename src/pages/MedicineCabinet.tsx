@@ -163,8 +163,8 @@ export default function MedicineCabinet() {
   const expiringCount = medicines.filter(m => !m.isExpired && (m.daysUntilExpiration ?? 0) <= 30).length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm">
+    <div className="h-full bg-gray-50 flex flex-col">
+      <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <button onClick={() => navigate('/')} className="p-2 hover:bg-gray-100 rounded-lg"><X size={20} /></button>

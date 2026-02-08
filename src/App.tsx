@@ -15,39 +15,44 @@ function App() {
   return (
     <Auth0Provider {...auth0Config}>
       <Router>
-        <div className="min-h-screen bg-gray-50 pb-20">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/scanner" element={
-              <AuthGuard>
-                <CameraScanner />
-              </AuthGuard>
-            } />
-            <Route path="/profile" element={
-              <AuthGuard>
-                <HealthProfile />
-              </AuthGuard>
-            } />
-            <Route path="/cabinet" element={
-              <AuthGuard>
-                <MedicineCabinet />
-              </AuthGuard>
-            } />
-            <Route path="/chat" element={
-              <AuthGuard>
-                <Chat />
-              </AuthGuard>
-            } />
-          </Routes>
+        <div className="h-[100dvh] flex flex-col bg-gray-50 overflow-hidden">
+          <main className="flex-1 overflow-y-auto pb-24 relative">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/scanner" element={
+                <AuthGuard>
+                  <CameraScanner />
+                </AuthGuard>
+              } />
+              <Route path="/profile" element={
+                <AuthGuard>
+                  <HealthProfile />
+                </AuthGuard>
+              } />
+              <Route path="/cabinet" element={
+                <AuthGuard>
+                  <MedicineCabinet />
+                </AuthGuard>
+              } />
+              <Route path="/chat" element={
+                <AuthGuard>
+                  <Chat />
+                </AuthGuard>
+              } />
+            </Routes>
+          </main>
+
           <MobileNavigation />
+
           <Toaster
             position="top-center"
             richColors
             closeButton
             toastOptions={{
               style: {
-                fontSize: '16px',
-                padding: '16px',
+                fontSize: '14px',
+                padding: '12px',
+                borderRadius: '16px',
               }
             }}
           />

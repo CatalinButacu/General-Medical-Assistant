@@ -2,13 +2,14 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 
+// Explicit configuration provided by user for test environment stability
 const firebaseConfig = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    apiKey: "AIzaSyDJQgQob-WmdkLQRXWJ9qBO7tZVO4_bOlI",
+    authDomain: "rag-pharma.firebaseapp.com",
+    projectId: "rag-pharma",
+    storageBucket: "rag-pharma.firebasestorage.app",
+    messagingSenderId: "166663531733",
+    appId: "1:166663531733:web:ffa6fd640bf0a9e849865c",
     measurementId: "G-C4LWNWXQ3Y"
 };
 

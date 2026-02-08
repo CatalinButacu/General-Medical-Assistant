@@ -174,7 +174,7 @@ export default function HealthProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-full bg-gray-50 flex flex-col overflow-hidden">
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
           <button onClick={() => navigate('/')} className="p-2 hover:bg-gray-100 rounded-full transition-colors font-bold text-gray-400 hover:text-gray-800"><X size={20} /></button>
@@ -185,7 +185,7 @@ export default function HealthProfile() {
         </div>
       </div>
 
-      <div className="max-w-md mx-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {showSafetyCheck && medicineForSafetyCheck && (
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-red-100 animate-in fade-in slide-in-from-top duration-300">
             <div className="flex items-center justify-between mb-5">
