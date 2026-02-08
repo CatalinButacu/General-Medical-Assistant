@@ -1,4 +1,7 @@
-# 💊 RAG Pharma Assistant
+# 💊 MedAssist: AI Pharmacist Demo
+
+> [!IMPORTANT]
+> **Educational Demo Purposes Only**: This project is a prototype developed for educational and research purposes. The information provided by the AI assistant is NOT medical advice. Always consult a healthcare professional.
 
 Asistent medical bazat pe AI pentru recomandări de medicamente din România.
 

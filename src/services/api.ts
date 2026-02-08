@@ -1,52 +1,61 @@
 import type { SearchResponse } from '../types';
 
-const rawBaseUrl = import.meta.env.VITE_HF_API_URL || "";
+/**
+ * API Configuration
+ * The backend is hosted on a custom server in Zurich.
+ */
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "";
 
-function getBaseUrl(): string {
-    if (!rawBaseUrl) return "";
-    if (rawBaseUrl.includes(".hf.space")) {
-        return rawBaseUrl.split(".hf.space")[0] + ".hf.space";
-    }
-    return rawBaseUrl.replace(/\/$/, "");
-}
+export const API_BASE_URL = BACKEND_URL.replace(/\/$/, "");
+export const API_SEARCH_URL = API_BASE_URL ? `${API_BASE_URL}/api/v1/search` : "";
 
-export const HF_API_BASE_URL = getBaseUrl();
-export const HF_API_PREDICT_URL = HF_API_BASE_URL ? `${HF_API_BASE_URL}/api/v1/search` : "";
-export const HF_SPACE_URL = "https://huggingface.co/spaces/catalinbutacu/rag-pharma-assistant";
-
+/**
+ * Check if the backend connection is configured
+ */
 export function isApiConfigured(): boolean {
-    return Boolean(HF_API_PREDICT_URL);
+    return Boolean(API_BASE_URL);
 }
 
+/**
+ * Search medicines using the custom RAG model
+ */
 export async function searchMedicines(query: string): Promise<string> {
-    if (!HF_API_PREDICT_URL) {
-        throw new Error("API URL is not configured. Please check VITE_HF_API_URL.");
+    if (!API_SEARCH_URL) {
+        throw new Error("Backend API URL is not configured. Please check VITE_BACKEND_URL in your .env file.");
     }
 
-    const response = await fetch(HF_API_PREDICT_URL, {
+    const response = await fetch(API_SEARCH_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: [query] }),
+        headers: {
+            "Content-Type": "application/json",
+            "X-Server-Location": "Zurich"
+        },
+        body: JSON.stringify({ query }),
     });
 
     if (!response.ok) {
-        throw new Error(`Backend Error: ${response.status}`);
+        throw new Error(`Server Error: ${response.status}`);
     }
 
-    const result: SearchResponse = await response.json();
-    if (result.data && result.data.length > 0) {
-        return result.data[0];
-    }
+    const result = await response.json();
 
-    throw new Error("Invalid response format from backend.");
+    // Support both Gradio-style {data: [...]} and standard {answer: "..."} formats
+    if (result.answer) return result.answer;
+    if (result.data && result.data.length > 0) return result.data[0];
+    if (result.text) return result.text;
+
+    return "No clear response from the medical database.";
 }
 
+/**
+ * Health check for the Zurich server
+ */
 export async function checkHealth(): Promise<boolean> {
-    if (!HF_API_BASE_URL) return false;
+    if (!API_BASE_URL) return false;
     try {
-        const response = await fetch(`${HF_API_BASE_URL}/health`, {
+        const response = await fetch(`${API_BASE_URL}/health`, {
             method: "GET",
-            signal: AbortSignal.timeout(5000),
+            signal: AbortSignal.timeout(3000),
         });
         return response.ok;
     } catch {

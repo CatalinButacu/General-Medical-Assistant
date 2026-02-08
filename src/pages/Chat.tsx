@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Message } from '../types';
-import { searchMedicines, HF_SPACE_URL } from '../services/api';
+import { searchMedicines, isApiConfigured } from '../services/api';
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -25,14 +25,14 @@ export default function Chat() {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const [isOnline, setIsOnline] = useState(true);
+  const [isOnline, setIsOnline] = useState(isApiConfigured());
 
   useEffect(() => {
     const welcomeMessage: Message = {
       id: Date.now().toString(),
-      content: `System ready. Connected to RAG Backend.
+      content: `System ready. Connected to Secure Patient Cloud.
       
-Ask about symptoms or medicines for accurate results from the database.`,
+Ask about symptoms or medicines to query our medical knowledge base.`,
       sender: 'ai',
       timestamp: new Date()
     };
@@ -73,7 +73,7 @@ Ask about symptoms or medicines for accurate results from the database.`,
       setIsOnline(false);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: `Error: ${error.message || "Could not reach the backend system."}\nPlease ensure the Hugging Face Space is running and the API URL is correct.`,
+        content: `Connection Error: ${error.message || "The Zurich backend is currently unreachable."}\n\nTechnical details: Error 503 or VITE_BACKEND_URL mismatch.`,
         sender: 'ai',
         timestamp: new Date()
       };
@@ -98,10 +98,6 @@ Ask about symptoms or medicines for accurate results from the database.`,
     inputRef.current?.focus();
   };
 
-  const openHuggingFace = () => {
-    window.open(HF_SPACE_URL, '_blank');
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="bg-white shadow-sm border-b">
@@ -111,27 +107,25 @@ Ask about symptoms or medicines for accurate results from the database.`,
               <X size={20} />
             </button>
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                 <Bot className="text-white" size={16} />
               </div>
               <div>
-                <h1 className="text-lg font-semibold">Pharma RAG</h1>
+                <h1 className="text-lg font-bold text-gray-800 tracking-tight">Health Assistant</h1>
                 <div className="flex items-center space-x-1">
                   {isOnline ? (
-                    <span className="text-xs text-green-600 flex items-center">
-                      <Wifi size={12} className="mr-1" /> Online
+                    <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest flex items-center">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full mr-1 animate-pulse" /> Zurich Cloud Active
                     </span>
                   ) : (
-                    <span className="text-xs text-red-600 flex items-center">
-                      <WifiOff size={12} className="mr-1" /> Offline
+                    <span className="text-[10px] font-bold text-red-600 uppercase tracking-widest flex items-center">
+                      <div className="w-1.5 h-1.5 bg-red-500 rounded-full mr-1" /> Offline
                     </span>
                   )}
                 </div>
               </div>
             </div>
-            <button onClick={openHuggingFace} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600" title="Open Space">
-              <ExternalLink size={20} />
-            </button>
+            <div className="w-9 h-9" /> {/* Spacer */}
           </div>
         </div>
       </div>
