@@ -119,30 +119,32 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="mb-10">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-800 tracking-tight">Quick Actions</h2>
-            <div className="h-[2px] w-12 bg-blue-200 rounded-full"></div>
+        {isAuthenticated && (
+          <div className="mb-10">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-800 tracking-tight">Quick Actions</h2>
+              <div className="h-[2px] w-12 bg-blue-200 rounded-full"></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {quickActions.map((action, index) => {
+                const Icon = action.icon;
+                return (
+                  <button
+                    key={index}
+                    onClick={action.action}
+                    className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+                  >
+                    <div className={`w-12 h-12 ${action.color} rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
+                      <Icon className="text-white" size={24} />
+                    </div>
+                    <h3 className="font-bold text-gray-800 mb-1 text-sm">{action.title}</h3>
+                    <p className="text-[10px] text-gray-500 leading-relaxed font-medium uppercase tracking-tighter">Click to open</p>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            {quickActions.map((action, index) => {
-              const Icon = action.icon;
-              return (
-                <button
-                  key={index}
-                  onClick={action.action}
-                  className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
-                >
-                  <div className={`w-12 h-12 ${action.color} rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}>
-                    <Icon className="text-white" size={24} />
-                  </div>
-                  <h3 className="font-bold text-gray-800 mb-1 text-sm">{action.title}</h3>
-                  <p className="text-[10px] text-gray-500 leading-relaxed font-medium uppercase tracking-tighter">Click to open</p>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        )}
 
         <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-10">
           <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center">
