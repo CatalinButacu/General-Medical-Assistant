@@ -13,45 +13,8 @@ import {
   WifiOff
 } from 'lucide-react';
 import { toast } from 'sonner';
-
-interface Message {
-  id: string;
-  content: string;
-  sender: 'user' | 'ai';
-  timestamp: Date;
-}
-
-// Hugging Face API URL from environment variables
-const rawBaseUrl = import.meta.env.VITE_HF_API_URL || "";
-// Robustly extract the base URL (e.g. https://user-space.hf.space) and append the exact API path
-const HF_API_BASE_URL = rawBaseUrl.includes(".hf.space")
-  ? rawBaseUrl.split(".hf.space")[0] + ".hf.space"
-  : rawBaseUrl.replace(/\/$/, "");
-const HF_API_PREDICT_URL = HF_API_BASE_URL ? `${HF_API_BASE_URL}/api/v1/search` : "";
-
-async function callHuggingFaceAPI(query: string): Promise<string> {
-  if (!HF_API_PREDICT_URL) {
-    throw new Error("API URL is not configured. Please check VITE_HF_API_URL.");
-  }
-
-  const response = await fetch(HF_API_PREDICT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ data: [query] }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Backend Error: ${response.status}`);
-  }
-
-  const result = await response.json();
-
-  if (result.data && result.data.length > 0) {
-    return result.data[0];
-  }
-
-  throw new Error("Invalid response format from backend.");
-}
+import type { Message } from '../types';
+import { searchMedicines, HF_SPACE_URL } from '../services/api';
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -96,21 +59,18 @@ Ask about symptoms or medicines for accurate results from the database.`,
     setIsTyping(true);
 
     try {
-      const aiResponse = await callHuggingFaceAPI(userMessage.content);
-
+      const aiResponse = await searchMedicines(userMessage.content);
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: aiResponse,
         sender: 'ai',
         timestamp: new Date()
       };
-
       setMessages(prev => [...prev, aiMessage]);
       setIsOnline(true);
     } catch (error: any) {
       console.error("API Error:", error);
       setIsOnline(false);
-
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: `Error: ${error.message || "Could not reach the backend system."}\nPlease ensure the Hugging Face Space is running and the API URL is correct.`,
@@ -131,12 +91,7 @@ Ask about symptoms or medicines for accurate results from the database.`,
     }
   };
 
-  const quickSearches = [
-    "headache",
-    "fever",
-    "cold",
-    "Ibuprofen"
-  ];
+  const quickSearches = ["headache", "fever", "cold", "Ibuprofen"];
 
   const handleQuickSearch = (query: string) => {
     setInputMessage(query);
@@ -144,19 +99,15 @@ Ask about symptoms or medicines for accurate results from the database.`,
   };
 
   const openHuggingFace = () => {
-    window.open('https://huggingface.co/spaces/catalinbutacu/rag-pharma-assistant', '_blank');
+    window.open(HF_SPACE_URL, '_blank');
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <button
-              onClick={() => navigate('/')}
-              className="p-2 hover:bg-gray-100 rounded-lg"
-            >
+            <button onClick={() => navigate('/')} className="p-2 hover:bg-gray-100 rounded-lg">
               <X size={20} />
             </button>
             <div className="flex items-center space-x-2">
@@ -178,52 +129,27 @@ Ask about symptoms or medicines for accurate results from the database.`,
                 </div>
               </div>
             </div>
-            <button
-              onClick={openHuggingFace}
-              className="p-2 hover:bg-gray-100 rounded-lg text-gray-600"
-              title="Open Space"
-            >
+            <button onClick={openHuggingFace} className="p-2 hover:bg-gray-100 rounded-lg text-gray-600" title="Open Space">
               <ExternalLink size={20} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-md mx-auto px-4 py-6">
           <div className="space-y-4">
             {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div className={`flex items-start space-x-2 max-w-[85%] ${message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''
-                  }`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${message.sender === 'user'
-                    ? 'bg-blue-600'
-                    : 'bg-gray-700'
-                    }`}>
-                    {message.sender === 'user' ? (
-                      <User className="text-white" size={16} />
-                    ) : (
-                      <Bot className="text-white" size={16} />
-                    )}
+              <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`flex items-start space-x-2 max-w-[85%] ${message.sender === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${message.sender === 'user' ? 'bg-blue-600' : 'bg-gray-700'}`}>
+                    {message.sender === 'user' ? <User className="text-white" size={16} /> : <Bot className="text-white" size={16} />}
                   </div>
 
-                  <div className={`rounded-2xl px-4 py-3 ${message.sender === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white border border-gray-200 text-gray-800 shadow-sm'
-                    }`}>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                      {message.content}
-                    </p>
-                    <p className={`text-[10px] mt-2 opacity-50 ${message.sender === 'user' ? 'text-white' : 'text-gray-500'
-                      }`}>
-                      {message.timestamp.toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                  <div className={`rounded-2xl px-4 py-3 ${message.sender === 'user' ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-800 shadow-sm'}`}>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                    <p className={`text-[10px] mt-2 opacity-50 ${message.sender === 'user' ? 'text-white' : 'text-gray-500'}`}>
+                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                 </div>
@@ -240,21 +166,15 @@ Ask about symptoms or medicines for accurate results from the database.`,
                 </div>
               </div>
             )}
-
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Search */}
           {messages.length <= 1 && (
             <div className="mt-8">
               <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Quick Search</h3>
               <div className="grid grid-cols-2 gap-2">
                 {quickSearches.map((query, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleQuickSearch(query)}
-                    className="text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors shadow-sm"
-                  >
+                  <button key={index} onClick={() => handleQuickSearch(query)} className="text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-gray-400 transition-colors shadow-sm">
                     <div className="flex items-center">
                       <Zap className="text-gray-400 mr-2 flex-shrink-0" size={14} />
                       <span className="text-sm text-gray-600">{query}</span>
@@ -267,19 +187,15 @@ Ask about symptoms or medicines for accurate results from the database.`,
         </div>
       </div>
 
-      {/* Warning */}
       <div className="bg-gray-100 border-t border-gray-200">
         <div className="max-w-md mx-auto px-4 py-2">
           <div className="flex items-center justify-center">
             <AlertTriangle className="text-gray-400 mr-1" size={12} />
-            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">
-              Medical accuracy provided by RAG backend
-            </p>
+            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Medical accuracy provided by RAG backend</p>
           </div>
         </div>
       </div>
 
-      {/* Input Area */}
       <div className="bg-white border-t border-gray-200 pb-safe">
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-end space-x-2">
@@ -300,16 +216,8 @@ Ask about symptoms or medicines for accurate results from the database.`,
                 disabled={isLoading}
               />
             </div>
-            <button
-              onClick={sendMessage}
-              disabled={!inputMessage.trim() || isLoading}
-              className="bg-gray-800 text-white p-3 rounded-2xl hover:bg-black disabled:opacity-30 transition-all shadow-md"
-            >
-              {isLoading ? (
-                <Loader2 className="animate-spin" size={20} />
-              ) : (
-                <Send size={20} />
-              )}
+            <button onClick={sendMessage} disabled={!inputMessage.trim() || isLoading} className="bg-gray-800 text-white p-3 rounded-2xl hover:bg-black disabled:opacity-30 transition-all shadow-md">
+              {isLoading ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
             </button>
           </div>
         </div>

@@ -37,7 +37,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="max-w-md mx-auto px-4 py-6">
           <div className="flex items-center justify-center mb-2">
@@ -52,9 +51,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-md mx-auto px-4 py-6">
-        {/* Safety Alert */}
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
           <div className="flex items-start">
             <AlertTriangle className="text-amber-600 mr-3 mt-0.5" size={20} />
@@ -67,7 +64,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Quick Actions */}
         <div className="mb-8">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -90,7 +86,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Features Overview */}
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <h2 className="text-lg font-bold text-gray-800 mb-4">How It Works</h2>
           <div className="space-y-4">

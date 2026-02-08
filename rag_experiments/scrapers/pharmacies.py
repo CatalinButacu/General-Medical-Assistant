@@ -1,152 +1,25 @@
+"""
+Pharmacy scraper implementations for Romanian pharmacies.
+"""
 import asyncio
-import aiohttp
 import json
 import logging
-import os
 import re
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field, asdict
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Set
-from datetime import datetime
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin, urlparse, quote
+from typing import List, Optional
+from urllib.parse import urljoin
 
-logging.basicConfig(level=logging.INFO)
+from bs4 import BeautifulSoup
+
+from .base import PharmacyScraper, ScrapedMedicine
+
 logger = logging.getLogger(__name__)
 
-DATA_DIR = Path(__file__).parent / "data"
-
-
-@dataclass
-class ScrapedMedicine:
-    name: str
-    price: Optional[float] = None
-    currency: str = "RON"
-    active_substance: str = ""
-    description: str = ""
-    category: str = ""
-    prescription_required: bool = False
-    manufacturer: str = ""
-    url: str = ""
-    image_url: str = ""
-    source: str = ""
-    scraped_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
-
-    def to_document(self) -> Dict[str, Any]:
-        rx_note = "⚠️ **Requires prescription**" if self.prescription_required else "Available without prescription"
-
-        content = f"""# {self.name}
-
-## Overview
-- **Active substance**: {self.active_substance or 'Not specified'}
-- **Category**: {self.category}
-- **Manufacturer**: {self.manufacturer or 'Not specified'}
-- **Prescription**: {rx_note}
-
-## Description
-{self.description or 'No description available.'}
-
-## Purchase Information
-- **Price**: {self.price} {self.currency} (as of {self.scraped_at[:10]})
-- **Buy online**: [{self.source}]({self.url})
-"""
-        return {
-            "content": content,
-            "title": f"{self.name} - {self.source}",
-            "source": self.source,
-            "metadata": {
-                "price": self.price,
-                "currency": self.currency,
-                "category": self.category,
-                "prescription_required": self.prescription_required,
-                "url": self.url,
-                "active_substance": self.active_substance
-            }
-        }
-
-
-class PharmacyScraper(ABC):
-    name: str = "base"
-    base_url: str = ""
-
-    def __init__(self, max_products: int = 100, delay: float = 0.5):
-        self.max_products = max_products
-        self.delay = delay
-        self.session: Optional[aiohttp.ClientSession] = None
-        self.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "ro-RO,ro;q=0.9,en;q=0.8"
-        }
-
-    async def __aenter__(self):
-        self.session = aiohttp.ClientSession(headers=self.headers)
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        if self.session:
-            await self.session.close()
-
-    async def fetch(self, url: str) -> Optional[str]:
-        try:
-            async with self.session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as response:
-                if response.status == 200:
-                    return await response.text()
-                logger.warning(f"HTTP {response.status} for {url}")
-                return None
-        except Exception as e:
-            logger.error(f"Fetch error for {url}: {e}")
-            return None
-
-    @abstractmethod
-    async def get_category_urls(self) -> List[str]:
-        pass
-
-    @abstractmethod
-    async def get_product_urls(self, category_url: str) -> List[str]:
-        pass
-
-    @abstractmethod
-    async def parse_product(self, url: str) -> Optional[ScrapedMedicine]:
-        pass
-
-    async def scrape(self) -> List[ScrapedMedicine]:
-        medicines = []
-        seen_urls: Set[str] = set()
-
-        logger.info(f"Starting {self.name} scraper (max: {self.max_products})")
-
-        category_urls = await self.get_category_urls()
-        logger.info(f"Found {len(category_urls)} categories")
-
-        for cat_url in category_urls:
-            if len(medicines) >= self.max_products:
-                break
-
-            product_urls = await self.get_product_urls(cat_url)
-            logger.info(f"Found {len(product_urls)} products in {cat_url}")
-
-            for prod_url in product_urls:
-                if len(medicines) >= self.max_products:
-                    break
-
-                if prod_url in seen_urls:
-                    continue
-                seen_urls.add(prod_url)
-
-                await asyncio.sleep(self.delay)
-                medicine = await self.parse_product(prod_url)
-
-                if medicine:
-                    medicines.append(medicine)
-                    logger.info(f"Scraped: {medicine.name} ({len(medicines)}/{self.max_products})")
-
-        logger.info(f"Completed {self.name}: {len(medicines)} medicines")
-        return medicines
+DATA_DIR = Path(__file__).parent.parent / "data"
 
 
 class FarmaciaTeiScraper(PharmacyScraper):
+    """Scraper for Farmacia Tei online pharmacy."""
     name = "Farmacia Tei"
     base_url = "https://comenzi.farmaciatei.ro"
 
@@ -230,7 +103,6 @@ class FarmaciaTeiScraper(PharmacyScraper):
                 active_substance = parent.get_text(strip=True)
 
         prescription = False
-        rx_indicators = soup.find_text(text=re.compile(r'rețetă|prescripție|rx', re.I)) if hasattr(soup, 'find_text') else None
         if soup.find(text=re.compile(r'rețetă|prescripție', re.I)):
             prescription = True
 
@@ -254,6 +126,7 @@ class FarmaciaTeiScraper(PharmacyScraper):
 
 
 class HelpNetScraper(PharmacyScraper):
+    """Scraper for HelpNet online pharmacy."""
     name = "HelpNet"
     base_url = "https://www.helpnet.ro"
 
@@ -323,6 +196,7 @@ class HelpNetScraper(PharmacyScraper):
 
 
 class EumedScraper(PharmacyScraper):
+    """Scraper for EUmed online pharmacy."""
     name = "EUmed"
     base_url = "https://www.eumed.ro"
 
@@ -384,6 +258,7 @@ class EumedScraper(PharmacyScraper):
         )
 
 
+# Registry of available scrapers
 SCRAPERS = {
     "farmaciatei": FarmaciaTeiScraper,
     "helpnet": HelpNetScraper,
@@ -395,6 +270,16 @@ async def scrape_all_pharmacies(
     max_per_pharmacy: int = 50,
     pharmacies: Optional[List[str]] = None
 ) -> List[ScrapedMedicine]:
+    """
+    Scrape medicines from multiple pharmacies.
+    
+    Args:
+        max_per_pharmacy: Maximum products per pharmacy
+        pharmacies: List of pharmacy keys to scrape (defaults to all)
+        
+    Returns:
+        List of scraped medicines
+    """
     all_medicines = []
     pharmacy_names = pharmacies or list(SCRAPERS.keys())
 
@@ -412,6 +297,16 @@ async def scrape_all_pharmacies(
 
 
 def save_medicines(medicines: List[ScrapedMedicine], filename: str = "ro_medicines.json") -> Path:
+    """
+    Save scraped medicines to a JSON file.
+    
+    Args:
+        medicines: List of ScrapedMedicine objects
+        filename: Output filename
+        
+    Returns:
+        Path to the saved file
+    """
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     output_file = DATA_DIR / filename
 
@@ -425,6 +320,7 @@ def save_medicines(medicines: List[ScrapedMedicine], filename: str = "ro_medicin
 
 
 async def build_pharmacy_knowledge_base(max_per_pharmacy: int = 50) -> Path:
+    """Build a knowledge base by scraping all pharmacies."""
     medicines = await scrape_all_pharmacies(max_per_pharmacy)
     return save_medicines(medicines)
 
