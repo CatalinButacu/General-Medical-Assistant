@@ -1,0 +1,11 @@
+raw/pages/
+raw/pdfs/
+raw/cache_meta.json
+
+# Override repo-root `lib/` venv exclusion for our shared script utilities.
+!scripts/lib/
+!scripts/lib/**
+
+# Large derived artifacts — regenerate via scripts/update_all.py
+processed/medicines_enriched.json
+processed/rcp_parsed.json
