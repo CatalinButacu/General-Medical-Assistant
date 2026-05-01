@@ -1,0 +1,2 @@
+# Built indices — large derived artifacts; rebuild with `python -m med_assist.index.builder`
+index/store/
