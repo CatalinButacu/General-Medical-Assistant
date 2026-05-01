@@ -141,7 +141,8 @@ RULES: list[_Rule] = [
         severity="urgent",
         action_ro=GO_ER,
         patterns=[
-            (r"(lovitur|cazut|cazatura).{0,20}cap", r"(varsaturi|amnezie|confuz|lesin|lichid|sange)"),
+            # Stem "lovi" catches lovit/lovitura/lovitul; "cazut" catches căzut/cazatura.
+            (r"(lovi|cazut|cazatura|traumatism).{0,30}cap", r"(varsat|varsatur|amnezi|confuz|lesin|lichid|sange)"),
             r"traumatism cranian",
             (r"cap", r"sange.{0,20}(nas|urechi)"),
         ],
@@ -168,12 +169,12 @@ RULES: list[_Rule] = [
         severity="emergency",
         action_ro=CALL_112,
         patterns=[
-            r"voma cu sange",
-            r"vars.{0,5} sange",
+            # Cover voma/vomit/vomitat/varsat/varsatura — any verb form near "sange"/"sangerare".
+            (r"(voma|vomit|varsat|varsatur).{0,15}sange",),
             r"hematemez",
             r"melena",
             r"scaun negru",
-            (r"(scaun|diaree)", r"sange"),
+            (r"(scaun|diaree)", r"(sange|hemoragi)"),
         ],
     ),
     _Rule(

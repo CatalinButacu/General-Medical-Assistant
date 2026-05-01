@@ -13,6 +13,7 @@ Phase 3 add-on; for now we trust the rule engine + retrieval scores.
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass, field
 from typing import Literal
 
@@ -32,24 +33,37 @@ class TriageDecision:
     confidence: float = 0.0                     # 0.0–1.0
 
 
-# Empirical thresholds — tuned on smoke queries.
-# RRF with k=60 caps single-retriever rank-0 contribution at 1/61 ≈ 0.0164;
-# a medicine that lands rank 0 in only one retriever therefore scores ~0.016.
-# We accept that as the lower bound for "real signal" and require >=2 hits
-# in that band to avoid recommending on weak retrieval.
-MIN_TOP_SCORE = 0.014
+# Two parallel paths qualify a query as OTC_SAFE:
+#
+#  1. Strong score path: top fused score >= 0.020 (both retrievers agreed)
+#     AND at least MIN_RELEVANT_HITS medicines above RELEVANT_SCORE_FLOOR.
+#  2. Coherence path:    top score is weaker (>= WEAK_FLOOR) but the top-3
+#     medicines clearly agree on a drug class — either >=2 share the same
+#     ATC level-4 prefix, or >=2 share the same trade-name brand root.
+#     This catches single-retriever hits that are nonetheless coherent
+#     (e.g. brand-name queries that BM25 nails but dense doesn't).
+#
+# Off-topic queries fail both paths: their weak score has no coherent
+# clustering in top-3, so they correctly route to UNCERTAIN.
+MIN_TOP_SCORE = 0.020
+WEAK_FLOOR = 0.014
 MIN_RELEVANT_HITS = 2
+RELEVANT_SCORE_FLOOR = 0.018
+COHERENCE_TOP_K = 3
+COHERENCE_MIN_SHARED = 2
 
 
 def classify(
     query: str,
     medicine_hits: list[MedicineHit] | None = None,
+    sparse_signal: bool = True,
 ) -> TriageDecision:
     """
     Decide the triage label for a query.
 
-    Pass `medicine_hits` already produced by RetrievalService.query() —
-    the classifier reads top-N hit scores to gauge retrieval confidence.
+    `sparse_signal` indicates whether BM25 returned non-zero hits.
+    When False, the query has no real Romanian medical terms (gibberish,
+    off-topic) — we then refuse the weak/coherent path and force UNCERTAIN.
     """
     flags = scan(query)
 
@@ -79,21 +93,51 @@ def classify(
         )
 
     top_score = medicine_hits[0].score
-    relevant_hits = sum(1 for h in medicine_hits if h.score >= MIN_TOP_SCORE * 0.8)
+    relevant_hits = sum(1 for h in medicine_hits if h.score >= RELEVANT_SCORE_FLOOR)
 
-    if top_score >= MIN_TOP_SCORE and relevant_hits >= MIN_RELEVANT_HITS:
+    top_k_for_coherence = medicine_hits[:COHERENCE_TOP_K]
+    atc4_counts = Counter(
+        h.medicine.atc_code[:5]
+        for h in top_k_for_coherence
+        if h.medicine.atc_code
+    )
+    brand_counts = Counter(
+        h.medicine.trade_name.split()[0].upper()
+        for h in top_k_for_coherence
+        if h.medicine.trade_name
+    )
+    top_atc_share = max(atc4_counts.values()) if atc4_counts else 0
+    top_brand_share = max(brand_counts.values()) if brand_counts else 0
+    coherent = top_atc_share >= COHERENCE_MIN_SHARED or top_brand_share >= COHERENCE_MIN_SHARED
+
+    strong = top_score >= MIN_TOP_SCORE and relevant_hits >= MIN_RELEVANT_HITS
+    coherent_path = top_score >= WEAK_FLOOR and coherent and sparse_signal
+
+    if strong or coherent_path:
+        rationale_bits = []
+        if strong:
+            rationale_bits.append(f"{relevant_hits} medicamente cu scor mare")
+        if coherent_path:
+            if top_atc_share >= COHERENCE_MIN_SHARED:
+                rationale_bits.append(f"top-{COHERENCE_TOP_K} agree pe clasa ATC")
+            elif top_brand_share >= COHERENCE_MIN_SHARED:
+                rationale_bits.append(f"top-{COHERENCE_TOP_K} agree pe brand")
         return TriageDecision(
             label="OTC_SAFE",
-            rationale=f"Identificate {relevant_hits} medicamente potrivite (scor maxim {top_score:.3f}).",
+            rationale="Retrieval coerent: " + "; ".join(rationale_bits) + f" (scor maxim {top_score:.3f}).",
             medicine_hits=medicine_hits,
-            confidence=min(top_score / 0.04, 1.0),  # 0.04 ≈ very confident, clamped
+            confidence=min(top_score / 0.04, 1.0),
             recommended_action_ro="Vedeți recomandările de mai jos. Consultați farmacistul dacă simptomele persistă.",
         )
 
     return TriageDecision(
         label="UNCERTAIN",
-        rationale=f"Rezultate slabe pentru întrebarea dvs. (scor maxim {top_score:.3f}). Recomandăm consultul unui farmacist.",
-        medicine_hits=medicine_hits[:3],  # show weak hits for transparency
+        rationale=(
+            f"Rezultate slabe pentru întrebarea dvs. "
+            f"(scor maxim {top_score:.3f}, top-{COHERENCE_TOP_K} share ATC={top_atc_share}, brand={top_brand_share}). "
+            f"Recomandăm consultul unui farmacist."
+        ),
+        medicine_hits=medicine_hits[:3],
         confidence=min(top_score / 0.04, 1.0),
         recommended_action_ro="Consultați un farmacist sau medicul dvs.",
     )

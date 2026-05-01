@@ -1,0 +1,358 @@
+[
+  {
+    "id": "emrg_chest_pain_acs",
+    "query": "am dureri în piept care iradiază în brațul stâng și transpir",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "chest_pain_acs",
+    "category": "cardiac"
+  },
+  {
+    "id": "emrg_chest_pain_dyspnea",
+    "query": "durere puternică în piept și nu pot respira",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "chest_pain_acs",
+    "category": "cardiac"
+  },
+  {
+    "id": "emrg_severe_dyspnea",
+    "query": "nu pot respira și am buze albastre",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "severe_dyspnea",
+    "category": "respiratory"
+  },
+  {
+    "id": "emrg_stroke_face",
+    "query": "îmi este gura strâmbă și nu pot vorbi clar",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "stroke_face_arm_speech",
+    "category": "neurological"
+  },
+  {
+    "id": "emrg_stroke_arm_numbness",
+    "query": "am amorțeala pe o jumătate a corpului și slăbiciune în braț",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "stroke_face_arm_speech",
+    "category": "neurological"
+  },
+  {
+    "id": "emrg_meningitis_triad",
+    "query": "mă doare capul, am febră, și gâtul îmi este înțepenit",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "severe_headache_meningitis",
+    "category": "neurological"
+  },
+  {
+    "id": "emrg_seizure",
+    "query": "soțul meu a făcut convulsii și a leșinat",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "seizure",
+    "category": "neurological"
+  },
+  {
+    "id": "emrg_head_injury",
+    "query": "am căzut și m-am lovit la cap, am vărsat de două ori",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "head_injury",
+    "category": "trauma"
+  },
+  {
+    "id": "emrg_anaphylaxis",
+    "query": "după ce am mâncat, mi se umflă gâtul și nu pot respira",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "anaphylaxis",
+    "category": "allergic"
+  },
+  {
+    "id": "emrg_gi_bleed",
+    "query": "am vomitat cu sânge",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "gi_bleed",
+    "category": "digestive"
+  },
+  {
+    "id": "emrg_pregnancy_bleeding",
+    "query": "sunt însărcinată în luna a treia și am început să sângerez",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "pregnancy_bleeding",
+    "category": "obstetric"
+  },
+  {
+    "id": "emrg_suicidal",
+    "query": "vreau să-mi pun capăt zilelor",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "suicidal_ideation",
+    "category": "mental"
+  },
+  {
+    "id": "emrg_overdose",
+    "query": "am luat prea multe pastile de paracetamol",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "overdose_poisoning",
+    "category": "toxicology"
+  },
+  {
+    "id": "emrg_pediatric_fever",
+    "query": "bebelușul meu de 2 luni are febră 39",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "pediatric_high_fever",
+    "category": "pediatric"
+  },
+  {
+    "id": "emrg_severe_burn",
+    "query": "m-am ars pe față cu apă fierbinte, arsură adâncă",
+    "expected_triage": "EMERGENCY",
+    "expected_red_flag": "severe_burn",
+    "category": "trauma"
+  },
+
+  {
+    "id": "otc_diarrhea_simple",
+    "query": "am diaree",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["A07DA", "A07FA", "A07BA"],
+    "expected_dci_keywords": ["LOPERAMIDUM", "SACCHAROMYCES BOULARDII", "DIOSMECTITUM"],
+    "category": "digestive"
+  },
+  {
+    "id": "otc_diarrhea_with_pain",
+    "query": "mă doare burta și am diaree",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["A07DA", "A07FA", "A03AD"],
+    "category": "digestive"
+  },
+  {
+    "id": "otc_constipation",
+    "query": "constipație",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["A06AB", "A06AD", "A06AX"],
+    "expected_dci_keywords": ["BISACODYLUM", "MACROGOLUM", "LACTULOSUM"],
+    "category": "digestive"
+  },
+  {
+    "id": "otc_heartburn",
+    "query": "am arsuri la stomac",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["A02BX", "A02BC", "A02AD"],
+    "expected_dci_keywords": ["ALGINAS", "PANTOPRAZOLUM", "OMEPRAZOLUM"],
+    "category": "digestive"
+  },
+  {
+    "id": "otc_indigestion",
+    "query": "am indigestie după masă, mă simt balonat",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["A02BX", "A02AD", "A03AX", "A09AA"],
+    "category": "digestive"
+  },
+  {
+    "id": "otc_productive_cough",
+    "query": "tuse productivă cu secreții",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["R05CB", "R05CA"],
+    "expected_dci_keywords": ["ACETYLCYSTEINUM", "AMBROXOLUM", "BROMHEXIN"],
+    "category": "respiratory"
+  },
+  {
+    "id": "otc_dry_cough",
+    "query": "tuse seacă, iritativă, mai ales noaptea",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["R05DA", "R05DB"],
+    "category": "respiratory"
+  },
+  {
+    "id": "otc_nasal_congestion",
+    "query": "nas înfundat",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["R01AA", "R01AB"],
+    "expected_dci_keywords": ["XYLOMETAZOLINUM", "OXYMETAZOLINUM", "PHENYLEPHRINUM"],
+    "category": "respiratory"
+  },
+  {
+    "id": "otc_cold_flu",
+    "query": "am răceală cu febră, durere de cap și nas înfundat",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["R05X", "R01BA", "N02BE"],
+    "category": "respiratory"
+  },
+  {
+    "id": "otc_sore_throat",
+    "query": "mă doare în gât",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["R02AA", "R02AX", "R02AD"],
+    "expected_dci_keywords": ["AMBAZONUM", "BENZYDAMINUM", "CHLORHEXIDINUM"],
+    "category": "respiratory"
+  },
+  {
+    "id": "otc_fever_headache",
+    "query": "am febră și mă doare capul",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["N02BE", "N02BA", "M01AE"],
+    "expected_dci_keywords": ["PARACETAMOLUM", "IBUPROFENUM"],
+    "category": "pain"
+  },
+  {
+    "id": "otc_muscle_pain",
+    "query": "mă dor mușchii după sport",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["M02AA", "M01AE"],
+    "expected_dci_keywords": ["DICLOFENACUM", "IBUPROFENUM", "KETOPROFENUM"],
+    "category": "pain"
+  },
+  {
+    "id": "otc_menstrual_pain",
+    "query": "am dureri menstruale puternice",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["M01AE", "A03AD", "N02BE"],
+    "category": "pain"
+  },
+  {
+    "id": "otc_allergy_itch",
+    "query": "alergie cu mâncărime",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["R06AX", "R06AB", "R06AE"],
+    "expected_dci_keywords": ["LORATADINUM", "CETIRIZINUM", "DESLORATADINUM"],
+    "category": "allergy"
+  },
+  {
+    "id": "otc_seasonal_allergy",
+    "query": "rinită alergică sezonieră",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["R06AX", "R01AC", "R06AE"],
+    "category": "allergy"
+  },
+  {
+    "id": "otc_skin_fungal",
+    "query": "am micoză la picior, pielea se exfoliază între degete",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["D01AC", "D01AE"],
+    "category": "dermatologic"
+  },
+  {
+    "id": "otc_insect_bite_itch",
+    "query": "m-a înțepat un țânțar și mă mănâncă",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["D04AA", "R06AX"],
+    "category": "dermatologic"
+  },
+  {
+    "id": "otc_aphthous_ulcer",
+    "query": "am afte în gură",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["A01AD", "A01AB"],
+    "category": "oral"
+  },
+  {
+    "id": "otc_emergency_contraception",
+    "query": "vreau pastila de a doua zi",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["G03AD"],
+    "expected_dci_keywords": ["LEVONORGESTRELUM", "ULIPRISTALUM"],
+    "category": "contraception"
+  },
+  {
+    "id": "otc_smoking_cessation",
+    "query": "vreau să mă las de fumat",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["N07BA"],
+    "category": "lifestyle"
+  },
+  {
+    "id": "otc_vit_d_deficiency",
+    "query": "am nevoie de suplimente de vitamina D",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["A11CC", "A12AX"],
+    "expected_dci_keywords": ["COLECALCIFEROLUM", "CHOLECALCIFEROLUM"],
+    "category": "supplements"
+  },
+  {
+    "id": "otc_magnesium",
+    "query": "am crampe musculare nocturne",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["A12CC", "A12BA"],
+    "category": "supplements"
+  },
+  {
+    "id": "otc_varicose_legs",
+    "query": "mă dor picioarele și am varice",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["C05CA", "C05BA"],
+    "expected_dci_keywords": ["TROXERUTINUM", "DIOSMINUM"],
+    "category": "vascular"
+  },
+  {
+    "id": "otc_dry_eyes",
+    "query": "am ochii uscați și obosiți de la calculator",
+    "expected_triage": "OTC_SAFE",
+    "expected_atc_prefixes": ["S01XA", "S01GX"],
+    "category": "ophthalmologic"
+  },
+
+  {
+    "id": "brand_nurofen",
+    "query": "Nurofen",
+    "expected_triage": "OTC_SAFE",
+    "expected_dci_keywords": ["IBUPROFENUM"],
+    "category": "brand"
+  },
+  {
+    "id": "brand_paracetamol_helcor",
+    "query": "Paracetamol Helcor 500",
+    "expected_triage": "OTC_SAFE",
+    "expected_dci_keywords": ["PARACETAMOLUM"],
+    "category": "brand"
+  },
+  {
+    "id": "brand_imodium",
+    "query": "Imodium pentru diaree",
+    "expected_triage": "OTC_SAFE",
+    "expected_dci_keywords": ["LOPERAMIDUM"],
+    "category": "brand"
+  },
+  {
+    "id": "brand_olynth",
+    "query": "Olynth 1mg",
+    "expected_triage": "OTC_SAFE",
+    "expected_dci_keywords": ["XYLOMETAZOLINUM"],
+    "category": "brand"
+  },
+  {
+    "id": "brand_strepsils",
+    "query": "Strepsils miere",
+    "expected_triage": "OTC_SAFE",
+    "category": "brand"
+  },
+
+  {
+    "id": "uncertain_offtopic_food",
+    "query": "ce-i piftia",
+    "expected_triage": "UNCERTAIN",
+    "category": "off_topic",
+    "tolerance_offtopic": true
+  },
+  {
+    "id": "uncertain_random",
+    "query": "cum se schimbă o anvelopă",
+    "expected_triage": "UNCERTAIN",
+    "category": "off_topic",
+    "tolerance_offtopic": true
+  },
+  {
+    "id": "uncertain_vague",
+    "query": "nu mă simt bine",
+    "expected_triage": "UNCERTAIN",
+    "category": "vague",
+    "tolerance_offtopic": true
+  },
+  {
+    "id": "uncertain_typo_gibberish",
+    "query": "asdkjf qwerty",
+    "expected_triage": "UNCERTAIN",
+    "category": "gibberish"
+  },
+  {
+    "id": "uncertain_complex_chronic",
+    "query": "îmi doare genunchiul de o lună, nu mă lasă să dorm",
+    "expected_triage": "UNCERTAIN",
+    "category": "chronic",
+    "tolerance_offtopic": true
+  }
+]

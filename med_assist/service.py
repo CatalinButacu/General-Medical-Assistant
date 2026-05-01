@@ -135,14 +135,48 @@ class RetrievalService:
     ) -> TriageDecision:
         """
         End-to-end pipeline: triage red-flag check, then retrieval if safe,
-        then triage confidence check on retrieval. Returns a TriageDecision
-        the chatbot UI can render directly.
+        then triage confidence check on retrieval (gated by sparse-signal).
         """
-        # Pre-retrieval red-flag scan: skip retrieval entirely on emergency
         early = classify(query, medicine_hits=None)
         if early.label == "EMERGENCY":
             return early
 
         rx_filter = {"OTC", "MIXED"} if otc_only else None
-        hits = self.query(query, top_k_medicines=top_k_medicines, rx_filter=rx_filter)
-        return classify(query, medicine_hits=hits)
+
+        # Run retrievers directly so we can track sparse provenance.
+        # If BM25 returns zero hits, the query has no real Romanian medical
+        # terms (gibberish, off-topic) and any dense "coherence" is noise.
+        top_k_chunks = max(top_k_medicines * 4, 50)
+        dense_hits = self._dedup_by_medicine(self.dense.search(query, top_k=top_k_chunks * 2))
+        sparse_hits = self._dedup_by_medicine(self.sparse.search(query, top_k=top_k_chunks * 2))
+        sparse_signal = len(sparse_hits) > 0
+
+        fused = reciprocal_rank_fusion([dense_hits, sparse_hits], top_k=top_k_chunks)
+        if rx_filter is not None:
+            fused = [h for h in fused if h.chunk.metadata.get("rx_status") in rx_filter]
+
+        by_med: dict[str, dict] = {}
+        for hit in fused:
+            mid = hit.chunk.medicine_id
+            if mid not in by_med:
+                by_med[mid] = {"score": hit.score, "best": hit.chunk, "supporting": [hit.chunk]}
+            else:
+                by_med[mid]["supporting"].append(hit.chunk)
+                if hit.score > by_med[mid]["score"]:
+                    by_med[mid]["score"] = hit.score
+                    by_med[mid]["best"] = hit.chunk
+
+        ordered = sorted(by_med.items(), key=lambda kv: kv[1]["score"], reverse=True)[:top_k_medicines]
+        med_hits: list[MedicineHit] = []
+        for mid, entry in ordered:
+            med = self._medicines_by_id.get(mid)
+            if med is None:
+                continue
+            med_hits.append(MedicineHit(
+                medicine=med,
+                score=entry["score"],
+                best_chunk=entry["best"],
+                supporting_chunks=entry["supporting"],
+            ))
+
+        return classify(query, medicine_hits=med_hits, sparse_signal=sparse_signal)
