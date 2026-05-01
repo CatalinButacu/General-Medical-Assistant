@@ -27,6 +27,7 @@ from med_assist.index.builder import INDEX_DIR
 from med_assist.retrieval.dense import DenseRetriever
 from med_assist.retrieval.fusion import reciprocal_rank_fusion
 from med_assist.retrieval.sparse import SparseRetriever
+from med_assist.triage.classifier import TriageDecision, classify
 
 
 class RetrievalService:
@@ -125,3 +126,23 @@ class RetrievalService:
                 supporting_chunks=entry["supporting"],
             ))
         return out
+
+    def advise(
+        self,
+        query: str,
+        top_k_medicines: int = 5,
+        otc_only: bool = True,
+    ) -> TriageDecision:
+        """
+        End-to-end pipeline: triage red-flag check, then retrieval if safe,
+        then triage confidence check on retrieval. Returns a TriageDecision
+        the chatbot UI can render directly.
+        """
+        # Pre-retrieval red-flag scan: skip retrieval entirely on emergency
+        early = classify(query, medicine_hits=None)
+        if early.label == "EMERGENCY":
+            return early
+
+        rx_filter = {"OTC", "MIXED"} if otc_only else None
+        hits = self.query(query, top_k_medicines=top_k_medicines, rx_filter=rx_filter)
+        return classify(query, medicine_hits=hits)
