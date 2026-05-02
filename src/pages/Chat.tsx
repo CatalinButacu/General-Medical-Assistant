@@ -97,7 +97,7 @@ export default function Chat() {
     return (
         // fixed inset-0 escapes the App's flex layout that adds pb-24 + scroll wrapper.
         // Without this the chat input gets pushed behind the mobile nav.
-        <div className="fixed inset-0 z-50 flex flex-col bg-gray-50">
+        <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
             <header className="bg-white border-b border-gray-100 shadow-sm flex-shrink-0">
                 <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
                     <button
@@ -134,7 +134,7 @@ export default function Chat() {
                 </div>
             </header>
 
-            <div className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white">
+            <div className="flex-1 overflow-y-auto">
                 <div className="max-w-md mx-auto px-4 py-6 space-y-4">
                     {messages.map(message => (
                         <MessageBubble key={message.id} message={message} />

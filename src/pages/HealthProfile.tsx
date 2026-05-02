@@ -174,7 +174,7 @@ export default function HealthProfile() {
   }
 
   return (
-    <div className="h-full bg-gray-50 flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden">
       <div className="bg-white shadow-sm sticky top-0 z-10">
         <div className="max-w-md mx-auto px-4 py-4 flex items-center justify-between">
           <button onClick={() => navigate('/')} className="p-2 hover:bg-gray-100 rounded-full transition-colors font-bold text-gray-400 hover:text-gray-800"><X size={20} /></button>
@@ -208,6 +208,26 @@ export default function HealthProfile() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {user && (
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center space-x-4">
+            {user.picture ? (
+              <img src={user.picture} alt={user.name || 'profile'} className="w-14 h-14 rounded-full border-2 border-blue-100 shadow-sm" />
+            ) : (
+              <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center">
+                <User className="text-blue-600" size={28} />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-gray-800 truncate">{user.name || profile.name || 'User'}</p>
+              {user.email && <p className="text-xs text-gray-500 truncate mt-0.5">{user.email}</p>}
+              <div className="inline-flex items-center mt-1.5 text-[9px] font-bold text-green-700 uppercase tracking-widest bg-green-50 px-2 py-0.5 rounded-full">
+                <span className="w-1 h-1 bg-green-500 rounded-full mr-1.5" />
+                Connected via Google
+              </div>
+            </div>
           </div>
         )}
 

@@ -15,7 +15,7 @@ function App() {
   return (
     <Auth0Provider {...auth0Config}>
       <Router>
-        <div className="h-[100dvh] flex flex-col bg-gray-50 overflow-hidden">
+        <div className="h-[100dvh] flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden">
           <main className="flex-1 overflow-y-auto pb-24 relative">
             <Routes>
               <Route path="/" element={<Home />} />

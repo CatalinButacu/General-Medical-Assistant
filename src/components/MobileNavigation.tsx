@@ -3,10 +3,16 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { Home, Camera, User, Package, MessageCircle } from 'lucide-react';
 import { cn } from '../lib/utils';
 
+// Routes that take over the full viewport with their own dismiss UX —
+// rendering the bottom nav on top of them covers content (e.g. the chat input).
+const FULLSCREEN_ROUTES = new Set(['/chat', '/scanner']);
+
 export default function MobileNavigation() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth0();
+
+  if (FULLSCREEN_ROUTES.has(location.pathname)) return null;
 
   const navigationItems = [
     {
