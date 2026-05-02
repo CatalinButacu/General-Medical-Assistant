@@ -34,9 +34,11 @@ export interface TriageEvent {
 }
 
 /**
- * Triage label produced by the backend.
+ * Triage label produced by the backend. FOLLOWUP is emitted during the
+ * mandatory information-gathering phase (first 2 user turns), when the
+ * assistant must ask a clarifying question and not recommend yet.
  */
-export type TriageLabel = 'EMERGENCY' | 'OTC_SAFE' | 'UNCERTAIN';
+export type TriageLabel = 'EMERGENCY' | 'OTC_SAFE' | 'UNCERTAIN' | 'FOLLOWUP';
 
 /**
  * One red-flag rule that fired for an emergency-classified query.

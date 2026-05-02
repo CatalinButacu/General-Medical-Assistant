@@ -21,14 +21,16 @@ from typing import AsyncIterator, Optional
 
 from med_assist.data.models import MedicineHit
 from med_assist.llm.client import GeminiClient, build_history
-from med_assist.llm.prompts import system_with_evidence
+from med_assist.llm.prompts import system_followup, system_with_evidence
 from med_assist.service import RetrievalService
 from med_assist.triage.classifier import TriageDecision
+from med_assist.triage.redflags import scan as scan_redflags, has_emergency, has_urgent
 
 log = logging.getLogger(__name__)
 
-MAX_HISTORY_TURNS = 6     # last N turns sent to the LLM (user+assistant counted as 2)
-TOP_K_MEDICINES = 5       # candidates handed to LLM and shown as cards in UI
+MAX_HISTORY_TURNS = 6              # last N turns sent to the LLM (user+assistant counted as 2)
+TOP_K_MEDICINES = 5                # candidates handed to LLM and shown as cards in UI
+MIN_USER_TURNS_BEFORE_RECOMMEND = 3  # 2 follow-up questions, then recommend on turn 3
 
 
 @dataclass
@@ -76,16 +78,59 @@ class ConversationService:
             yield ChatStreamEvent("error", {"message": "no user message in history"})
             return
 
-        # --- Step 1+2: triage + (optional) retrieval. Reuse advise() for
-        # consistent thresholds with the Phase-2 eval harness.
+        user_turn_count = sum(1 for m in history if m.role == "user")
+        in_followup_phase = user_turn_count < MIN_USER_TURNS_BEFORE_RECOMMEND
+
+        # --- Step 1: red-flag scan ALWAYS runs first, regardless of phase.
+        # Even mid-conversation, an emergency mention bypasses everything.
+        flags = scan_redflags(last_user.text)
+        if has_emergency(flags) or has_urgent(flags):
+            primary = next(f for f in flags if f.severity in ("emergency", "urgent"))
+            yield ChatStreamEvent("triage", {
+                "label": "EMERGENCY",
+                "rationale": f"Detectat: {primary.description}.",
+                "recommended_action_ro": primary.action_ro,
+                "confidence": 0.0,
+                "red_flags": [
+                    {
+                        "name": f.name, "category": f.category,
+                        "description": f.description, "severity": f.severity,
+                        "matched_pattern": f.matched_pattern,
+                    }
+                    for f in flags
+                ],
+            })
+            yield ChatStreamEvent("done", {"used_llm": False, "phase": "emergency"})
+            return
+
+        # --- Step 2 (follow-up phase): no retrieval, no medicines, only ask a question.
+        if in_followup_phase:
+            yield ChatStreamEvent("triage", {
+                "label": "FOLLOWUP",
+                "rationale": f"Colectare informații (întrebarea {user_turn_count}/2).",
+                "recommended_action_ro": "",
+                "confidence": 0.0,
+                "red_flags": [],
+            })
+            async for ev in self._stream_llm_yielding(
+                history=history,
+                system=system_followup(turn_index=user_turn_count),
+            ):
+                yield ev
+            yield ChatStreamEvent("done", {"used_llm": True, "phase": "followup"})
+            return
+
+        # --- Step 3 (recommendation phase): full retrieval + grounded LLM.
+        # Concatenate ALL user turns so retrieval sees the accumulated context
+        # ("burta + de două zile + diaree fără febră"), not just the last reply.
+        # Mitigates BM25's lack of negation handling and surfaces the dominant
+        # symptom theme.
+        retrieval_query = " ".join(m.text for m in history if m.role == "user").strip()
         decision = self.retrieval.advise(
-            last_user.text,
+            retrieval_query,
             top_k_medicines=TOP_K_MEDICINES,
             otc_only=True,
         )
-
-        # Always emit triage immediately so UI can paint label + red-flags
-        # before the LLM stream begins.
         yield ChatStreamEvent("triage", {
             "label": decision.label,
             "rationale": decision.rationale,
@@ -93,39 +138,37 @@ class ConversationService:
             "confidence": decision.confidence,
             "red_flags": [
                 {
-                    "name": rf.name,
-                    "category": rf.category,
-                    "description": rf.description,
-                    "severity": rf.severity,
+                    "name": rf.name, "category": rf.category,
+                    "description": rf.description, "severity": rf.severity,
                     "matched_pattern": rf.matched_pattern,
                 }
                 for rf in decision.red_flags
             ],
         })
 
-        # Step 3a: emergency short-circuit. No LLM in safety path.
-        if decision.label == "EMERGENCY":
-            yield ChatStreamEvent("done", {"used_llm": False})
-            return
-
-        # Step 3b: serialize medicines for the UI card stack regardless of LLM output.
         medicines_payload = [_medicine_to_dto(h) for h in decision.medicine_hits]
         yield ChatStreamEvent("medicines", {"items": medicines_payload})
 
-        # Step 4: LLM stream, grounded on the retrieved evidence.
+        async for ev in self._stream_llm_yielding(
+            history=history,
+            system=system_with_evidence(decision.medicine_hits),
+        ):
+            yield ev
+        yield ChatStreamEvent("done", {"used_llm": True, "phase": "recommend"})
+
+    async def _stream_llm_yielding(
+        self,
+        history: list[ChatMessageIn],
+        system: str,
+    ) -> AsyncIterator[ChatStreamEvent]:
         trimmed = self._trim_history(history)
         contents = build_history([{"role": m.role, "text": m.text} for m in trimmed])
-        system = system_with_evidence(decision.medicine_hits)
-
         try:
             async for chunk in self.llm.stream(system_instruction=system, contents=contents):
                 yield ChatStreamEvent("token", {"text": chunk})
         except Exception as exc:
             log.exception("LLM stream failed")
             yield ChatStreamEvent("error", {"message": str(exc)[:200]})
-            return
-
-        yield ChatStreamEvent("done", {"used_llm": True})
 
 
 def _medicine_to_dto(hit: MedicineHit) -> dict:
