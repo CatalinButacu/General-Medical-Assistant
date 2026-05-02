@@ -4,16 +4,33 @@
  */
 
 /**
- * Chat message structure (UI-only).
+ * Chat message structure (UI-only). Assistant messages are populated
+ * incrementally from the /chat SSE stream:
+ *   - `triage`     arrives first (label, red_flags, recommended_action)
+ *   - `medicines`  arrives next (skipped on EMERGENCY)
+ *   - `text`       grows token-by-token from `token` events
+ *   - `isStreaming` flips false on `done`
  */
 export interface Message {
     id: string;
     sender: 'user' | 'ai';
     timestamp: Date;
-    /** Free text used for the user's outgoing message and welcome bubble. */
     text?: string;
-    /** Structured AI response from /advise. When set, render the rich card. */
-    advise?: AdviseResponse;
+    triage?: TriageEvent;
+    medicines?: MedicineDTO[];
+    isStreaming?: boolean;
+    error?: string;
+}
+
+/**
+ * Triage payload emitted by the backend SSE stream.
+ */
+export interface TriageEvent {
+    label: TriageLabel;
+    rationale: string;
+    recommended_action_ro: string;
+    confidence: number;
+    red_flags: RedFlagDTO[];
 }
 
 /**

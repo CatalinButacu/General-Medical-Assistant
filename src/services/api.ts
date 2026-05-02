@@ -11,6 +11,11 @@
 
 import type { AdviseRequest, AdviseResponse, ManifestResponse } from '../types';
 
+export type ChatRole = 'user' | 'assistant' | 'system';
+export interface ChatTurn { role: ChatRole; text: string; }
+export type ChatEventKind = 'triage' | 'medicines' | 'token' | 'done' | 'error';
+export type ChatEventHandler = (kind: ChatEventKind, payload: any) => void;
+
 const RAW_BACKEND = import.meta.env.VITE_BACKEND_URL ?? '';
 export const API_BASE_URL = RAW_BACKEND.replace(/\/$/, '');
 
@@ -66,6 +71,57 @@ export async function checkHealth(): Promise<boolean> {
 export async function getManifest(): Promise<ManifestResponse> {
     const res = await fetch(endpoint('/manifest'), { method: 'GET' });
     return jsonOrThrow<ManifestResponse>(res);
+}
+
+/**
+ * Streaming chat. Calls the SSE-format `POST /chat` and invokes onEvent
+ * for every parsed event. Resolves when the stream ends cleanly,
+ * rejects on transport / parse errors. The signal lets callers cancel
+ * (e.g. user navigates away mid-stream).
+ */
+export async function streamChat(
+    messages: ChatTurn[],
+    onEvent: ChatEventHandler,
+    signal?: AbortSignal,
+): Promise<void> {
+    const res = await fetch(endpoint('/chat'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages }),
+        signal,
+    });
+    if (!res.ok) {
+        const body = await res.text().catch(() => '');
+        throw new Error(`HTTP ${res.status}: ${body || res.statusText}`);
+    }
+    if (!res.body) throw new Error('streaming response has no body');
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        // SSE events are separated by a blank line; each event has
+        // an `event: <kind>` line and one or more `data: <json>` lines.
+        let sep: number;
+        while ((sep = buffer.indexOf('\n\n')) !== -1) {
+            const raw = buffer.slice(0, sep);
+            buffer = buffer.slice(sep + 2);
+            const eventMatch = raw.match(/^event: (\S+)/m);
+            const dataMatch = raw.match(/^data: (.+)$/m);
+            if (!eventMatch || !dataMatch) continue;
+            const kind = eventMatch[1] as ChatEventKind;
+            try {
+                onEvent(kind, JSON.parse(dataMatch[1]));
+            } catch {
+                onEvent('error', { message: 'malformed SSE payload' });
+            }
+        }
+    }
 }
 
 /**

@@ -14,26 +14,30 @@ import {
     X,
     Zap,
 } from 'lucide-react';
-import { advise, checkHealth, isApiConfigured } from '../services/api';
-import type { AdviseResponse, MedicineDTO, Message, RedFlagDTO } from '../types';
+import { checkHealth, isApiConfigured, streamChat } from '../services/api';
+import type { ChatTurn } from '../services/api';
+import type { MedicineDTO, Message, RedFlagDTO, TriageEvent } from '../types';
 
-const QUICK_QUERIES: { label: string; query: string; icon: typeof Sparkles }[] = [
-    { label: 'durere de cap',     query: 'mă doare capul și am febră',                        icon: Sparkles },
-    { label: 'tuse productivă',   query: 'tuse productivă cu secreții',                       icon: Sparkles },
-    { label: 'nas înfundat',      query: 'nas înfundat de la răceală',                        icon: Sparkles },
-    { label: 'arsuri stomac',     query: 'am arsuri la stomac',                                icon: Sparkles },
-    { label: 'alergie',           query: 'alergie cu mâncărime',                               icon: Sparkles },
-    { label: 'diaree',            query: 'mă doare burta și am diaree',                        icon: Sparkles },
+const QUICK_QUERIES = [
+    { label: 'durere de cap',     query: 'mă doare capul și am febră' },
+    { label: 'tuse productivă',   query: 'tuse productivă cu secreții' },
+    { label: 'nas înfundat',      query: 'nas înfundat de la răceală' },
+    { label: 'arsuri stomac',     query: 'am arsuri la stomac' },
+    { label: 'alergie',           query: 'alergie cu mâncărime' },
+    { label: 'diaree',            query: 'mă doare burta și am diaree' },
 ];
+
+const HISTORY_TURNS_TO_SEND = 6;
 
 export default function Chat() {
     const navigate = useNavigate();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
+    const abortRef = useRef<AbortController | null>(null);
 
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputMessage, setInputMessage] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+    const [isStreaming, setIsStreaming] = useState(false);
     const [isOnline, setIsOnline] = useState<boolean | null>(null);
 
     useEffect(() => {
@@ -42,62 +46,98 @@ export default function Chat() {
             sender: 'ai',
             timestamp: new Date(),
             text: isApiConfigured()
-                ? 'Salut. Descrie simptomele tale sau întreabă despre un medicament. Răspund din nomenclatorul ANMDM.'
-                : 'Backend not configured. Set VITE_BACKEND_URL in .env.local — see README.',
+                ? 'Salut. Spune-mi ce simptome ai sau ce medicament cauți. Răspund din nomenclatorul ANMDM.'
+                : 'Backend not configured. Set VITE_BACKEND_URL in .env.local.',
         }]);
         let cancelled = false;
         checkHealth().then(ok => { if (!cancelled) setIsOnline(ok); });
-        return () => { cancelled = true; };
+        return () => { cancelled = true; abortRef.current?.abort(); };
     }, []);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages, isLoading]);
+    }, [messages]);
 
     const sendMessage = async (queryText?: string) => {
         const text = (queryText ?? inputMessage).trim();
-        if (!text || isLoading) return;
+        if (!text || isStreaming) return;
 
-        setMessages(prev => [...prev, {
+        const userMsg: Message = {
             id: `u-${Date.now()}`,
             sender: 'user',
             timestamp: new Date(),
             text,
-        }]);
+        };
+        const aiId = `a-${Date.now()}`;
+        const aiMsg: Message = {
+            id: aiId,
+            sender: 'ai',
+            timestamp: new Date(),
+            text: '',
+            isStreaming: true,
+        };
+        setMessages(prev => [...prev, userMsg, aiMsg]);
         setInputMessage('');
-        setIsLoading(true);
+        setIsStreaming(true);
 
-        try {
-            const response = await advise({ query: text, top_k: 5, otc_only: true });
-            setIsOnline(true);
-            setMessages(prev => [...prev, {
-                id: `a-${Date.now()}`,
-                sender: 'ai',
-                timestamp: new Date(),
-                advise: response,
-            }]);
-        } catch (err: any) {
-            setIsOnline(false);
-            setMessages(prev => [...prev, {
-                id: `a-${Date.now()}`,
-                sender: 'ai',
-                timestamp: new Date(),
-                text: `Backend indisponibil. ${err?.message ?? 'Eroare necunoscută'}.\n\nVerifică VITE_BACKEND_URL și că serverul uvicorn rulează.`,
-            }]);
-        } finally {
-            setIsLoading(false);
-        }
+        // Build the conversation payload from the freshly-pushed history,
+        // dropping the welcome bubble and any in-progress streaming placeholder.
+        setMessages(latest => {
+            const cleanForSend: ChatTurn[] = latest
+                .filter(m => m.id !== 'welcome' && m.id !== aiId && (m.text ?? '').trim())
+                .slice(-HISTORY_TURNS_TO_SEND)
+                .map(m => ({
+                    role: m.sender === 'user' ? 'user' : 'assistant',
+                    text: (m.text ?? '').trim(),
+                }));
+
+            const controller = new AbortController();
+            abortRef.current = controller;
+
+            (async () => {
+                try {
+                    await streamChat(cleanForSend, (kind, payload) => {
+                        setMessages(curr => curr.map(m => {
+                            if (m.id !== aiId) return m;
+                            switch (kind) {
+                                case 'triage':
+                                    return { ...m, triage: payload as TriageEvent };
+                                case 'medicines':
+                                    return { ...m, medicines: (payload?.items ?? []) as MedicineDTO[] };
+                                case 'token':
+                                    return { ...m, text: (m.text ?? '') + (payload?.text ?? '') };
+                                case 'done':
+                                    return { ...m, isStreaming: false };
+                                case 'error':
+                                    return { ...m, isStreaming: false, error: payload?.message ?? 'unknown error' };
+                                default:
+                                    return m;
+                            }
+                        }));
+                        if (kind === 'done' || kind === 'error') {
+                            setIsOnline(true);
+                            setIsStreaming(false);
+                        }
+                    }, controller.signal);
+                } catch (err: any) {
+                    setIsOnline(false);
+                    setIsStreaming(false);
+                    setMessages(curr => curr.map(m =>
+                        m.id === aiId ? { ...m, isStreaming: false, error: err?.message ?? 'unknown' } : m
+                    ));
+                }
+            })();
+
+            return latest;
+        });
     };
 
-    const handleQuickQuery = (query: string) => {
-        setInputMessage(query);
-        sendMessage(query);
+    const handleQuickQuery = (q: string) => {
+        setInputMessage(q);
+        sendMessage(q);
     };
 
     return (
-        // Chat fills the App's <main> content area (which already reserves
-        // pb-24 for MobileNavigation), so input sits right above the bottom nav.
-        // Background is inherited from App's gradient.
         <div className="h-full flex flex-col">
             <header className="bg-white border-b border-gray-100 shadow-sm flex-shrink-0">
                 <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
@@ -141,24 +181,7 @@ export default function Chat() {
                         <MessageBubble key={message.id} message={message} />
                     ))}
 
-                    {isLoading && (
-                        <div className="flex justify-start">
-                            <div className="flex items-start space-x-3">
-                                <div className="w-8 h-8 rounded-xl bg-white border border-gray-100 flex items-center justify-center flex-shrink-0">
-                                    <Loader2 className="animate-spin text-blue-500" size={16} />
-                                </div>
-                                <div className="bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm">
-                                    <div className="flex space-x-1">
-                                        <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" />
-                                        <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:0.2s]" />
-                                        <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:0.4s]" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {messages.length === 1 && !isLoading && (
+                    {messages.length === 1 && !isStreaming && (
                         <div className="pt-6 animate-in fade-in duration-700">
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] ml-1">
@@ -167,14 +190,14 @@ export default function Chat() {
                                 <div className="h-[1px] flex-1 bg-gray-100 ml-4" />
                             </div>
                             <div className="grid grid-cols-2 gap-3">
-                                {QUICK_QUERIES.map(({ label, query, icon: Icon }) => (
+                                {QUICK_QUERIES.map(({ label, query }) => (
                                     <button
                                         key={label}
                                         onClick={() => handleQuickQuery(query)}
                                         className="text-left p-3 bg-white border border-gray-100 rounded-2xl hover:border-blue-200 hover:shadow-md transition-all active:scale-[0.98]"
                                     >
                                         <div className="flex items-center mb-1">
-                                            <Icon className="text-blue-500 mr-2 flex-shrink-0" size={14} />
+                                            <Sparkles className="text-blue-500 mr-2 flex-shrink-0" size={14} />
                                             <span className="text-xs font-bold text-gray-700 capitalize">{label}</span>
                                         </div>
                                         <p className="text-[10px] text-gray-400 font-medium truncate">{query}</p>
@@ -204,21 +227,21 @@ export default function Chat() {
                             }}
                             placeholder="Descrie simptomele…"
                             className="w-full pl-4 pr-12 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 text-sm resize-none transition-all placeholder:text-gray-400"
-                            disabled={isLoading}
+                            disabled={isStreaming}
                         />
                         <button
                             onClick={() => sendMessage()}
-                            disabled={!inputMessage.trim() || isLoading}
+                            disabled={!inputMessage.trim() || isStreaming}
                             className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-md active:scale-90"
                             aria-label="Trimite"
                         >
-                            {isLoading ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
+                            {isStreaming ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
                         </button>
                     </div>
                     <div className="flex items-center justify-center mt-2 space-x-1.5">
                         <AlertTriangle className="text-amber-500" size={10} />
                         <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tight">
-                            Demo educativ • Nu este sfat medical
+                            Demo educativ • Verifică recomandările cu farmacistul
                         </p>
                     </div>
                 </div>
@@ -243,19 +266,15 @@ function MessageBubble({ message }: { message: Message }) {
                     }
                 </div>
 
-                <div className="flex-1 min-w-0">
-                    {message.advise ? (
-                        <AdviseCard advise={message.advise} />
-                    ) : (
-                        <div className={`rounded-2xl px-4 py-3 shadow-sm ${
-                            isUser
-                                ? 'bg-gradient-to-br from-blue-600 to-indigo-700 text-white'
-                                : 'bg-white border border-gray-100 text-gray-800'
-                        }`}>
+                <div className="flex-1 min-w-0 space-y-2">
+                    {isUser ? (
+                        <div className="rounded-2xl px-4 py-3 shadow-sm bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
                             <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">{message.text}</p>
                         </div>
+                    ) : (
+                        <AssistantMessage message={message} />
                     )}
-                    <div className={`text-[9px] font-bold uppercase tracking-tight text-gray-300 mt-1 ${isUser ? 'text-right pr-1' : 'pl-1'}`}>
+                    <div className={`text-[9px] font-bold uppercase tracking-tight text-gray-300 ${isUser ? 'text-right pr-1' : 'pl-1'}`}>
                         {time}
                     </div>
                 </div>
@@ -264,17 +283,62 @@ function MessageBubble({ message }: { message: Message }) {
     );
 }
 
-function AdviseCard({ advise }: { advise: AdviseResponse }) {
-    if (advise.label === 'EMERGENCY') {
-        return <EmergencyCard advise={advise} />;
+function AssistantMessage({ message }: { message: Message }) {
+    const triage = message.triage;
+
+    // Emergency short-circuits the whole layout — no LLM text, no medicine grid.
+    if (triage?.label === 'EMERGENCY') {
+        return <EmergencyCard triage={triage} />;
     }
-    if (advise.label === 'UNCERTAIN') {
-        return <UncertainCard advise={advise} />;
-    }
-    return <OtcSafeCard advise={advise} />;
+
+    return (
+        <>
+            {/* The LLM text bubble. Always visible (even if just a typing indicator). */}
+            <TextBubble
+                text={message.text}
+                isStreaming={!!message.isStreaming}
+                error={message.error}
+            />
+            {triage?.label === 'UNCERTAIN' && triage.recommended_action_ro && (
+                <UncertainAction triage={triage} />
+            )}
+            {message.medicines && message.medicines.length > 0 && (
+                <MedicineGrid medicines={message.medicines} />
+            )}
+        </>
+    );
 }
 
-function EmergencyCard({ advise }: { advise: AdviseResponse }) {
+function TextBubble({ text, isStreaming, error }: { text?: string; isStreaming: boolean; error?: string }) {
+    if (error) {
+        return (
+            <div className="rounded-2xl px-4 py-3 shadow-sm bg-red-50 border border-red-200 text-red-800 text-sm">
+                {error}
+            </div>
+        );
+    }
+    if (!text && isStreaming) {
+        return (
+            <div className="rounded-2xl px-4 py-3 shadow-sm bg-white border border-gray-100">
+                <div className="flex space-x-1">
+                    <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" />
+                    <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:0.2s]" />
+                    <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:0.4s]" />
+                </div>
+            </div>
+        );
+    }
+    return (
+        <div className="rounded-2xl px-4 py-3 shadow-sm bg-white border border-gray-100 text-gray-800">
+            <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">
+                {text}
+                {isStreaming && <span className="inline-block w-1 h-4 ml-0.5 bg-blue-500 align-middle animate-pulse" />}
+            </p>
+        </div>
+    );
+}
+
+function EmergencyCard({ triage }: { triage: TriageEvent }) {
     return (
         <div className="rounded-2xl border-2 border-red-300 bg-gradient-to-br from-red-50 to-white shadow-md overflow-hidden">
             <div className="bg-red-600 text-white px-4 py-3 flex items-center justify-between">
@@ -282,13 +346,10 @@ function EmergencyCard({ advise }: { advise: AdviseResponse }) {
                     <AlertTriangle size={20} />
                     <span className="font-bold text-sm uppercase tracking-wider">URGENȚĂ</span>
                 </div>
-                <span className="text-[10px] font-mono opacity-80">{advise.latency_ms.toFixed(0)} ms</span>
             </div>
             <div className="p-4 space-y-3">
-                <p className="text-sm font-bold text-red-900 leading-relaxed">
-                    {advise.recommended_action_ro}
-                </p>
-                {advise.red_flags.map(flag => (
+                <p className="text-sm font-bold text-red-900 leading-relaxed">{triage.recommended_action_ro}</p>
+                {triage.red_flags.map(flag => (
                     <RedFlagBadge key={flag.name} flag={flag} />
                 ))}
                 <a
@@ -298,9 +359,7 @@ function EmergencyCard({ advise }: { advise: AdviseResponse }) {
                     <Phone size={18} />
                     <span>Sună 112</span>
                 </a>
-                <p className="text-[10px] text-red-700 italic text-center px-2 leading-relaxed">
-                    {advise.rationale}
-                </p>
+                <p className="text-[10px] text-red-700 italic text-center px-2 leading-relaxed">{triage.rationale}</p>
             </div>
         </div>
     );
@@ -322,67 +381,34 @@ function RedFlagBadge({ flag }: { flag: RedFlagDTO }) {
     );
 }
 
-function UncertainCard({ advise }: { advise: AdviseResponse }) {
+function UncertainAction({ triage }: { triage: TriageEvent }) {
     return (
-        <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white shadow-sm overflow-hidden">
-            <div className="bg-amber-100 px-4 py-2.5 flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                    <AlertTriangle size={14} className="text-amber-700" />
-                    <span className="font-bold text-xs text-amber-900 uppercase tracking-wider">Nu sunt sigur</span>
-                </div>
-                <span className="text-[10px] font-mono text-amber-700 opacity-80">{advise.latency_ms.toFixed(0)} ms</span>
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start">
+            <AlertTriangle size={14} className="text-amber-600 mr-2 mt-0.5 flex-shrink-0" />
+            <p className="text-[11px] text-amber-800 leading-relaxed">{triage.recommended_action_ro}</p>
+        </div>
+    );
+}
+
+function MedicineGrid({ medicines }: { medicines: MedicineDTO[] }) {
+    return (
+        <div className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100 px-4 py-2 flex items-center">
+                <Sparkles size={12} className="text-green-600 mr-2" />
+                <span className="font-bold text-[11px] text-green-900 uppercase tracking-wider">
+                    Medicamente · {medicines.length}
+                </span>
             </div>
-            <div className="p-4 space-y-3">
-                <p className="text-sm text-amber-900 leading-relaxed">
-                    {advise.recommended_action_ro || 'Vă rugăm să consultați un farmacist.'}
-                </p>
-                <p className="text-[11px] text-amber-700 italic">{advise.rationale}</p>
-                {advise.medicines.length > 0 && (
-                    <div className="pt-2 border-t border-amber-200">
-                        <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-2">
-                            Rezultate slabe (referință)
-                        </p>
-                        <div className="space-y-2">
-                            {advise.medicines.slice(0, 3).map(med => (
-                                <MedicineRow key={`${med.trade_name}-${med.atc_code}`} med={med} compact />
-                            ))}
-                        </div>
-                    </div>
-                )}
+            <div className="p-3 space-y-2.5">
+                {medicines.map(med => (
+                    <MedicineRow key={`${med.trade_name}-${med.atc_code}`} med={med} />
+                ))}
             </div>
         </div>
     );
 }
 
-function OtcSafeCard({ advise }: { advise: AdviseResponse }) {
-    return (
-        <div className="space-y-3">
-            <div className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
-                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100 px-4 py-2.5 flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                        <Sparkles size={14} className="text-green-600" />
-                        <span className="font-bold text-xs text-green-900 uppercase tracking-wider">Recomandare OTC</span>
-                    </div>
-                    <span className="text-[10px] font-mono text-gray-400">{advise.latency_ms.toFixed(0)} ms</span>
-                </div>
-                <div className="p-3 space-y-2.5">
-                    {advise.medicines.map(med => (
-                        <MedicineRow key={`${med.trade_name}-${med.atc_code}`} med={med} />
-                    ))}
-                    <p className="text-[10px] text-gray-400 italic px-1 pt-1">{advise.rationale}</p>
-                </div>
-            </div>
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-start">
-                <AlertTriangle size={14} className="text-amber-600 mr-2 mt-0.5 flex-shrink-0" />
-                <p className="text-[11px] text-amber-800 leading-relaxed">
-                    {advise.recommended_action_ro || 'Consultați farmacistul dacă simptomele persistă.'}
-                </p>
-            </div>
-        </div>
-    );
-}
-
-function MedicineRow({ med, compact = false }: { med: MedicineDTO; compact?: boolean }) {
+function MedicineRow({ med }: { med: MedicineDTO }) {
     const rxBadgeColor = med.rx_status === 'OTC'
         ? 'bg-green-100 text-green-700'
         : med.rx_status === 'MIXED'
@@ -402,15 +428,10 @@ function MedicineRow({ med, compact = false }: { med: MedicineDTO; compact?: boo
             {med.category && (
                 <div className="text-[11px] text-blue-600 font-semibold mt-1">{med.category}</div>
             )}
-            {!compact && med.lay_symptoms.length > 0 && (
+            {med.lay_symptoms.length > 0 && (
                 <div className="text-[11px] text-gray-600 mt-1.5 leading-relaxed">
                     <span className="text-gray-400">pentru:</span> {med.lay_symptoms.join(', ')}
                 </div>
-            )}
-            {!compact && med.best_chunk_snippet && (
-                <p className="text-[11px] text-gray-500 mt-2 leading-snug line-clamp-3 italic">
-                    {med.best_chunk_snippet}…
-                </p>
             )}
             <div className="flex items-center gap-3 mt-2">
                 {med.prospect_url && (

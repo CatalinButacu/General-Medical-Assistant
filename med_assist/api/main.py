@@ -21,9 +21,11 @@ from typing import Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 
+from med_assist.conversation import ChatMessageIn, ConversationService
+from med_assist.llm.client import GeminiClient
 from med_assist.service import RetrievalService
 
 app = FastAPI(
@@ -40,6 +42,7 @@ app.add_middleware(
 )
 
 _service: Optional[RetrievalService] = None
+_conversation: Optional[ConversationService] = None
 
 
 def get_service() -> RetrievalService:
@@ -47,6 +50,13 @@ def get_service() -> RetrievalService:
     if _service is None:
         _service = RetrievalService()
     return _service
+
+
+def get_conversation() -> ConversationService:
+    global _conversation
+    if _conversation is None:
+        _conversation = ConversationService(retrieval=get_service(), llm=GeminiClient())
+    return _conversation
 
 
 class AdviseRequest(BaseModel):
@@ -147,6 +157,49 @@ def advise(req: AdviseRequest) -> AdviseResponse:
     decision = svc.advise(req.query, top_k_medicines=req.top_k, otc_only=req.otc_only)
     latency_ms = (time.time() - t0) * 1000
     return _to_dto(decision, latency_ms)
+
+
+# ───────────────── /chat — streaming conversational endpoint ─────────────────
+
+
+class ChatMessage(BaseModel):
+    role: str = Field(..., pattern="^(user|assistant|system)$")
+    text: str = Field(..., min_length=1, max_length=2000)
+
+
+class ChatRequest(BaseModel):
+    messages: list[ChatMessage] = Field(..., min_length=1, max_length=20)
+
+
+@app.post("/chat")
+async def chat(req: ChatRequest):
+    """
+    Server-Sent Events stream of conversation events. Frontend reads with
+    fetch+ReadableStream and splits on '\\n\\n'.
+
+    Event kinds (one JSON payload per event):
+      triage     — emitted first, contains label + red_flags + action
+      medicines  — list of structured medicine cards (skipped on EMERGENCY)
+      token      — text fragment from the LLM (skipped on EMERGENCY)
+      done       — final event, indicates clean stream end
+      error      — on failure
+    """
+    convo = get_conversation()
+    history = [ChatMessageIn(role=m.role, text=m.text) for m in req.messages]
+
+    async def sse_stream():
+        try:
+            async for event in convo.stream_turn(history):
+                yield f"event: {event.kind}\ndata: {json.dumps(event.payload, ensure_ascii=False)}\n\n"
+        except Exception as exc:
+            payload = {"message": f"server error: {str(exc)[:200]}"}
+            yield f"event: error\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"
+
+    return StreamingResponse(
+        sse_stream(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 _INDEX_HTML = (Path(__file__).resolve().parent / "static" / "index.html").read_text(encoding="utf-8") \
