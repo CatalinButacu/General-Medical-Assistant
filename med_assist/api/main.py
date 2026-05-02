@@ -19,6 +19,13 @@ import time
 from pathlib import Path
 from typing import Optional
 
+# Load .env.local before anything that reads env vars (e.g. GOOGLE_API_KEY).
+# Works the same on Windows, macOS, Linux — no shell sourcing needed.
+from dotenv import load_dotenv
+_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(_ROOT / ".env.local")
+load_dotenv(_ROOT / ".env")
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
