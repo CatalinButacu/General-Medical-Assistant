@@ -95,9 +95,10 @@ export default function Chat() {
     };
 
     return (
-        // fixed inset-0 escapes the App's flex layout that adds pb-24 + scroll wrapper.
-        // Without this the chat input gets pushed behind the mobile nav.
-        <div className="fixed inset-0 z-50 flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
+        // Chat fills the App's <main> content area (which already reserves
+        // pb-24 for MobileNavigation), so input sits right above the bottom nav.
+        // Background is inherited from App's gradient.
+        <div className="h-full flex flex-col">
             <header className="bg-white border-b border-gray-100 shadow-sm flex-shrink-0">
                 <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
                     <button
