@@ -104,8 +104,21 @@ export default function Chat() {
                                     return { ...m, triage: payload as TriageEvent };
                                 case 'medicines':
                                     return { ...m, medicines: (payload?.items ?? []) as MedicineDTO[] };
-                                case 'token':
-                                    return { ...m, text: (m.text ?? '') + (payload?.text ?? '') };
+                                case 'token': {
+                                    // Some LLM SDKs (incl. Gemini) sometimes emit
+                                    // cumulative chunks where each one includes
+                                    // everything so far rather than just the delta.
+                                    // Detect that and replace instead of appending,
+                                    // so we don't render "hello hello world" when
+                                    // the stream sends "hello" then "hello world".
+                                    const incoming = (payload?.text ?? '').toString();
+                                    const existing = m.text ?? '';
+                                    if (!incoming || incoming === existing) return m;
+                                    if (incoming.length > existing.length && incoming.startsWith(existing)) {
+                                        return { ...m, text: incoming };
+                                    }
+                                    return { ...m, text: existing + incoming };
+                                }
                                 case 'done':
                                     return { ...m, isStreaming: false };
                                 case 'error':
