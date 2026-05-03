@@ -71,28 +71,6 @@ export interface MedicineDTO {
 }
 
 /**
- * Full structured advice response from POST /advise.
- */
-export interface AdviseResponse {
-    label: TriageLabel;
-    rationale: string;
-    recommended_action_ro: string;
-    confidence: number;
-    red_flags: RedFlagDTO[];
-    medicines: MedicineDTO[];
-    latency_ms: number;
-}
-
-/**
- * Request body for POST /advise.
- */
-export interface AdviseRequest {
-    query: string;
-    otc_only?: boolean;
-    top_k?: number;
-}
-
-/**
  * Index manifest from GET /manifest.
  */
 export interface ManifestResponse {

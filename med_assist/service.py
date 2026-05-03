@@ -1,14 +1,12 @@
 """
-Top-level retrieval service: load indices once, expose a query() that
-returns medicine-level recommendations with retrieval provenance.
+Top-level retrieval service: load FAISS+BM25 indices once, expose
+`advise()` — the single entry point that runs triage, retrieval and
+returns a TriageDecision the chatbot UI consumes.
 
-Flow:
-  query -> dense + sparse retrieve -> RRF fusion -> filter
-        -> dedup chunks to medicines -> top-N medicines
-
-Filtering options at query time:
-  rx_filter:        keep only medicines with rx_status in this set
-  exclude_chunks:   skip chunk types (e.g. don't surface contraindications text)
+Pipeline (advise):
+  query -> dense + sparse retrieve -> dedup-by-medicine within each
+        -> Reciprocal Rank Fusion -> rx-status filter -> group by medicine
+        -> classify (EMERGENCY / OTC_SAFE / UNCERTAIN with sparse-signal gate)
 """
 
 from __future__ import annotations
@@ -21,7 +19,7 @@ from typing import Optional
 
 import faiss
 
-from med_assist.data.models import Chunk, Medicine, MedicineHit, RetrievalHit
+from med_assist.data.models import Chunk, Medicine, MedicineHit
 from med_assist.data.loader import load_medicines
 from med_assist.index.builder import INDEX_DIR
 from med_assist.retrieval.dense import DenseRetriever
@@ -83,69 +81,13 @@ class RetrievalService:
             out.append(h)
         return out
 
-    def query(
+    def _retrieve(
         self,
         query: str,
-        top_k_chunks: int = 50,
-        top_k_medicines: int = 10,
-        rx_filter: Optional[set[str]] = None,
-        exclude_chunk_types: Optional[set[str]] = None,
-    ) -> list[MedicineHit]:
-        dense_hits = self._dedup_by_medicine(self.dense.search(query, top_k=top_k_chunks * 2))
-        sparse_hits = self._dedup_by_medicine(self.sparse.search(query, top_k=top_k_chunks * 2))
-        fused = reciprocal_rank_fusion([dense_hits, sparse_hits], top_k=top_k_chunks)
-
-        if exclude_chunk_types:
-            fused = [h for h in fused if h.chunk.chunk_type not in exclude_chunk_types]
-
-        if rx_filter is not None:
-            fused = [h for h in fused if h.chunk.metadata.get("rx_status") in rx_filter]
-
-        # Dedup chunks to medicine level — keep best supporting chunk per medicine
-        by_med: dict[str, dict] = {}
-        for hit in fused:
-            mid = hit.chunk.medicine_id
-            if mid not in by_med:
-                by_med[mid] = {"score": hit.score, "best": hit.chunk, "supporting": [hit.chunk]}
-            else:
-                by_med[mid]["supporting"].append(hit.chunk)
-                if hit.score > by_med[mid]["score"]:
-                    by_med[mid]["score"] = hit.score
-                    by_med[mid]["best"] = hit.chunk
-
-        ordered = sorted(by_med.items(), key=lambda kv: kv[1]["score"], reverse=True)[:top_k_medicines]
-        out: list[MedicineHit] = []
-        for mid, entry in ordered:
-            med = self._medicines_by_id.get(mid)
-            if med is None:
-                continue
-            out.append(MedicineHit(
-                medicine=med,
-                score=entry["score"],
-                best_chunk=entry["best"],
-                supporting_chunks=entry["supporting"],
-            ))
-        return out
-
-    def advise(
-        self,
-        query: str,
-        top_k_medicines: int = 5,
-        otc_only: bool = True,
-    ) -> TriageDecision:
-        """
-        End-to-end pipeline: triage red-flag check, then retrieval if safe,
-        then triage confidence check on retrieval (gated by sparse-signal).
-        """
-        early = classify(query, medicine_hits=None)
-        if early.label == "EMERGENCY":
-            return early
-
-        rx_filter = {"OTC", "MIXED"} if otc_only else None
-
-        # Run retrievers directly so we can track sparse provenance.
-        # If BM25 returns zero hits, the query has no real Romanian medical
-        # terms (gibberish, off-topic) and any dense "coherence" is noise.
+        top_k_medicines: int,
+        rx_filter: Optional[set[str]],
+    ) -> tuple[list[MedicineHit], bool]:
+        """Run dense + sparse, fuse, group by medicine. Returns (hits, sparse_signal)."""
         top_k_chunks = max(top_k_medicines * 4, 50)
         dense_hits = self._dedup_by_medicine(self.dense.search(query, top_k=top_k_chunks * 2))
         sparse_hits = self._dedup_by_medicine(self.sparse.search(query, top_k=top_k_chunks * 2))
@@ -178,5 +120,19 @@ class RetrievalService:
                 best_chunk=entry["best"],
                 supporting_chunks=entry["supporting"],
             ))
+        return med_hits, sparse_signal
 
+    def advise(
+        self,
+        query: str,
+        top_k_medicines: int = 5,
+        otc_only: bool = True,
+    ) -> TriageDecision:
+        """End-to-end pipeline: triage red-flag scan, retrieval, classify."""
+        early = classify(query, medicine_hits=None)
+        if early.label == "EMERGENCY":
+            return early
+
+        rx_filter = {"OTC", "MIXED"} if otc_only else None
+        med_hits, sparse_signal = self._retrieve(query, top_k_medicines, rx_filter)
         return classify(query, medicine_hits=med_hits, sparse_signal=sparse_signal)
