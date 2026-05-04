@@ -1,78 +1,53 @@
-name: Build and Deploy
+name: Build and deploy frontend (GitHub Pages)
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-frontend:
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-    
-    - name: Install dependencies
-      run: npm ci
-    
-    - name: Type check
-      run: npm run check
-      continue-on-error: true
-    
-    - name: Build frontend
-      env:
-        VITE_HF_API_URL: ${{ secrets.HF_API_URL }}
-      run: npm run build
-    
-    - name: Upload build artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: ./dist
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run check
+        continue-on-error: true
+
+      - name: Build frontend
+        env:
+          # Public URL of the HF Space backend, e.g.
+          # https://catalinbutacu-med-assist.hf.space
+          VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
 
   deploy-pages:
     needs: build-frontend
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    
     permissions:
       pages: write
       id-token: write
-    
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    
     steps:
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
-
-  test-rag:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-    
-    - name: Install RAG dependencies
-      run: |
-        pip install -r rag_experiments/requirements.txt
-        pip install -r huggingface_space/requirements.txt
-    
-    - name: Verify data files exist
-      run: |
-        echo "Checking medicine database..."
-        ls -la huggingface_space/data/
-        python -c "import json; data = json.load(open('huggingface_space/data/comprehensive_medicines.json')); print(f'Loaded {len(data)} medicines')"
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

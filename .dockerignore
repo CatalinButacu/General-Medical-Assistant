@@ -1,0 +1,58 @@
+# Keep the Docker build context small — never ship the React app,
+# node_modules, raw PDFs, or local virtualenvs into the backend image.
+
+# Frontend (deployed separately to GitHub Pages)
+src/
+public/
+node_modules/
+dist/
+*.tsx
+*.ts
+!med_assist/**
+package.json
+package-lock.json
+tsconfig.json
+vite.config.ts
+tailwind.config.js
+postcss.config.js
+eslint.config.js
+.eslintcache
+index.html
+.flake8
+
+# Local environment + secrets
+.env
+.env.local
+.env.example
+
+# Local data not needed at runtime (Dockerfile rebuilds the corpus)
+data_acquisition/raw/pages/
+data_acquisition/raw/pdfs/
+data_acquisition/raw/cache_meta.json
+data_acquisition/processed/medicines_enriched.json
+data_acquisition/processed/rcp_parsed.json
+data_acquisition/processed/parse_report.json
+data_acquisition/processed/download_manifest.json
+data_acquisition/snapshots/
+data_acquisition/CHANGELOG.md
+
+# Pre-built local indices — Dockerfile rebuilds them deterministically
+med_assist/index/store/
+
+# Repo machinery
+.git/
+.github/
+.gitignore
+.gitattributes
+.dockerignore
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.idea/
+.vscode/
+
+# Project docs that don't matter at runtime
+DEPLOY.md
