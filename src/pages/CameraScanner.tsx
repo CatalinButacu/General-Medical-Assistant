@@ -2,12 +2,8 @@ import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, X, RotateCcw, Check, Loader2, AlertTriangle, Info } from 'lucide-react';
 import { toast } from 'sonner';
-import type { Medicine } from '../types';
-
-interface ScanResult extends Medicine {
-  confidence: number;
-  warnings?: string[];
-}
+import { scanMedicine } from '../services/api';
+import type { Medicine, ScanResponse } from '../types';
 
 export default function CameraScanner() {
   const navigate = useNavigate();
@@ -18,7 +14,7 @@ export default function CameraScanner() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [result, setResult] = useState<ScanResult | null>(null);
+  const [result, setResult] = useState<ScanResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const startCamera = useCallback(async () => {
@@ -75,25 +71,50 @@ export default function CameraScanner() {
     setIsAnalyzing(true);
     setError(null);
     try {
-      await new Promise(r => setTimeout(r, 1500));
-      const demoResult: ScanResult = {
-        name: 'Paracetamol 500mg',
-        genericName: 'Acetaminofen',
-        dosage: '500mg',
-        type: 'tablet',
-        description: 'Paracetamolul este un medicament folosit pentru ameliorarea durerii.',
-        confidence: 0.85,
-        warnings: ['Nu depășiți doza recomandată', 'Evitați consumul de alcool']
-      };
-      setResult(demoResult);
-      toast.success('Medicine identified (Demo)');
-    } catch (err) {
-      setError('Analysis failed.');
-      toast.error('Analysis failed');
+      const scan = await scanMedicine(capturedImage);
+      setResult(scan);
+      if (scan.matched) {
+        toast.success(`Identificat: ${scan.matched.trade_name}`);
+      } else if (scan.extracted.trade_name) {
+        toast.warning(`Detectat ${scan.extracted.trade_name}, dar nu e în baza ANMDM`);
+      } else {
+        toast.error('Nu am putut identifica medicamentul. Reîncearcă cu o imagine mai clară.');
+      }
+    } catch (err: any) {
+      setError(err?.message ?? 'Identificare eșuată.');
+      toast.error('Identificare eșuată');
     } finally {
       setIsAnalyzing(false);
     }
   }, [capturedImage]);
+
+  const navigateToCabinet = useCallback(() => {
+    if (!result) return;
+    // Build a Medicine-shaped object from the matched ANMDM record (or
+    // fall back to the raw OCR extraction if no corpus match).
+    const m = result.matched;
+    const e = result.extracted;
+    const cabinetMedicine: Medicine & { expirationDate?: string } = m
+      ? {
+          name: m.trade_name,
+          genericName: m.dci,
+          dosage: m.concentration || e.dosage || '',
+          type: (m.form || e.form || 'tablet').toLowerCase(),
+          category: m.category,
+          prescription_required: m.rx_status !== 'OTC',
+          rx: m.rx_status !== 'OTC',
+          symptoms: m.lay_symptoms,
+          url: m.prospect_url,
+          expirationDate: e.expiration_date ?? undefined,
+        }
+      : {
+          name: e.trade_name ?? 'Medicament necunoscut',
+          dosage: e.dosage ?? '',
+          type: (e.form ?? 'tablet').toLowerCase(),
+          expirationDate: e.expiration_date ?? undefined,
+        };
+    navigate('/cabinet', { state: { addMedicine: cabinetMedicine } });
+  }, [navigate, result]);
 
   const retake = () => { setCapturedImage(null); setResult(null); setError(null); startCamera(); };
 
@@ -151,27 +172,65 @@ export default function CameraScanner() {
         <div className="bg-white min-h-screen pt-20">
           <div className="max-w-md mx-auto p-4">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"><Check className="text-green-600" size={32} /></div>
-              <h2 className="text-xl font-bold">Medicine Identified</h2>
-              <p className="text-gray-500 text-sm">Confidence: {Math.round(result.confidence * 100)}%</p>
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${result.matched ? 'bg-green-100' : 'bg-amber-100'}`}>
+                {result.matched
+                  ? <Check className="text-green-600" size={32} />
+                  : <Info className="text-amber-600" size={32} />}
+              </div>
+              <h2 className="text-xl font-bold">
+                {result.matched ? 'Medicament identificat' : 'Detectare parțială'}
+              </h2>
+              <p className="text-gray-500 text-xs mt-1">
+                Încredere OCR: {Math.round(result.extracted.confidence * 100)}%
+                {result.matched && ` · potrivire ANMDM: ${result.matched.match_score.toFixed(2)}`}
+                {' · '}{result.latency_ms.toFixed(0)} ms
+              </p>
             </div>
-            <div className="bg-gray-50 rounded-xl p-6 mb-6">
-              <h3 className="text-lg font-bold">{result.name}</h3>
-              {result.genericName && <p className="text-gray-600 text-sm mb-2">Generic: {result.genericName}</p>}
-              <div className="flex justify-between text-sm py-2 border-b"><span>Dosage</span><b>{result.dosage}</b></div>
-              <div className="flex justify-between text-sm py-2 mb-4"><span>Type</span><b>{result.type}</b></div>
-              {result.description && <p className="text-gray-600 text-xs leading-relaxed">{result.description}</p>}
-            </div>
-            {result.warnings?.length && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-                <div className="flex items-center mb-2 text-amber-800 font-semibold"><AlertTriangle size={18} className="mr-2" /> Warnings</div>
-                {result.warnings.map((w, i) => <p key={i} className="text-amber-700 text-xs">• {w}</p>)}
+
+            {/* Matched ANMDM record (authoritative) — preferred */}
+            {result.matched && (
+              <div className="bg-gray-50 rounded-xl p-6 mb-4">
+                <h3 className="text-lg font-bold">{result.matched.trade_name}</h3>
+                <p className="text-gray-600 text-sm mb-3">
+                  {result.matched.dci} · <span className="font-mono text-xs">{result.matched.atc_code}</span>
+                </p>
+                <div className="flex justify-between text-sm py-2 border-b"><span>Concentrație</span><b>{result.matched.concentration || '—'}</b></div>
+                <div className="flex justify-between text-sm py-2 border-b"><span>Formă</span><b className="capitalize">{result.matched.form.toLowerCase()}</b></div>
+                <div className="flex justify-between text-sm py-2 border-b"><span>Status</span>
+                  <b className={result.matched.rx_status === 'OTC' ? 'text-green-700' : 'text-red-700'}>
+                    {result.matched.rx_status === 'OTC' ? 'Fără rețetă' : result.matched.rx_status}
+                  </b>
+                </div>
+                {result.extracted.expiration_date && (
+                  <div className="flex justify-between text-sm py-2 border-b">
+                    <span>Expiră (din imagine)</span><b>{result.extracted.expiration_date}</b>
+                  </div>
+                )}
+                {result.matched.category && (
+                  <p className="mt-3 text-blue-600 text-sm font-semibold">{result.matched.category}</p>
+                )}
               </div>
             )}
+
+            {/* OCR-only result (no corpus match) — show what we read */}
+            {!result.matched && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
+                <div className="flex items-center mb-3 text-amber-800 font-semibold"><AlertTriangle size={18} className="mr-2" /> Nu am găsit acest medicament în baza ANMDM</div>
+                <div className="space-y-1.5 text-sm">
+                  {result.extracted.trade_name && <div><span className="text-gray-500">Citit:</span> <b>{result.extracted.trade_name}</b></div>}
+                  {result.extracted.dosage && <div><span className="text-gray-500">Doză:</span> <b>{result.extracted.dosage}</b></div>}
+                  {result.extracted.form && <div><span className="text-gray-500">Formă:</span> <b className="capitalize">{result.extracted.form}</b></div>}
+                  {result.extracted.expiration_date && <div><span className="text-gray-500">Expiră:</span> <b>{result.extracted.expiration_date}</b></div>}
+                </div>
+              </div>
+            )}
+
             <div className="space-y-3">
-              <button onClick={() => navigate('/profile', { state: { medicineForSafetyCheck: result } })} className="w-full bg-red-600 text-white py-4 rounded-xl font-semibold">Check Safety</button>
-              <button onClick={() => navigate('/cabinet', { state: { addMedicine: result } })} className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold">Add to Cabinet</button>
-              <button onClick={retake} className="w-full bg-gray-200 text-gray-800 py-4 rounded-xl font-semibold">Scan Another</button>
+              {result.matched && (
+                <button onClick={() => navigate('/profile', { state: { medicineForSafetyCheck: { name: result.matched!.trade_name, dosage: result.matched!.concentration, type: result.matched!.form } } })} className="w-full bg-red-600 text-white py-4 rounded-xl font-semibold">Verifică siguranța</button>
+              )}
+              <button onClick={navigateToCabinet} className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold">Adaugă în Cabinet</button>
+              <button onClick={retake} className="w-full bg-gray-200 text-gray-800 py-4 rounded-xl font-semibold">Scanează altul</button>
             </div>
           </div>
         </div>

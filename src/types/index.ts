@@ -71,6 +71,37 @@ export interface MedicineDTO {
 }
 
 /**
+ * Result of POST /scan — Gemini Vision OCR + ANMDM corpus match.
+ */
+export interface ScanExtraction {
+    trade_name: string | null;
+    expiration_date: string | null;   // YYYY-MM-DD
+    dosage: string | null;
+    form: string | null;
+    confidence: number;
+}
+
+export interface ScanMedicineMatch {
+    trade_name: string;
+    dci: string;
+    form: string;
+    concentration: string;
+    atc_code: string;
+    rx_status: 'OTC' | 'RX' | 'RESTRICTED' | 'MIXED' | 'UNKNOWN';
+    category: string;
+    lay_symptoms: string[];
+    rcp_url: string;
+    prospect_url: string;
+    match_score: number;
+}
+
+export interface ScanResponse {
+    extracted: ScanExtraction;
+    matched: ScanMedicineMatch | null;
+    latency_ms: number;
+}
+
+/**
  * Index manifest from GET /manifest.
  */
 export interface ManifestResponse {

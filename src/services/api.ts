@@ -9,7 +9,7 @@
  * by the same gateway as the API.
  */
 
-import type { ManifestResponse } from '../types';
+import type { ManifestResponse, ScanResponse } from '../types';
 
 export type ChatRole = 'user' | 'assistant' | 'system';
 export interface ChatTurn { role: ChatRole; text: string; }
@@ -54,6 +54,23 @@ export async function checkHealth(): Promise<boolean> {
 export async function getManifest(): Promise<ManifestResponse> {
     const res = await fetch(endpoint('/manifest'), { method: 'GET' });
     return jsonOrThrow<ManifestResponse>(res);
+}
+
+/**
+ * Identify a medicine from a captured photo. `imageDataUrl` is the
+ * full result of `canvas.toDataURL('image/jpeg')` — the backend strips
+ * the `data:image/jpeg;base64,` prefix automatically.
+ */
+export async function scanMedicine(imageDataUrl: string): Promise<ScanResponse> {
+    // Detect mime type from the data URL header so PNG uploads still work.
+    const mimeMatch = imageDataUrl.match(/^data:(image\/(jpeg|png|webp));base64,/);
+    const mime_type = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const res = await fetch(endpoint('/scan'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image_base64: imageDataUrl, mime_type }),
+    });
+    return jsonOrThrow<ScanResponse>(res);
 }
 
 /**
