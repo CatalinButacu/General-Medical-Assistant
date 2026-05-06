@@ -65,7 +65,7 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     HF_HUB_DISABLE_SYMLINKS_WARNING=1
 
-# HF Spaces routes 8000 -> public URL when app_port: 8000 in README.
-EXPOSE 8000
+# HF Spaces' default Docker port is 7860; matches app_port in README.
+EXPOSE 7860
 
-CMD ["uvicorn", "med_assist.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "med_assist.api.main:app", "--host", "0.0.0.0", "--port", "7860"]
