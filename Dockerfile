@@ -16,26 +16,32 @@ FROM python:3.12-slim AS builder
 
 WORKDIR /build
 
-# System deps for faiss / torch wheels
+# System deps for faiss / torch wheels + curl for fetching binary corpus
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential curl \
+        build-essential curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
 RUN pip install --no-cache-dir --upgrade pip \
  && pip install --no-cache-dir -r requirements.txt
 
-# Bring in only what build steps need — keep the build context small.
-COPY data_acquisition/raw/anmdm_nomenclator.xlsx data_acquisition/raw/anmdm_nomenclator.xlsx
+# Source + plain-text data are COPYed from the build context.
 COPY data_acquisition/processed/medicines_anmdm.json data_acquisition/processed/medicines_anmdm.json
-# pdf_links.json is gzipped on the HF deploy snapshot (10 MiB pre-receive
-# hook), uncompressed locally. The glob accepts whichever form is present.
-COPY data_acquisition/processed/pdf_links.json* data_acquisition/processed/
-RUN if [ -f data_acquisition/processed/pdf_links.json.gz ]; then \
-        gunzip data_acquisition/processed/pdf_links.json.gz; \
-    fi
 COPY data_acquisition/scripts/ data_acquisition/scripts/
 COPY med_assist/ med_assist/
+
+# Binary inputs are fetched from the public GitHub repo at build time.
+# HF Spaces' Xet storage rejects unwrapped binaries (.xlsx, .gz) on
+# git push, so we keep them out of the deploy snapshot entirely and
+# pull them here. Pinned to `main`; rebuild the Space to pick up new
+# corpus snapshots that land on main.
+ARG GH_REPO=CatalinButacu/General-Medical-Assistant
+ARG GH_REF=main
+RUN mkdir -p data_acquisition/raw data_acquisition/processed && \
+    curl -fsSL -o data_acquisition/raw/anmdm_nomenclator.xlsx \
+        "https://raw.githubusercontent.com/${GH_REPO}/${GH_REF}/data_acquisition/raw/anmdm_nomenclator.xlsx" && \
+    curl -fsSL -o data_acquisition/processed/pdf_links.json \
+        "https://raw.githubusercontent.com/${GH_REPO}/${GH_REF}/data_acquisition/processed/pdf_links.json"
 
 # Re-derive the enriched corpus from the committed xlsx + pdf_links.
 # `--allow-missing-rcp` produces a slimmer corpus (lay-summary chunks
