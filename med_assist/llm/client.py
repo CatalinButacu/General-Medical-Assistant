@@ -42,14 +42,25 @@ class GeminiClient:
         system_instruction: str,
         contents: list[types.ContentDict],
         temperature: float = 0.6,
-        max_output_tokens: int = 400,
+        max_output_tokens: int = 1024,
     ) -> AsyncIterator[str]:
         """Yield text chunks from a streaming generation."""
-        config = types.GenerateContentConfig(
-            system_instruction=system_instruction,
-            temperature=temperature,
-            max_output_tokens=max_output_tokens,
-        )
+        # Gemini 2.5+/3 Flash are thinking models — reasoning tokens count
+        # against max_output_tokens by default, which truncates mid-word
+        # on chat-length budgets. Disable thinking for these short replies.
+        try:
+            config = types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=temperature,
+                max_output_tokens=max_output_tokens,
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
+            )
+        except (AttributeError, TypeError):
+            config = types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                temperature=temperature,
+                max_output_tokens=max_output_tokens,
+            )
         try:
             stream = await self._client.aio.models.generate_content_stream(
                 model=self._model_id,
