@@ -1,9 +1,11 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, X, RotateCcw, Check, Loader2, AlertTriangle, Info, ChevronRight } from 'lucide-react';
+import { Camera, X, RotateCcw, Check, Loader2, AlertTriangle, Info, ChevronRight, Image as ImageIcon, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { scanMedicine } from '../services/api';
 import type { Medicine, ScanMedicineMatch, ScanResponse } from '../types';
+
+type CameraState = 'idle' | 'requesting' | 'live' | 'denied';
 
 export default function CameraScanner() {
   const navigate = useNavigate();
@@ -11,48 +13,62 @@ export default function CameraScanner() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [isStreaming, setIsStreaming] = useState(false);
+  const [cameraState, setCameraState] = useState<CameraState>('idle');
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [resolution, setResolution] = useState<{ w: number; h: number } | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<ScanResponse | null>(null);
   const [activeMatchIdx, setActiveMatchIdx] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !stream) return;
+    video.srcObject = stream;
+    const handleMeta = () => setResolution({ w: video.videoWidth, h: video.videoHeight });
+    video.addEventListener('loadedmetadata', handleMeta);
+    return () => video.removeEventListener('loadedmetadata', handleMeta);
+  }, [stream]);
+
+  useEffect(() => () => stream?.getTracks().forEach(t => t.stop()), [stream]);
+
   const startCamera = useCallback(async () => {
+    setError(null);
+    setCameraState('requesting');
     try {
-      setError(null);
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
       });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        setIsStreaming(true);
-      }
+      setStream(newStream);
+      setCameraState('live');
     } catch (err) {
-      setError('Unable to access camera.');
-      toast.error('Camera access denied');
+      setCameraState('denied');
+      setError('Acces camera refuzat sau indisponibil. Folosește încărcarea din galerie.');
+      toast.error('Acces camera refuzat');
     }
   }, []);
 
   const stopCamera = useCallback(() => {
-    if (videoRef.current?.srcObject) {
-      (videoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop());
-      videoRef.current.srcObject = null;
-      setIsStreaming(false);
-    }
-  }, []);
+    stream?.getTracks().forEach(t => t.stop());
+    setStream(null);
+    setResolution(null);
+    setCameraState('idle');
+  }, [stream]);
 
   const capturePhoto = useCallback(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (!video || !canvas) return;
+    if (!video || !canvas || !video.videoWidth) {
+      toast.error('Camera nu e gata, încearcă din nou.');
+      return;
+    }
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0);
-    setCapturedImage(canvas.toDataURL('image/jpeg', 0.8));
+    setCapturedImage(canvas.toDataURL('image/jpeg', 0.85));
     stopCamera();
   }, [stopCamera]);
 
@@ -116,55 +132,165 @@ export default function CameraScanner() {
     navigate('/cabinet', { state: { addMedicine: cabinetMedicine, fromScanner: true } });
   }, [navigate, result, activeMatchIdx]);
 
-  const retake = () => { setCapturedImage(null); setResult(null); setActiveMatchIdx(0); setError(null); startCamera(); };
+  const retake = () => {
+    setCapturedImage(null);
+    setResult(null);
+    setActiveMatchIdx(0);
+    setError(null);
+    startCamera();
+  };
+
   const activeMatch: ScanMedicineMatch | null = result?.candidates[activeMatchIdx] ?? result?.matched ?? null;
   const alternatives: ScanMedicineMatch[] = (result?.candidates ?? []).filter((_, i) => i !== activeMatchIdx);
 
+  const showCameraStage = !capturedImage && !result;
+
   return (
     <div className="min-h-screen bg-black relative">
-      <div className="absolute top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/50 p-4 pt-8 flex items-center justify-between">
-        <button onClick={() => navigate('/')} className="w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center"><X className="text-white" size={20} /></button>
-        <h1 className="text-white font-semibold">Medicine Scanner</h1>
+      <div className="absolute top-0 left-0 right-0 z-30 bg-gradient-to-b from-black/70 to-transparent p-4 pt-8 flex items-center justify-between">
+        <button
+          onClick={() => { stopCamera(); navigate('/'); }}
+          className="w-10 h-10 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center active:scale-95 transition-transform"
+          aria-label="Înapoi"
+        >
+          <X className="text-white" size={20} />
+        </button>
+        <h1 className="text-white font-semibold text-sm tracking-wide">Scaner medicamente</h1>
         <div className="w-10" />
       </div>
 
-      {!capturedImage && !result && (
-        <div className="relative w-full h-full">
-          {isStreaming ? (
+      {showCameraStage && (
+        <div className="relative w-full h-screen overflow-hidden">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className={`w-full h-full object-cover transition-opacity duration-300 ${cameraState === 'live' ? 'opacity-100' : 'opacity-0'}`}
+          />
+
+          {cameraState === 'live' && (
             <>
-              <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-80 h-80 border-2 border-white/50 rounded-2xl relative">
-                  <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-white rounded-tl-2xl"></div>
-                  <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-white rounded-tr-2xl"></div>
-                  <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-white rounded-bl-2xl"></div>
-                  <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-white rounded-br-2xl"></div>
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
+              </div>
+
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-72 h-72 sm:w-80 sm:h-80 relative">
+                  <CornerL position="tl" />
+                  <CornerL position="tr" />
+                  <CornerL position="bl" />
+                  <CornerL position="br" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-white/70 text-[10px] font-bold uppercase tracking-[0.3em] bg-black/40 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                      Aliniază cutia
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-                <button onClick={capturePhoto} className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-transform"><div className="w-16 h-16 bg-white border-4 border-gray-300 rounded-full"></div></button>
+
+              <div className="absolute top-20 left-1/2 -translate-x-1/2 z-20">
+                <div className="flex items-center gap-2 bg-black/50 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                  </span>
+                  Live · {resolution ? `${resolution.w}×${resolution.h}` : '—'}
+                </div>
+              </div>
+
+              <div className="absolute bottom-0 left-0 right-0 z-20 pb-10 pt-6 px-6 flex items-center justify-between">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center active:scale-95 transition-transform"
+                  aria-label="Încarcă din galerie"
+                >
+                  <ImageIcon className="text-white" size={20} />
+                </button>
+                <button
+                  onClick={capturePhoto}
+                  className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-2xl shadow-white/20 active:scale-90 transition-transform border-4 border-white/30"
+                  aria-label="Captură"
+                >
+                  <div className="w-16 h-16 bg-white border-2 border-gray-200 rounded-full" />
+                </button>
+                <button
+                  onClick={stopCamera}
+                  className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center active:scale-95 transition-transform"
+                  aria-label="Oprește camera"
+                >
+                  <X className="text-white" size={20} />
+                </button>
               </div>
             </>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full text-white p-8">
-              <Camera size={64} className="mb-6 text-gray-400" />
-              <div className="space-y-4 w-full max-w-sm">
-                <button onClick={startCamera} className="w-full bg-blue-600 py-4 rounded-xl font-semibold">Open Camera</button>
-                <button onClick={() => fileInputRef.current?.click()} className="w-full bg-gray-700 py-4 rounded-xl font-semibold">Upload Photo</button>
+          )}
+
+          {cameraState === 'requesting' && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+              <Loader2 size={48} className="animate-spin mb-4 text-blue-400" />
+              <p className="text-sm font-medium">Pornesc camera…</p>
+              <p className="text-xs text-gray-400 mt-1">Aprobă accesul când îți cere browserul</p>
+            </div>
+          )}
+
+          {(cameraState === 'idle' || cameraState === 'denied') && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-8">
+              <div className="w-20 h-20 bg-white/5 backdrop-blur-md rounded-3xl flex items-center justify-center mb-6 border border-white/10">
+                <Camera size={36} className="text-white/80" />
               </div>
-              {error && <p className="mt-6 text-red-400 text-sm">{error}</p>}
+              <h2 className="text-lg font-bold mb-2">Scanează medicamentul</h2>
+              <p className="text-sm text-gray-400 text-center mb-8 max-w-xs leading-relaxed">
+                Fă o poză cutiei sau încarcă o imagine — recunoaștem numele și data de expirare.
+              </p>
+              <div className="space-y-3 w-full max-w-sm">
+                <button
+                  onClick={startCamera}
+                  className="w-full flex items-center justify-center gap-2 bg-blue-600 py-4 rounded-2xl font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-all active:scale-[0.98]"
+                >
+                  <Camera size={18} /> Deschide camera
+                </button>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-2 bg-white/10 backdrop-blur-md py-4 rounded-2xl font-bold border border-white/10 hover:bg-white/15 transition-all active:scale-[0.98]"
+                >
+                  <ImageIcon size={18} /> Încarcă din galerie
+                </button>
+              </div>
+              {error && (
+                <div className="mt-6 flex items-start gap-2 text-red-300 text-xs max-w-sm">
+                  <AlertTriangle size={14} className="flex-shrink-0 mt-0.5" />
+                  <span className="leading-relaxed">{error}</span>
+                </div>
+              )}
             </div>
           )}
         </div>
       )}
 
       {capturedImage && !result && (
-        <div className="relative w-full h-full">
-          <img src={capturedImage} alt="Captured" className="w-full h-full object-cover" />
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-4">
-            <button onClick={retake} disabled={isAnalyzing} className="w-14 h-14 bg-gray-700/80 backdrop-blur-sm rounded-full flex items-center justify-center"><RotateCcw className="text-white" size={24} /></button>
-            <button onClick={analyzeMedicine} disabled={isAnalyzing} className="w-14 h-14 bg-green-600 rounded-full flex items-center justify-center">
-              {isAnalyzing ? <Loader2 className="animate-spin text-white" size={24} /> : <Check className="text-white" size={24} />}
+        <div className="relative w-full h-screen">
+          <img src={capturedImage} alt="Captured" className="w-full h-full object-contain bg-black" />
+          <div className="absolute top-20 left-1/2 -translate-x-1/2 bg-black/50 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full flex items-center gap-2">
+            <Zap size={10} className="text-amber-400" />
+            {isAnalyzing ? 'Analizez imaginea…' : 'Confirmă imaginea'}
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 pb-10 pt-6 px-6 flex justify-center items-center gap-4 bg-gradient-to-t from-black/80 to-transparent">
+            <button
+              onClick={retake}
+              disabled={isAnalyzing}
+              className="w-14 h-14 bg-white/15 backdrop-blur-md rounded-full flex items-center justify-center active:scale-95 transition-transform disabled:opacity-40"
+              aria-label="Refă fotografia"
+            >
+              <RotateCcw className="text-white" size={22} />
+            </button>
+            <button
+              onClick={analyzeMedicine}
+              disabled={isAnalyzing}
+              className="px-8 h-14 bg-green-600 rounded-full flex items-center gap-2 font-bold text-white shadow-2xl shadow-green-500/40 active:scale-95 transition-transform disabled:opacity-60"
+            >
+              {isAnalyzing
+                ? <><Loader2 className="animate-spin" size={18} /> Identific…</>
+                : <><Check size={18} /> Identifică medicament</>}
             </button>
           </div>
         </div>
@@ -264,8 +390,19 @@ export default function CameraScanner() {
           </div>
         </div>
       )}
+
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
       <canvas ref={canvasRef} className="hidden" />
     </div>
   );
+}
+
+function CornerL({ position }: { position: 'tl' | 'tr' | 'bl' | 'br' }) {
+  const cls: Record<typeof position, string> = {
+    tl: 'top-0 left-0 border-t-4 border-l-4 rounded-tl-2xl',
+    tr: 'top-0 right-0 border-t-4 border-r-4 rounded-tr-2xl',
+    bl: 'bottom-0 left-0 border-b-4 border-l-4 rounded-bl-2xl',
+    br: 'bottom-0 right-0 border-b-4 border-r-4 rounded-br-2xl',
+  };
+  return <div className={`absolute w-10 h-10 border-white/90 ${cls[position]}`} />;
 }
