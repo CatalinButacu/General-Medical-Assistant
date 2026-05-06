@@ -36,7 +36,8 @@ MAX_HISTORY_TURNS = 8                   # last N turns sent to the LLM
 TOP_K_MEDICINES = 5
 MIN_FOLLOWUPS_NO_PROFILE = 2            # ask at least 2 questions if profile is empty
 MIN_FOLLOWUPS_WITH_PROFILE = 1          # one is enough if we already know allergies/conditions
-MAX_FOLLOWUPS = 5                       # hard cap — recommend even if uncertain after this
+MAX_FOLLOWUPS = 4                       # hard cap — recommend even if uncertain after this
+STRONG_CONFIDENCE = 0.5                 # OTC_SAFE label alone isn't enough — need score-backed confidence too
 
 
 @dataclass
@@ -111,12 +112,12 @@ class ConversationService:
 
         # Step 3: decide phase.
         min_followups = MIN_FOLLOWUPS_WITH_PROFILE if has_meaningful_profile(profile) else MIN_FOLLOWUPS_NO_PROFILE
-        confident = decision.label == "OTC_SAFE"
-        forced_to_recommend = user_turn_count >= MAX_FOLLOWUPS
+        strong_match = decision.label == "OTC_SAFE" and decision.confidence >= STRONG_CONFIDENCE
+        hit_cap = user_turn_count >= MAX_FOLLOWUPS
 
         in_followup_phase = (
             user_turn_count < min_followups
-            or (not confident and not forced_to_recommend)
+            or not (strong_match or hit_cap)
         )
 
         if in_followup_phase:
@@ -138,7 +139,9 @@ class ConversationService:
             yield ChatStreamEvent("done", {"used_llm": True, "phase": "followup"})
             return
 
-        # Step 4: recommend.
+        # Step 4: recommend. Two sub-cases:
+        # - strong_match: emit medicine cards + grounded recommend prompt.
+        # - hit_cap without strong_match: skip cards, force a graceful refusal.
         yield ChatStreamEvent("triage", {
             "label": decision.label,
             "rationale": decision.rationale,
@@ -146,13 +149,20 @@ class ConversationService:
             "confidence": float(decision.confidence),
             "red_flags": [_redflag_dto(f) for f in decision.red_flags],
         })
-        medicines_payload = [_medicine_to_dto(h) for h in decision.medicine_hits]
-        yield ChatStreamEvent("medicines", {"items": medicines_payload})
-        system = system_recommend(
-            hits=decision.medicine_hits,
-            profile=profile,
-            forced_low_confidence=forced_to_recommend and not confident,
-        )
+        if strong_match:
+            medicines_payload = [_medicine_to_dto(h) for h in decision.medicine_hits]
+            yield ChatStreamEvent("medicines", {"items": medicines_payload})
+            system = system_recommend(
+                hits=decision.medicine_hits,
+                profile=profile,
+                forced_low_confidence=False,
+            )
+        else:
+            system = system_recommend(
+                hits=[],
+                profile=profile,
+                forced_low_confidence=True,
+            )
         async for ev in self._stream_llm_yielding(history=history, system=system):
             yield ev
         yield ChatStreamEvent("done", {"used_llm": True, "phase": "recommend"})

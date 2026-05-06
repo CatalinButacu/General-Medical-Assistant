@@ -46,7 +46,7 @@ class TriageDecision:
 # Off-topic queries fail both paths: their weak score has no coherent
 # clustering in top-3, so they correctly route to UNCERTAIN.
 MIN_TOP_SCORE = 0.020
-WEAK_FLOOR = 0.014
+WEAK_FLOOR = 0.018           # bumped from 0.014: prevents accidental ATC clustering noise from passing as OTC_SAFE
 MIN_RELEVANT_HITS = 2
 RELEVANT_SCORE_FLOOR = 0.018
 COHERENCE_TOP_K = 3

@@ -207,11 +207,17 @@ def system_recommend(
     profile_block = format_profile(profile)
     if profile_block:
         parts.append(profile_block)
-    if forced_low_confidence:
+    if forced_low_confidence or not hits:
         parts.append(
-            "ATENȚIE: certitudinea este scăzută (multe întrebări au fost puse). "
-            "Recomandă cea mai apropiată opțiune din listă cu o notă explicită că "
-            "un consult la farmacist e indicat înainte de a începe tratamentul."
+            "IMPORTANT — RETRIEVAL FĂRĂ POTRIVIRE:\n"
+            "Nu am găsit medicamente OTC potrivite pentru această problemă în baza ANMDM.\n"
+            "REGULI STRICTE pentru acest răspuns:\n"
+            "  • NU enumera niciun nume de medicament — nicio denumire comercială, nicio substanță activă.\n"
+            "  • Recunoaște limpede, în 1 propoziție empatică, că această problemă necesită o evaluare directă.\n"
+            "  • Recomandă concret: vizită la farmacist (pentru sfat OTC) sau consult medical specialist (dacă pare să iasă din zona OTC).\n"
+            "  • Încheie cu disclaimer-ul standard.\n"
+            "Răspunsul total: 2-3 propoziții. Fără liste, fără medicamente."
         )
-    parts.append(format_evidence(hits))
+    else:
+        parts.append(format_evidence(hits))
     return "\n\n".join(parts)
