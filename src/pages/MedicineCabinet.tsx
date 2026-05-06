@@ -9,7 +9,7 @@ import {
 import { db } from '../config/firebase';
 import {
   Package, Plus, Search, Calendar, AlertTriangle,
-  Trash2, Camera, Edit3, X, Clock, CheckCircle, Sparkles
+  Trash2, Edit3, X, Clock, CheckCircle, Sparkles
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { CabinetItem, Medicine } from '../types';
