@@ -175,6 +175,7 @@ class ScanMedicineMatch(BaseModel):
 class ScanResponse(BaseModel):
     extracted: ScanExtraction
     matched: Optional[ScanMedicineMatch]
+    candidates: list[ScanMedicineMatch] = Field(default_factory=list)
     latency_ms: float
 
 
@@ -183,6 +184,33 @@ def _strip_data_url_prefix(b64: str) -> str:
         _, _, rest = b64.partition(",")
         return rest
     return b64
+
+
+def _strip_pharma_suffixes(name: str) -> str:
+    """Strip dose/form noise so a partial OCR like 'PARACETAMOL ZENTIVA 500MG' still matches."""
+    import re
+    s = re.sub(r"\b\d+([\.,]\d+)?\s*(mg/ml|mg|ml|mcg|μg|g|ui|iu)\b", " ", name, flags=re.I)
+    s = re.sub(r"\b(comprimate|capsule|sirop|unguent|drajeuri|filmate|orala|suspensie|crema|sol\.?)\b", " ", s, flags=re.I)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _hit_to_match_dto(svc: "RetrievalService", hit) -> Optional[ScanMedicineMatch]:
+    med = svc._medicines_by_id.get(hit.chunk.medicine_id)
+    if med is None:
+        return None
+    return ScanMedicineMatch(
+        trade_name=med.trade_name,
+        dci=med.dci,
+        form=med.form,
+        concentration=med.concentration,
+        atc_code=med.atc_code,
+        rx_status=med.rx_status,
+        category=med.category,
+        lay_symptoms=list(med.lay_symptoms),
+        rcp_url=med.rcp_url,
+        prospect_url=med.prospect_url,
+        match_score=hit.score,
+    )
 
 
 @app.post("/scan", response_model=ScanResponse)
@@ -214,34 +242,36 @@ def scan(req: ScanRequest) -> ScanResponse:
         confidence=float(extracted.get("confidence") or 0.0),
     )
 
-    # Match the extracted trade name against ANMDM via sparse retrieval.
-    # Title chunks are short and brand-specific so BM25 nails this.
+    # Match against ANMDM via sparse retrieval over title chunks. If the raw
+    # OCR'd name returns nothing strong, retry with dose/form noise stripped
+    # ("PARACETAMOL ZENTIVA 500MG" -> "PARACETAMOL ZENTIVA").
     matched: Optional[ScanMedicineMatch] = None
+    candidates: list[ScanMedicineMatch] = []
     if extraction_dto.trade_name:
         svc = get_service()
         sparse_hits = svc._dedup_by_medicine(
             svc.sparse.search(extraction_dto.trade_name, top_k=5)
         )
-        if sparse_hits:
-            best = sparse_hits[0]
-            med = svc._medicines_by_id.get(best.chunk.medicine_id)
-            if med is not None:
-                matched = ScanMedicineMatch(
-                    trade_name=med.trade_name,
-                    dci=med.dci,
-                    form=med.form,
-                    concentration=med.concentration,
-                    atc_code=med.atc_code,
-                    rx_status=med.rx_status,
-                    category=med.category,
-                    lay_symptoms=list(med.lay_symptoms),
-                    rcp_url=med.rcp_url,
-                    prospect_url=med.prospect_url,
-                    match_score=best.score,
-                )
+        if not sparse_hits or sparse_hits[0].score < 0.05:
+            stripped = _strip_pharma_suffixes(extraction_dto.trade_name)
+            if stripped and stripped.upper() != extraction_dto.trade_name.upper():
+                fallback = svc._dedup_by_medicine(svc.sparse.search(stripped, top_k=5))
+                seen = {h.chunk.medicine_id for h in sparse_hits}
+                for fh in fallback:
+                    if fh.chunk.medicine_id not in seen:
+                        sparse_hits.append(fh)
+                sparse_hits.sort(key=lambda h: -h.score)
+
+        for hit in sparse_hits[:3]:
+            dto = _hit_to_match_dto(svc, hit)
+            if dto is not None:
+                candidates.append(dto)
+        if candidates:
+            matched = candidates[0]
 
     return ScanResponse(
         extracted=extraction_dto,
         matched=matched,
+        candidates=candidates,
         latency_ms=round((time.time() - t0) * 1000, 1),
     )

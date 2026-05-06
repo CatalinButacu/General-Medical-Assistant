@@ -1,9 +1,9 @@
 import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, X, RotateCcw, Check, Loader2, AlertTriangle, Info } from 'lucide-react';
+import { Camera, X, RotateCcw, Check, Loader2, AlertTriangle, Info, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { scanMedicine } from '../services/api';
-import type { Medicine, ScanResponse } from '../types';
+import type { Medicine, ScanMedicineMatch, ScanResponse } from '../types';
 
 export default function CameraScanner() {
   const navigate = useNavigate();
@@ -15,6 +15,7 @@ export default function CameraScanner() {
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<ScanResponse | null>(null);
+  const [activeMatchIdx, setActiveMatchIdx] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const startCamera = useCallback(async () => {
@@ -73,6 +74,7 @@ export default function CameraScanner() {
     try {
       const scan = await scanMedicine(capturedImage);
       setResult(scan);
+      setActiveMatchIdx(0);
       if (scan.matched) {
         toast.success(`Identificat: ${scan.matched.trade_name}`);
       } else if (scan.extracted.trade_name) {
@@ -90,9 +92,7 @@ export default function CameraScanner() {
 
   const navigateToCabinet = useCallback(() => {
     if (!result) return;
-    // Build a Medicine-shaped object from the matched ANMDM record (or
-    // fall back to the raw OCR extraction if no corpus match).
-    const m = result.matched;
+    const m: ScanMedicineMatch | null = result.candidates[activeMatchIdx] ?? result.matched;
     const e = result.extracted;
     const cabinetMedicine: Medicine & { expirationDate?: string } = m
       ? {
@@ -113,10 +113,12 @@ export default function CameraScanner() {
           type: (e.form ?? 'tablet').toLowerCase(),
           expirationDate: e.expiration_date ?? undefined,
         };
-    navigate('/cabinet', { state: { addMedicine: cabinetMedicine } });
-  }, [navigate, result]);
+    navigate('/cabinet', { state: { addMedicine: cabinetMedicine, fromScanner: true } });
+  }, [navigate, result, activeMatchIdx]);
 
-  const retake = () => { setCapturedImage(null); setResult(null); setError(null); startCamera(); };
+  const retake = () => { setCapturedImage(null); setResult(null); setActiveMatchIdx(0); setError(null); startCamera(); };
+  const activeMatch: ScanMedicineMatch | null = result?.candidates[activeMatchIdx] ?? result?.matched ?? null;
+  const alternatives: ScanMedicineMatch[] = (result?.candidates ?? []).filter((_, i) => i !== activeMatchIdx);
 
   return (
     <div className="min-h-screen bg-black relative">
@@ -172,33 +174,32 @@ export default function CameraScanner() {
         <div className="bg-white min-h-screen pt-20">
           <div className="max-w-md mx-auto p-4">
             <div className="text-center mb-6">
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${result.matched ? 'bg-green-100' : 'bg-amber-100'}`}>
-                {result.matched
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${activeMatch ? 'bg-green-100' : 'bg-amber-100'}`}>
+                {activeMatch
                   ? <Check className="text-green-600" size={32} />
                   : <Info className="text-amber-600" size={32} />}
               </div>
               <h2 className="text-xl font-bold">
-                {result.matched ? 'Medicament identificat' : 'Detectare parțială'}
+                {activeMatch ? 'Medicament identificat' : 'Detectare parțială'}
               </h2>
               <p className="text-gray-500 text-xs mt-1">
                 Încredere OCR: {Math.round(result.extracted.confidence * 100)}%
-                {result.matched && ` · potrivire ANMDM: ${result.matched.match_score.toFixed(2)}`}
+                {activeMatch && ` · potrivire ANMDM: ${activeMatch.match_score.toFixed(2)}`}
                 {' · '}{result.latency_ms.toFixed(0)} ms
               </p>
             </div>
 
-            {/* Matched ANMDM record (authoritative) — preferred */}
-            {result.matched && (
+            {activeMatch && (
               <div className="bg-gray-50 rounded-xl p-6 mb-4">
-                <h3 className="text-lg font-bold">{result.matched.trade_name}</h3>
+                <h3 className="text-lg font-bold">{activeMatch.trade_name}</h3>
                 <p className="text-gray-600 text-sm mb-3">
-                  {result.matched.dci} · <span className="font-mono text-xs">{result.matched.atc_code}</span>
+                  {activeMatch.dci} · <span className="font-mono text-xs">{activeMatch.atc_code}</span>
                 </p>
-                <div className="flex justify-between text-sm py-2 border-b"><span>Concentrație</span><b>{result.matched.concentration || '—'}</b></div>
-                <div className="flex justify-between text-sm py-2 border-b"><span>Formă</span><b className="capitalize">{result.matched.form.toLowerCase()}</b></div>
+                <div className="flex justify-between text-sm py-2 border-b"><span>Concentrație</span><b>{activeMatch.concentration || '—'}</b></div>
+                <div className="flex justify-between text-sm py-2 border-b"><span>Formă</span><b className="capitalize">{activeMatch.form.toLowerCase()}</b></div>
                 <div className="flex justify-between text-sm py-2 border-b"><span>Status</span>
-                  <b className={result.matched.rx_status === 'OTC' ? 'text-green-700' : 'text-red-700'}>
-                    {result.matched.rx_status === 'OTC' ? 'Fără rețetă' : result.matched.rx_status}
+                  <b className={activeMatch.rx_status === 'OTC' ? 'text-green-700' : 'text-red-700'}>
+                    {activeMatch.rx_status === 'OTC' ? 'Fără rețetă' : activeMatch.rx_status}
                   </b>
                 </div>
                 {result.extracted.expiration_date && (
@@ -206,14 +207,42 @@ export default function CameraScanner() {
                     <span>Expiră (din imagine)</span><b>{result.extracted.expiration_date}</b>
                   </div>
                 )}
-                {result.matched.category && (
-                  <p className="mt-3 text-blue-600 text-sm font-semibold">{result.matched.category}</p>
+                {activeMatch.category && (
+                  <p className="mt-3 text-blue-600 text-sm font-semibold">{activeMatch.category}</p>
                 )}
               </div>
             )}
 
-            {/* OCR-only result (no corpus match) — show what we read */}
-            {!result.matched && (
+            {alternatives.length > 0 && (
+              <div className="bg-white border border-gray-100 rounded-xl p-4 mb-4">
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">
+                  Alte potriviri posibile
+                </div>
+                <div className="space-y-2">
+                  {alternatives.map(alt => {
+                    const idx = result.candidates.indexOf(alt);
+                    return (
+                      <button
+                        key={`${alt.trade_name}-${alt.atc_code}`}
+                        onClick={() => setActiveMatchIdx(idx)}
+                        className="w-full flex items-center justify-between bg-gray-50 hover:bg-blue-50 border border-gray-100 rounded-xl p-3 transition-colors text-left active:scale-[0.99]"
+                      >
+                        <div className="min-w-0">
+                          <div className="font-bold text-sm text-gray-800 truncate">{alt.trade_name}</div>
+                          <div className="text-[11px] text-gray-500 truncate">{alt.dci} · {alt.form.toLowerCase()} {alt.concentration}</div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                          <span className="text-[10px] font-mono text-gray-400">{alt.match_score.toFixed(2)}</span>
+                          <ChevronRight size={14} className="text-gray-400" />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {!activeMatch && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
                 <div className="flex items-center mb-3 text-amber-800 font-semibold"><AlertTriangle size={18} className="mr-2" /> Nu am găsit acest medicament în baza ANMDM</div>
                 <div className="space-y-1.5 text-sm">
@@ -226,8 +255,8 @@ export default function CameraScanner() {
             )}
 
             <div className="space-y-3">
-              {result.matched && (
-                <button onClick={() => navigate('/profile', { state: { medicineForSafetyCheck: { name: result.matched!.trade_name, dosage: result.matched!.concentration, type: result.matched!.form } } })} className="w-full bg-red-600 text-white py-4 rounded-xl font-semibold">Verifică siguranța</button>
+              {activeMatch && (
+                <button onClick={() => navigate('/profile', { state: { medicineForSafetyCheck: { name: activeMatch.trade_name, dosage: activeMatch.concentration, type: activeMatch.form } } })} className="w-full bg-red-600 text-white py-4 rounded-xl font-semibold">Verifică siguranța</button>
               )}
               <button onClick={navigateToCabinet} className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold">Adaugă în Cabinet</button>
               <button onClick={retake} className="w-full bg-gray-200 text-gray-800 py-4 rounded-xl font-semibold">Scanează altul</button>

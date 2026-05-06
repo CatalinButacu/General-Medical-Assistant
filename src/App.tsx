@@ -7,6 +7,7 @@ import CameraScanner from './pages/CameraScanner';
 import HealthProfile from './pages/HealthProfile';
 import MedicineCabinet from './pages/MedicineCabinet';
 import Chat from './pages/Chat';
+import Onboarding from './pages/Onboarding';
 import MobileNavigation from './components/MobileNavigation';
 import AuthGuard from './components/AuthGuard';
 import './index.css';
@@ -37,6 +38,11 @@ function App() {
               <Route path="/chat" element={
                 <AuthGuard>
                   <Chat />
+                </AuthGuard>
+              } />
+              <Route path="/onboarding" element={
+                <AuthGuard>
+                  <Onboarding />
                 </AuthGuard>
               } />
             </Routes>

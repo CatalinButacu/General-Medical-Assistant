@@ -9,7 +9,7 @@ import {
 import { db } from '../config/firebase';
 import {
   Package, Plus, Search, Calendar, AlertTriangle,
-  Trash2, Camera, Edit3, X, Clock, CheckCircle
+  Trash2, Camera, Edit3, X, Clock, CheckCircle, Sparkles
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { CabinetItem, Medicine } from '../types';
@@ -18,7 +18,8 @@ export default function MedicineCabinet() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth0();
-  const medicineToAdd = location.state?.addMedicine as Medicine;
+  const medicineToAdd = location.state?.addMedicine as (Medicine & { expirationDate?: string }) | undefined;
+  const fromScanner = Boolean(location.state?.fromScanner);
 
   const [medicines, setMedicines] = useState<CabinetItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,7 +78,7 @@ export default function MedicineCabinet() {
         dosage: medicineToAdd.dosage || '',
         type: medicineToAdd.type || 'tablet',
         quantity: 1,
-        expirationDate: '',
+        expirationDate: medicineToAdd.expirationDate || '',
         notes: ''
       });
       setShowAddForm(true);
@@ -265,10 +266,17 @@ export default function MedicineCabinet() {
       {showAddForm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50 p-4">
           <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom duration-300">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-2">
               <h2 className="text-xl font-bold text-gray-800">{editingMedicine ? 'Edit Medicine' : 'Add to Cabinet'}</h2>
               <button onClick={() => { setShowAddForm(false); setEditingMedicine(null); resetForm(); }} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"><X size={20} /></button>
             </div>
+            {fromScanner && !editingMedicine && (
+              <div className="flex items-center gap-2 mb-6 px-3 py-2 bg-blue-50 border border-blue-100 rounded-xl text-[11px] font-semibold text-blue-700">
+                <Sparkles size={12} />
+                <span>Date precompletate din scaner — verifică și ajustează dacă e cazul.</span>
+              </div>
+            )}
+            {!fromScanner && <div className="mb-6" />}
             <div className="space-y-5">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-gray-400 uppercase ml-1">Medicine Name</label>

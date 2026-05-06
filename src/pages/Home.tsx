@@ -1,10 +1,29 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
+import { doc, getDoc } from 'firebase/firestore';
 import { Camera, MessageCircle, Shield, Package, Heart, AlertTriangle, LogIn, LogOut, User as UserIcon } from 'lucide-react';
+import { db } from '../config/firebase';
 
 export default function Home() {
   const navigate = useNavigate();
   const { loginWithRedirect, logout, user, isAuthenticated, isLoading } = useAuth0();
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.sub) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const snap = await getDoc(doc(db, 'health_profiles', user.sub!));
+        if (cancelled) return;
+        const onboarded = snap.exists() && snap.data()?.onboarded === true;
+        if (!onboarded) navigate('/onboarding', { replace: true });
+      } catch (err) {
+        console.warn('onboarding-check failed', err);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isAuthenticated, user?.sub, navigate]);
 
   const quickActions = [
     {

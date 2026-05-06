@@ -98,6 +98,7 @@ export interface ScanMedicineMatch {
 export interface ScanResponse {
     extracted: ScanExtraction;
     matched: ScanMedicineMatch | null;
+    candidates: ScanMedicineMatch[];
     latency_ms: number;
 }
 
@@ -145,6 +146,7 @@ export interface HealthProfile {
     conditions: string[];
     medications: string[];
     notes?: string;
+    onboarded?: boolean;
 }
 
 export interface CabinetItem extends Medicine {
