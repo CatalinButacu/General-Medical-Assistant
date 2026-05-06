@@ -15,6 +15,7 @@ Run locally:
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 from typing import Optional
 
@@ -34,6 +35,8 @@ from med_assist.conversation import ChatMessageIn, ConversationService
 from med_assist.llm.client import GeminiClient
 from med_assist.llm.vision import VisionClient
 from med_assist.service import RetrievalService
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Med Assist API",
@@ -129,8 +132,9 @@ async def chat(req: ChatRequest):
         try:
             async for event in convo.stream_turn(history, profile=profile_dict):
                 yield f"event: {event.kind}\ndata: {json.dumps(event.payload, ensure_ascii=False)}\n\n"
-        except Exception as exc:
-            payload = {"message": f"server error: {str(exc)[:200]}"}
+        except Exception:
+            logger.exception("Unhandled error while streaming /chat SSE response")
+            payload = {"message": "An internal error has occurred."}
             yield f"event: error\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"
 
     return StreamingResponse(
