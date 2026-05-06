@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { CabinetItem, Medicine } from '../types';
+import { Button, FormField, TextInput, Textarea, Select } from '../components/ui';
 
 export default function MedicineCabinet() {
   const navigate = useNavigate();
@@ -283,22 +284,18 @@ export default function MedicineCabinet() {
             )}
             {!fromScanner && <div className="mb-6" />}
             <div className="space-y-5">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Denumire</label>
-                <input type="text" placeholder="ex: Paracetamol" value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Substanță activă (DCI)</label>
-                <input type="text" placeholder="ex: Paracetamolum" value={formData.genericName} onChange={e => setFormData(p => ({ ...p, genericName: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
-              </div>
+              <FormField label="Denumire">
+                <TextInput placeholder="ex: Paracetamol" value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} />
+              </FormField>
+              <FormField label="Substanță activă (DCI)">
+                <TextInput placeholder="ex: Paracetamolum" value={formData.genericName} onChange={e => setFormData(p => ({ ...p, genericName: e.target.value }))} />
+              </FormField>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Concentrație</label>
-                  <input type="text" placeholder="500mg" value={formData.dosage} onChange={e => setFormData(p => ({ ...p, dosage: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Formă</label>
-                  <select value={formData.type} onChange={e => setFormData(p => ({ ...p, type: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium appearance-none">
+                <FormField label="Concentrație">
+                  <TextInput placeholder="500mg" value={formData.dosage} onChange={e => setFormData(p => ({ ...p, dosage: e.target.value }))} />
+                </FormField>
+                <FormField label="Formă">
+                  <Select value={formData.type} onChange={e => setFormData(p => ({ ...p, type: e.target.value }))}>
                     {[
                       { v: 'tablet', l: 'Comprimat' },
                       { v: 'capsule', l: 'Capsulă' },
@@ -307,24 +304,23 @@ export default function MedicineCabinet() {
                       { v: 'injection', l: 'Injectabil' },
                       { v: 'other', l: 'Alta' },
                     ].map(({ v, l }) => <option key={v} value={v}>{l}</option>)}
-                  </select>
-                </div>
+                  </Select>
+                </FormField>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Cantitate</label>
-                  <input type="number" value={formData.quantity} onChange={e => setFormData(p => ({ ...p, quantity: parseInt(e.target.value) || 1 }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Data expirării</label>
-                  <input type="date" value={formData.expirationDate} onChange={e => setFormData(p => ({ ...p, expirationDate: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
-                </div>
+                <FormField label="Cantitate">
+                  <TextInput type="number" value={formData.quantity} onChange={e => setFormData(p => ({ ...p, quantity: parseInt(e.target.value) || 1 }))} />
+                </FormField>
+                <FormField label="Data expirării">
+                  <TextInput type="date" value={formData.expirationDate} onChange={e => setFormData(p => ({ ...p, expirationDate: e.target.value }))} />
+                </FormField>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Notițe personale</label>
-                <textarea placeholder="ex: De luat după mese" value={formData.notes} onChange={e => setFormData(p => ({ ...p, notes: e.target.value }))} rows={2} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium resize-none" />
-              </div>
-              <button onClick={saveMedicine} className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all active:scale-[0.98] mt-4 uppercase tracking-widest text-sm">{editingMedicine ? 'Actualizează' : 'Adaugă în cabinet'}</button>
+              <FormField label="Notițe personale">
+                <Textarea placeholder="ex: De luat după mese" value={formData.notes} onChange={e => setFormData(p => ({ ...p, notes: e.target.value }))} rows={2} />
+              </FormField>
+              <Button onClick={saveMedicine} variant="primary" size="lg" fullWidth className="mt-4 uppercase tracking-widest">
+                {editingMedicine ? 'Actualizează' : 'Adaugă în cabinet'}
+              </Button>
             </div>
           </div>
         </div>
