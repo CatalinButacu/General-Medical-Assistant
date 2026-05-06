@@ -12,80 +12,111 @@ short_description: Romanian RAG triage chatbot over ANMDM medicines
 
 # 💊 Med Assist — Romanian Pharmacy Triage Chatbot
 
-> **Educational demo only.** Information here is NOT medical advice. Always consult a pharmacist or doctor.
+> Educational portfolio project. Not medical advice.
 
-Conversational triage + recommendation over the official ANMDM nomenclator
-(7,555 authorized human-use medicines in Romania). Streams in Romanian via
-Gemini 3 Flash, grounded on retrieval that won't let the model invent drug
-names. Red-flag rules short-circuit emergencies straight to 112 — the LLM
-is never in the safety path.
+A grounded RAG assistant over the **official Romanian ANMDM medicine
+nomenclator** (7,555 authorized human-use drugs). Streams replies in
+Romanian, recommends only from retrieved evidence, and routes emergencies
+to 112 via a deterministic rule layer that the LLM cannot override.
 
-## 🏗️ Architecture
+**Live**: frontend on GitHub Pages · backend on a HuggingFace Space (Docker SDK).
+
+## What this project demonstrates
+
+End-to-end ML engineering on a real-world corpus, not a toy dataset:
+
+- **Hybrid retrieval** — dense (FAISS + multilingual MiniLM) **+** sparse
+  (BM25 over Romanian-tokenized chunks), fused with Reciprocal Rank Fusion.
+  Catches both semantic queries (*"mă dor articulațiile dimineața"*) and
+  brand-name lookups (*"Aspenter 75"*) that one retriever alone misses.
+- **Rules-first safety layer** — 17 hand-authored red-flag rules scan every
+  user turn before the LLM sees it. Emergency phrases (chest pain, anaphylaxis,
+  suicidal ideation) short-circuit straight to a 112 card; the LLM is **never**
+  in the safety path. 0% false-negative emergency rate on the eval set.
+- **Three-way triage classifier** — combines top fused score, score floor of
+  relevant hits, and ATC/brand coherence in the top-3 to decide
+  `EMERGENCY | OTC_SAFE | UNCERTAIN`. Coherence path catches single-retriever
+  wins that the score-only path misses.
+- **Adaptive conversational orchestration** — confidence-gated phases:
+  followup-questioning while the classifier is uncertain, recommendation
+  once retrieval is coherent, hard cap at 5 followups. Profile-aware
+  prompting skips questions already answered in the user's stored profile
+  (allergies, conditions, pregnancy).
+- **Grounded recommendation** — the LLM may only mention drug names from
+  the retrieved evidence list. Contraindication-aware: a profile flag for
+  "gastrită" steers it off ibuprofen, "graviditate" off teratogens.
+- **Vision OCR for medicine cabinet** — Gemini Vision extracts trade name,
+  dose, form, and expiration date from a phone photo of a box, then matches
+  the trade name back to the ANMDM corpus via the same sparse retriever.
+
+## Architecture
 
 ```
 src/                       React + Vite + TypeScript frontend (GitHub Pages)
-med_assist/                Python backend
-├── api/main.py            FastAPI: /health /manifest /chat /scan
-├── conversation.py        triage → followup-gating → retrieval → Gemini stream
-├── service.py             RetrievalService.advise() — fusion + classifier
-├── retrieval/             dense (FAISS+MiniLM) · sparse (BM25) · RRF · rerank
-├── triage/                17 red-flag rules + three-way classifier
-├── llm/                   Gemini chat (text) + Gemini Vision (camera scan)
-├── eval/                  49-case golden set + metrics (recall@k, MRR, FN-emerg)
-├── index/builder.py       builds FAISS+BM25 from chunks
-└── data/                  Medicine + Chunk dataclasses
+├── pages/Chat.tsx          SSE-streamed chat with profile passthrough
+├── pages/CameraScanner.tsx phone-camera capture + OCR + cabinet handoff
+├── pages/HealthProfile.tsx Firestore-backed user health profile
+└── services/api.ts         /chat (SSE) and /scan (REST) clients
+
+med_assist/                Python backend (FastAPI on HF Spaces)
+├── api/main.py             /health /manifest /chat /scan
+├── conversation.py         confidence-gated followup ↔ recommend orchestrator
+├── service.py              RetrievalService.advise() — fusion + classifier
+├── retrieval/              dense (FAISS+MiniLM) · sparse (BM25) · RRF · rerank
+├── triage/                 17 red-flag rules + three-way classifier
+├── llm/                    Gemini chat (text) + Gemini Vision (camera scan)
+├── eval/                   49-case Romanian golden set + metrics
+├── index/builder.py        builds FAISS+BM25 from medicine chunks
+└── data/                   Medicine + Chunk dataclasses
+
 data_acquisition/          ANMDM scraper + RCP parser + auto-update orchestrator
 ```
 
-## 🚀 Deployment
+## Why these choices
 
-| Surface | Where | How |
-|---|---|---|
-| Frontend | GitHub Pages (`gh-pages` branch) | `.github/workflows/deploy.yml` builds + deploys on push to `main` |
-| Backend | HuggingFace Space (Docker SDK) | `.github/workflows/deploy-hf.yml` mirrors repo to `huggingface.co/spaces/USER/SPACE` on push to `main` |
+**FAISS + BM25 instead of just dense.** Romanian medical text mixes brand
+names (BM25 wins) with lay-language symptom descriptions (dense wins).
+Picking one alone leaves a recall gap on the other.
 
-Set these GitHub repo secrets to enable CI:
-- `VITE_BACKEND_URL` — public HF Space URL, e.g. `https://your-user-med-assist.hf.space`
-- `HF_TOKEN` — HuggingFace write token from <https://huggingface.co/settings/tokens>
-- `HF_USERNAME`, `HF_SPACE` — Space owner + name
+**Rules-first emergency routing instead of asking the LLM.** An LLM that
+"usually" routes chest pain correctly is a malpractice incident waiting to
+happen. The 17 red-flag rules are deterministic, auditable, and never
+hallucinate — at the cost of less natural phrasing on rare cases.
 
-Set this HF Space secret (Settings → Variables and secrets):
-- `GOOGLE_API_KEY` — Gemini API key from <https://aistudio.google.com/apikey>
+**Confidence-gated phases instead of fixed-turn followups.** Earlier
+versions hard-coded a 2-question intake before recommending. Real users
+either gave enough on turn 1 (vague "headache" goes nowhere; specific
+"sinus pressure 3 days" hits a strong cluster) or kept being vague through
+4 turns. Gating on the classifier confidence + a 5-turn cap matches both.
 
-## 💻 Local development
+**Docker SDK on HF Spaces, not Gradio.** The backend is a FastAPI service
+and Gradio's auto-UI wasn't useful — we have our own React frontend. Docker
+gives full control over the build (FAISS index baked at image build time,
+~480 MB MiniLM weights cached) at the cost of a longer first-deploy.
 
-Backend:
-```bash
-pip install -r requirements.txt
-python data_acquisition/scripts/01_parse_anmdm.py
-python data_acquisition/scripts/06_enrich.py --allow-missing-rcp
-python -m med_assist.index.builder
-uvicorn med_assist.api.main:app --port 8000 --reload
-```
+## Eval
 
-Frontend:
-```bash
-cp .env.example .env.local           # set VITE_BACKEND_URL=http://localhost:8000
-npm install
-npm run dev
-```
+49-case Romanian golden set, run with `python -m med_assist.cli.eval`:
 
-`.env.local` is auto-loaded by FastAPI on startup — no shell sourcing needed.
+| Metric | Value |
+|---|---|
+| Triage accuracy | 93.9% |
+| False-negative emergency rate | **0%** |
+| Retrieval recall@5 | 89.7% |
+| MRR | 0.71 |
+| p95 retrieval latency | 88 ms |
 
-## 📊 Eval
+## Tech stack
 
-```bash
-python -m med_assist.cli.eval
-```
+- **Backend**: Python 3.12, FastAPI, sentence-transformers (paraphrase-multilingual-MiniLM-L12-v2), faiss-cpu, rank-bm25, google-genai (Gemini 3 Flash + Vision)
+- **Frontend**: React + Vite + TypeScript, TailwindCSS, Auth0 (Google OAuth), Firestore (user profiles)
+- **Infra**: HuggingFace Spaces (Docker), GitHub Pages, GitHub Actions (orphan-snapshot mirror to HF, GH Pages deploy)
 
-49-case Romanian golden set. Current numbers: 93.9% triage accuracy, **0%
-false-negative emergency rate**, retrieval recall@5 = 89.7%, p95 latency 88ms.
+## Disclaimer
 
-## ⚠️ Disclaimer
+Educational project, not medical advice. Romanian SMURD: dial **112** for
+emergencies; antitox 021 318 36 06; suicide-prevention TelVerde 0800 801 200.
 
-Educational project. Not medical advice. Romanian SMURD: dial **112** for
-emergencies; antitox 021 318 36 06; suicidal-ideation TelVerde 0800 801 200.
-
-## 📝 License
+## License
 
 MIT
