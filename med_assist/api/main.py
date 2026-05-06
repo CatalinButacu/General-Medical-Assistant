@@ -93,8 +93,18 @@ class ChatMessage(BaseModel):
     text: str = Field(..., min_length=1, max_length=2000)
 
 
+class ChatProfile(BaseModel):
+    age: Optional[int] = Field(None, ge=0, le=120)
+    gender: Optional[str] = Field(None, pattern="^(male|female|other)$")
+    isPregnant: Optional[bool] = None
+    allergies: list[str] = Field(default_factory=list)
+    conditions: list[str] = Field(default_factory=list)
+    medications: list[str] = Field(default_factory=list)
+
+
 class ChatRequest(BaseModel):
     messages: list[ChatMessage] = Field(..., min_length=1, max_length=20)
+    profile: Optional[ChatProfile] = None
 
 
 @app.post("/chat")
@@ -113,10 +123,11 @@ async def chat(req: ChatRequest):
     """
     convo = get_conversation()
     history = [ChatMessageIn(role=m.role, text=m.text) for m in req.messages]
+    profile_dict = req.profile.model_dump(exclude_none=False) if req.profile else None
 
     async def sse_stream():
         try:
-            async for event in convo.stream_turn(history):
+            async for event in convo.stream_turn(history, profile=profile_dict):
                 yield f"event: {event.kind}\ndata: {json.dumps(event.payload, ensure_ascii=False)}\n\n"
         except Exception as exc:
             payload = {"message": f"server error: {str(exc)[:200]}"}

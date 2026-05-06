@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
+import { doc, getDoc } from 'firebase/firestore';
 import {
     AlertTriangle,
     Bot,
@@ -15,8 +17,9 @@ import {
     Zap,
 } from 'lucide-react';
 import { checkHealth, isApiConfigured, streamChat } from '../services/api';
-import type { ChatTurn } from '../services/api';
-import type { MedicineDTO, Message, RedFlagDTO, TriageEvent } from '../types';
+import type { ChatProfilePayload, ChatTurn } from '../services/api';
+import { db } from '../config/firebase';
+import type { HealthProfile, MedicineDTO, Message, RedFlagDTO, TriageEvent } from '../types';
 
 const QUICK_QUERIES = [
     { label: 'durere de cap',     query: 'mă doare capul și am febră' },
@@ -31,9 +34,11 @@ const HISTORY_TURNS_TO_SEND = 6;
 
 export default function Chat() {
     const navigate = useNavigate();
+    const { user } = useAuth0();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const abortRef = useRef<AbortController | null>(null);
+    const profileRef = useRef<ChatProfilePayload | undefined>(undefined);
 
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputMessage, setInputMessage] = useState('');
@@ -53,6 +58,32 @@ export default function Chat() {
         checkHealth().then(ok => { if (!cancelled) setIsOnline(ok); });
         return () => { cancelled = true; abortRef.current?.abort(); };
     }, []);
+
+    useEffect(() => {
+        if (!user?.sub) {
+            profileRef.current = undefined;
+            return;
+        }
+        let cancelled = false;
+        (async () => {
+            try {
+                const snap = await getDoc(doc(db, 'health_profiles', user.sub!));
+                if (cancelled || !snap.exists()) return;
+                const p = snap.data() as HealthProfile;
+                profileRef.current = {
+                    age: p.age,
+                    gender: p.gender,
+                    isPregnant: p.isPregnant,
+                    allergies: p.allergies ?? [],
+                    conditions: p.conditions ?? [],
+                    medications: p.medications ?? [],
+                };
+            } catch (err) {
+                console.warn('profile load failed', err);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [user?.sub]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -131,7 +162,7 @@ export default function Chat() {
                             setIsOnline(true);
                             setIsStreaming(false);
                         }
-                    }, controller.signal);
+                    }, controller.signal, profileRef.current);
                 } catch (err: any) {
                     setIsOnline(false);
                     setIsStreaming(false);

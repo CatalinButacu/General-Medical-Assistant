@@ -16,6 +16,15 @@ export interface ChatTurn { role: ChatRole; text: string; }
 export type ChatEventKind = 'triage' | 'medicines' | 'token' | 'done' | 'error';
 export type ChatEventHandler = (kind: ChatEventKind, payload: any) => void;
 
+export interface ChatProfilePayload {
+    age?: number;
+    gender?: 'male' | 'female' | 'other';
+    isPregnant?: boolean;
+    allergies?: string[];
+    conditions?: string[];
+    medications?: string[];
+}
+
 const RAW_BACKEND = import.meta.env.VITE_BACKEND_URL ?? '';
 export const API_BASE_URL = RAW_BACKEND.replace(/\/$/, '');
 
@@ -83,11 +92,14 @@ export async function streamChat(
     messages: ChatTurn[],
     onEvent: ChatEventHandler,
     signal?: AbortSignal,
+    profile?: ChatProfilePayload,
 ): Promise<void> {
+    const body: Record<string, unknown> = { messages };
+    if (profile && Object.keys(profile).length > 0) body.profile = profile;
     const res = await fetch(endpoint('/chat'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages }),
+        body: JSON.stringify(body),
         signal,
     });
     if (!res.ok) {

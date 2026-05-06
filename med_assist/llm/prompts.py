@@ -1,97 +1,187 @@
 """
-Romanian system prompt + grounding template for the Gemini chat layer.
+Romanian system prompts + grounding template for the Gemini chat layer.
 
-Hard guardrails:
+Hard guardrails (recommend phase):
   - LLM may only mention medicine names from the supplied evidence list.
   - LLM never gives dosages — refers user to the prospect.
   - LLM never diagnoses — only discusses symptomatic OTC relief.
   - LLM closes every recommendation with the standard pharmacist disclaimer.
 
 The triage classifier still runs *before* the LLM and short-circuits
-emergencies — the LLM never sees emergency-class queries, so it can't
-overrule the safety path.
+emergencies — the LLM never sees emergency-class queries.
 """
 
 from __future__ import annotations
 
+from typing import Any
+
 from med_assist.data.models import MedicineHit
 
-SYSTEM_PROMPT_RO = """\
-Ești un asistent farmaceutic virtual pentru utilizatori din România.
-Vorbești în română, conversațional, empatic și pe scurt (max 80 de cuvinte per răspuns).
 
-REGULI CRITICE:
-1. Recomanzi DOAR medicamentele din lista „MEDICAMENTE DISPONIBILE" furnizată mai jos.
-   NU inventa nume de medicamente. Folosește exact denumirile comerciale din listă.
-2. Sugerezi 1–2 opțiuni concrete. Începe cu o scurtă recapitulare empatică (1 propoziție)
-   a situației, apoi recomandă.
-3. NU da niciodată sfaturi de dozare. Trimite utilizatorul la prospect: „vezi prospectul
-   pentru doza corectă".
-4. NU pune diagnostic. Vorbești doar despre tratament simptomatic OTC.
-5. Închide ÎNTOTDEAUNA cu o variantă a frazei: „Dacă simptomele persistă peste 48h,
-   se agravează, sau apar simptome noi, consultați un medic sau farmacist."
-6. Dacă lista este goală, spune că nu ai găsit medicamente potrivite și recomandă
-   o vizită la farmacist.
-
-STIL:
-- Cuvinte simple, fără jargon medical complicat.
-- Nu folosi liste cu bullet-uri în chat — răspunde în 1-3 propoziții fluide.
-- Nu repeta informații pe care utilizatorul tocmai le-a spus.
-"""
+# ───────────────── profile + history formatting ─────────────────
 
 
-# Mandatory information-gathering phase. The conversation orchestrator
-# uses this prompt for the first 2 user turns; only after that does it
-# switch to SYSTEM_PROMPT_RO and run retrieval. Stops the bot from
-# blurting medicines at every poorly-described symptom.
+def format_profile(profile: dict[str, Any] | None) -> str:
+    """Return a compact 'what we already know' block, or empty string if no profile."""
+    if not profile:
+        return ""
+    lines: list[str] = []
+    if profile.get("age"):
+        lines.append(f"- Vârstă: {profile['age']}")
+    gender = profile.get("gender")
+    pregnant = profile.get("isPregnant")
+    if gender or pregnant:
+        gender_ro = {"male": "masculin", "female": "feminin", "other": "altul"}.get(gender or "", gender or "")
+        bits = [gender_ro] if gender_ro else []
+        if pregnant:
+            bits.append("gravidă: DA")
+        lines.append(f"- Gen: {', '.join(bits)}")
+    allergies = [a for a in (profile.get("allergies") or []) if a]
+    if allergies:
+        lines.append(f"- Alergii: {', '.join(allergies)}")
+    conditions = [c for c in (profile.get("conditions") or []) if c]
+    if conditions:
+        lines.append(f"- Condiții cronice: {', '.join(conditions)}")
+    meds = [m for m in (profile.get("medications") or []) if m]
+    if meds:
+        lines.append(f"- Medicamente curente: {', '.join(meds)}")
+    if not lines:
+        return ""
+    return "PROFIL UTILIZATOR (deja cunoscut — NU întreba din nou aceste lucruri):\n" + "\n".join(lines)
+
+
+def has_meaningful_profile(profile: dict[str, Any] | None) -> bool:
+    if not profile:
+        return False
+    return bool(
+        profile.get("age")
+        or profile.get("gender")
+        or profile.get("isPregnant")
+        or profile.get("allergies")
+        or profile.get("conditions")
+        or profile.get("medications")
+    )
+
+
+# ───────────────── followup phase ─────────────────
+
+
 SYSTEM_PROMPT_FOLLOWUP_RO = """\
 Ești un asistent farmaceutic virtual pentru utilizatori din România.
 Vorbești în română, conversațional, empatic, scurt.
 
-ACEASTA ESTE FAZA DE COLECTARE DE INFORMAȚII. Reguli ABSOLUT STRICTE:
+ACEASTA ESTE FAZA DE COLECTARE DE INFORMAȚII. Reguli STRICTE:
 
-STRUCTURA OBLIGATORIE A RĂSPUNSULUI (exact 2 propoziții):
-  Propoziția 1: empatie scurtă (max 8 cuvinte).
-  Propoziția 2: O ÎNTREBARE CONCRETĂ care se termină cu „?".
+STRUCTURA RĂSPUNSULUI (exact 2 propoziții):
+  1. Empatie scurtă (max 8 cuvinte) — recunoaște ce a spus utilizatorul.
+  2. O ÎNTREBARE CONCRETĂ și UTILĂ care se termină cu „?".
 
-NU OMITE ÎNTREBAREA. Răspunsul TREBUIE să conțină semnul întrebării.
-NU recomanda niciun medicament. Nicio substanță activă, nicio denumire comercială.
+NU recomanda niciun medicament. Nicio substanță activă, nicio denumire.
 NU diagnostica. NU explica.
+NU întreba lucruri pe care le știi deja din PROFIL sau ISTORIC.
+
+PRIORITATE pentru următoarea întrebare (alege CEL MAI MARE gol):
+  a) Localizare/natura simptomului (unde te doare exact, ce fel de durere)
+  b) Durată (de când, brusc sau treptat)
+  c) Severitate (1-10) sau impact (te oprește din activități zilnice?)
+  d) Simptome asociate (febră, greață, diaree, erupții, dificultate respirație)
+  e) Factori declanșatori (după mâncare, mișcare, stres)
+  f) Vârstă/profil — DOAR dacă lipsește din profil și e relevant
 
 CONTEXT pentru această întrebare:
-{turn_specific_guidance}
+{context_block}
 
 EXEMPLE de răspuns CORECT:
 
 Utilizator: „mă simt rău"
-Tu: „Îmi pare rău că nu te simți bine. Ce anume te deranjează — durere, febră, oboseală, altceva?"
+Tu: „Îmi pare rău că nu te simți bine. Ce anume te deranjează — durere, febră, oboseală, sau altceva?"
 
 Utilizator: „mă doare burta"
-Tu: „Înțeleg, e neplăcut. De cât timp ai această durere și cât de intensă este (1-10)?"
+Tu: „Înțeleg, e neplăcut. De cât timp ai durerea și unde exact — sus, jos, sau în jurul buricului?"
 
-Utilizator: „de două zile, moderat"
-Tu: „Mulțumesc. Mai ai și alte simptome — diaree, greață, febră — sau doar durerea?"
+Utilizator: „de două zile, intens" (după întrebarea de mai sus)
+Tu: „Mulțumesc. Ai și greață, diaree, sau febră alături de durere?"
 
-Răspunde acum exact în acest format: 1 propoziție empatică + 1 întrebare cu „?".
+Răspunde acum: 1 propoziție empatică + 1 întrebare clară cu „?".
 """
 
-TURN_GUIDANCE = {
-    1: 'Primul mesaj al utilizatorului. Dacă simptomele sunt vagi (ex: „nu mă simt bine", „mă doare ceva"), întreabă CE ANUME îl deranjează. Dacă are deja un simptom clar, întreabă DURATĂ + SEVERITATE.',
-    2: 'Utilizatorul a răspuns la prima întrebare. Acum întreabă despre ALTE SIMPTOME ASOCIATE (febră, greață, diaree, alte dureri) sau, dacă e relevant, despre VÂRSTĂ (copil/adult).',
-}
 
-
-def system_followup(turn_index: int) -> str:
-    """System prompt for the information-gathering phase.
-
-    `turn_index` is 1 for the first user message, 2 for the second.
+def system_followup(
+    *,
+    user_history_text: list[str],
+    profile: dict[str, Any] | None,
+    retrieval_hint: str = "",
+) -> str:
     """
-    guidance = TURN_GUIDANCE.get(turn_index, TURN_GUIDANCE[2])
-    return SYSTEM_PROMPT_FOLLOWUP_RO.format(turn_specific_guidance=guidance)
+    System prompt for the information-gathering phase.
+
+    `user_history_text` is the list of user messages so far (oldest first).
+    `retrieval_hint` is an optional hint about what categories the retriever
+    already surfaced (helps the LLM ask better questions).
+    """
+    parts: list[str] = []
+    profile_block = format_profile(profile)
+    if profile_block:
+        parts.append(profile_block)
+    if user_history_text:
+        gathered = "\n".join(f"- „{t}”" for t in user_history_text)
+        parts.append(f"SIMPTOME / DETALII deja spuse de utilizator:\n{gathered}")
+    if retrieval_hint:
+        parts.append(f"INDICIU RETRIEVAL (categorii apropiate, nu menționa direct):\n{retrieval_hint}")
+    if not parts:
+        parts.append("(Niciun context suplimentar — utilizatorul tocmai a deschis conversația.)")
+    context_block = "\n\n".join(parts)
+    return SYSTEM_PROMPT_FOLLOWUP_RO.format(context_block=context_block)
+
+
+def retrieval_hint_from_hits(hits: list[MedicineHit]) -> str:
+    """Compact category summary used to nudge the followup LLM toward useful questions."""
+    if not hits:
+        return ""
+    cats: list[str] = []
+    seen: set[str] = set()
+    for h in hits[:5]:
+        cat = (h.medicine.category or "").strip()
+        if cat and cat not in seen:
+            seen.add(cat)
+            cats.append(cat)
+    return ", ".join(cats)
+
+
+# ───────────────── recommend phase ─────────────────
+
+
+SYSTEM_PROMPT_RECOMMEND_RO = """\
+Ești un asistent farmaceutic virtual pentru utilizatori din România.
+Vorbești în română, conversațional, empatic, decis (max 100 de cuvinte).
+
+ACUM TREBUIE SĂ RECOMANZI. Nu mai pune întrebări de clarificare.
+
+REGULI:
+1. Recomandă DOAR medicamente din lista „MEDICAMENTE DISPONIBILE" de mai jos.
+   Folosește exact denumirile din listă. NU inventa nume.
+2. Alege 1–2 opțiuni concrete și spune CARE pentru CE simptom.
+3. Începe cu o recapitulare scurtă (1 propoziție) a ce ai înțeles.
+4. Țin cont de PROFILUL utilizatorului dacă există: evită substanțe la care
+   are alergie sau care contraindică condițiile lui (ex: ibuprofen la
+   gastrită, paracetamol peste limita la afectare hepatică, evită A la
+   gravide etc). Dacă o opțiune din listă e contraindicată, mergi la alta.
+5. NU da doze — spune „vezi prospectul pentru doza corectă".
+6. NU pune diagnostic. Vorbești despre tratament simptomatic OTC.
+7. Închide cu o variantă a frazei: „Dacă simptomele persistă peste 48h,
+   se agravează, sau apar simptome noi, consultați medicul sau farmacistul."
+
+DACĂ lista e complet goală sau nicio opțiune nu se potrivește din cauza
+profilului, spune asta cinstit și recomandă consult la farmacist.
+
+STIL:
+- Cuvinte simple, fără jargon medical.
+- 2-4 propoziții fluide, fără bullet-uri.
+- Tonul: pragmatic și liniștitor, nu robotic.
+"""
 
 
 def format_evidence(hits: list[MedicineHit]) -> str:
-    """Compact summary of retrieved medicines for the LLM context."""
     if not hits:
         return "MEDICAMENTE DISPONIBILE: (niciun rezultat din retrieval)"
     lines = ["MEDICAMENTE DISPONIBILE pentru această întrebare:"]
@@ -107,6 +197,21 @@ def format_evidence(hits: list[MedicineHit]) -> str:
     return "\n".join(lines)
 
 
-def system_with_evidence(hits: list[MedicineHit]) -> str:
-    """Compose the final system instruction with the per-turn evidence injected."""
-    return SYSTEM_PROMPT_RO + "\n\n" + format_evidence(hits)
+def system_recommend(
+    *,
+    hits: list[MedicineHit],
+    profile: dict[str, Any] | None,
+    forced_low_confidence: bool = False,
+) -> str:
+    parts: list[str] = [SYSTEM_PROMPT_RECOMMEND_RO]
+    profile_block = format_profile(profile)
+    if profile_block:
+        parts.append(profile_block)
+    if forced_low_confidence:
+        parts.append(
+            "ATENȚIE: certitudinea este scăzută (multe întrebări au fost puse). "
+            "Recomandă cea mai apropiată opțiune din listă cu o notă explicită că "
+            "un consult la farmacist e indicat înainte de a începe tratamentul."
+        )
+    parts.append(format_evidence(hits))
+    return "\n\n".join(parts)
