@@ -28,7 +28,12 @@ RUN pip install --no-cache-dir --upgrade pip \
 # Bring in only what build steps need — keep the build context small.
 COPY data_acquisition/raw/anmdm_nomenclator.xlsx data_acquisition/raw/anmdm_nomenclator.xlsx
 COPY data_acquisition/processed/medicines_anmdm.json data_acquisition/processed/medicines_anmdm.json
-COPY data_acquisition/processed/pdf_links.json data_acquisition/processed/pdf_links.json
+# pdf_links.json is gzipped on the HF deploy snapshot (10 MiB pre-receive
+# hook), uncompressed locally. The glob accepts whichever form is present.
+COPY data_acquisition/processed/pdf_links.json* data_acquisition/processed/
+RUN if [ -f data_acquisition/processed/pdf_links.json.gz ]; then \
+        gunzip data_acquisition/processed/pdf_links.json.gz; \
+    fi
 COPY data_acquisition/scripts/ data_acquisition/scripts/
 COPY med_assist/ med_assist/
 
