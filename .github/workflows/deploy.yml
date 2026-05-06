@@ -27,8 +27,6 @@ jobs:
 
       - name: Build frontend
         env:
-          # Public URL of the HF Space backend, e.g.
-          # https://catalinbutacu-med-assist.hf.space
           VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
         run: npm run build
 

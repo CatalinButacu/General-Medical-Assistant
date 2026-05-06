@@ -9,27 +9,20 @@ jobs:
   push-to-hf:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: Configure git identity for the HF push
+      - name: Configure git identity
         run: |
           git config user.email "ci@github.actions"
           git config user.name "GitHub Actions"
 
-      - name: Build deploy snapshot (orphan commit, drop binary corpus inputs)
+      - name: Build deploy snapshot (orphan, drop binaries)
         run: |
-          # HF Spaces' Xet storage rejects all binary blobs on push
-          # (regardless of size) unless tracked via LFS. The Dockerfile
-          # fetches these two files from the public GitHub repo at
-          # build time, so we just remove them from the snapshot.
           rm -f data_acquisition/raw/anmdm_nomenclator.xlsx
           rm -f data_acquisition/processed/pdf_links.json
           rm -f data_acquisition/processed/pdf_links.json.gz
-          # Single-commit deploy history also keeps the HF Space repo
-          # small and free of any historical large/binary blobs.
           git checkout --orphan hf-deploy
           git add -A
           git commit -m "Med Assist deploy ${{ github.sha }}"
