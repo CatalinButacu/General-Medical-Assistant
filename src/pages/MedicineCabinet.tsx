@@ -63,7 +63,7 @@ export default function MedicineCabinet() {
       setIsLoading(false);
     }, (error) => {
       console.error("Firestore error:", error);
-      toast.error('Failed to sync cabinet data');
+      toast.error('Sincronizare cabinet eșuată');
       setIsLoading(false);
     });
 
@@ -87,7 +87,7 @@ export default function MedicineCabinet() {
 
   const saveMedicine = async () => {
     if (!formData.name || !formData.expirationDate || !user?.sub) {
-      toast.error('Missing required fields');
+      toast.error('Completează câmpurile obligatorii');
       return;
     }
 
@@ -107,16 +107,16 @@ export default function MedicineCabinet() {
     try {
       if (editingMedicine) {
         await updateDoc(doc(db, 'medicine_cabinets', editingMedicine.id), payload);
-        toast.success('Medicine updated');
+        toast.success('Medicament actualizat');
       } else {
         await addDoc(collection(db, 'medicine_cabinets'), payload);
-        toast.success('Medicine added');
+        toast.success('Medicament adăugat');
       }
       setShowAddForm(false);
       setEditingMedicine(null);
       resetForm();
     } catch (e) {
-      toast.error('Failed to save medicine');
+      toast.error('Salvare eșuată');
     }
   };
 
@@ -139,16 +139,16 @@ export default function MedicineCabinet() {
   const deleteMedicine = async (id: string) => {
     try {
       await deleteDoc(doc(db, 'medicine_cabinets', id));
-      toast.success('Removed from cabinet');
+      toast.success('Eliminat din cabinet');
     } catch (e) {
-      toast.error('Failed to delete');
+      toast.error('Ștergere eșuată');
     }
   };
 
   const getStatus = (item: CabinetItem) => {
-    if (item.isExpired) return { color: 'text-red-600 bg-red-50', label: 'Expired', icon: AlertTriangle };
-    if ((item.daysUntilExpiration ?? 100) <= 30) return { color: 'text-orange-600 bg-orange-50', label: 'Expiring Soon', icon: Clock };
-    return { color: 'text-green-600 bg-green-50', label: 'Active', icon: CheckCircle };
+    if (item.isExpired) return { color: 'text-red-600 bg-red-50', label: 'Expirat', icon: AlertTriangle };
+    if ((item.daysUntilExpiration ?? 100) <= 30) return { color: 'text-orange-600 bg-orange-50', label: 'Expiră curând', icon: Clock };
+    return { color: 'text-green-600 bg-green-50', label: 'Activ', icon: CheckCircle };
   };
 
   const filteredMedicines = medicines.filter(med => {
@@ -169,7 +169,7 @@ export default function MedicineCabinet() {
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <button onClick={() => navigate('/')} className="p-2 hover:bg-gray-100 rounded-lg"><X size={20} /></button>
-            <h1 className="text-lg font-semibold">Medicine Cabinet</h1>
+            <h1 className="text-lg font-semibold">Cabinet medicamente</h1>
             <button onClick={() => setShowAddForm(true)} className="bg-blue-600 text-white p-2 rounded-lg"><Plus size={20} /></button>
           </div>
         </div>
@@ -181,13 +181,13 @@ export default function MedicineCabinet() {
             {expiredCount > 0 && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
                 <AlertTriangle className="text-red-600 mr-3" size={20} />
-                <span className="text-red-800 font-semibold">{expiredCount} medicine{expiredCount > 1 ? 's' : ''} expired</span>
+                <span className="text-red-800 font-semibold">{expiredCount} medicament{expiredCount > 1 ? 'e' : ''} expirat{expiredCount > 1 ? 'e' : ''}</span>
               </div>
             )}
             {expiringCount > 0 && (
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 flex items-center">
                 <Clock className="text-orange-600 mr-3" size={20} />
-                <span className="text-orange-800 font-semibold">{expiringCount} medicine{expiringCount > 1 ? 's' : ''} expiring soon</span>
+                <span className="text-orange-800 font-semibold">{expiringCount} medicament{expiringCount > 1 ? 'e' : ''} expiră curând</span>
               </div>
             )}
           </div>
@@ -197,19 +197,24 @@ export default function MedicineCabinet() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
-              type="text" placeholder="Search medicines..." value={searchQuery}
+              type="text" placeholder="Caută medicamente…" value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
             />
           </div>
 
           <div className="flex space-x-2 overflow-x-auto pb-1 no-scrollbar">
-            {['all', 'active', 'expiring', 'expired'].map(key => (
+            {([
+              { key: 'all', label: 'Toate' },
+              { key: 'active', label: 'Active' },
+              { key: 'expiring', label: 'Expiră curând' },
+              { key: 'expired', label: 'Expirate' },
+            ] as const).map(({ key, label }) => (
               <button
-                key={key} onClick={() => setFilterType(key as any)}
+                key={key} onClick={() => setFilterType(key)}
                 className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${filterType === key ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200'}`}
               >
-                {key.charAt(0).toUpperCase() + key.slice(1)}
+                {label}
               </button>
             ))}
           </div>
@@ -219,13 +224,13 @@ export default function MedicineCabinet() {
           {isLoading ? (
             <div className="text-center py-20">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-500 font-medium">Syncing with cloud...</p>
+              <p className="mt-4 text-gray-500 font-medium">Sincronizare cu cloud…</p>
             </div>
           ) : filteredMedicines.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
               <Package className="mx-auto mb-4 text-gray-300" size={48} />
-              <p className="text-gray-500 font-medium">No medicines found</p>
-              <button onClick={() => setShowAddForm(true)} className="mt-4 text-blue-600 font-bold">Add Your First Medicine</button>
+              <p className="text-gray-500 font-medium">Niciun medicament</p>
+              <button onClick={() => setShowAddForm(true)} className="mt-4 text-blue-600 font-bold">Adaugă primul medicament</button>
             </div>
           ) : (
             filteredMedicines.map(med => {
@@ -240,7 +245,7 @@ export default function MedicineCabinet() {
                       <div className="flex items-center flex-wrap gap-2 mt-3">
                         <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold rounded uppercase tracking-wider">{med.dosage}</span>
                         <span className="px-2 py-0.5 bg-gray-50 text-gray-600 text-[10px] font-bold rounded uppercase tracking-wider">{med.type}</span>
-                        <span className="px-2 py-0.5 bg-gray-50 text-gray-600 text-[10px] font-bold rounded uppercase tracking-wider">Qty: {med.quantity}</span>
+                        <span className="px-2 py-0.5 bg-gray-50 text-gray-600 text-[10px] font-bold rounded uppercase tracking-wider">Cant: {med.quantity}</span>
                       </div>
                     </div>
                     <div className="flex -mr-2">
@@ -249,11 +254,11 @@ export default function MedicineCabinet() {
                     </div>
                   </div>
                   <div className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold border ${status.color}`}>
-                    <StatusIcon size={12} className="mr-1.5" /> {status.label} {!med.isExpired && med.daysUntilExpiration !== undefined && `(${med.daysUntilExpiration} days left)`}
+                    <StatusIcon size={12} className="mr-1.5" /> {status.label} {!med.isExpired && med.daysUntilExpiration !== undefined && `(${med.daysUntilExpiration} zile rămase)`}
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-gray-400 mt-4 pt-4 border-t border-gray-50">
-                    <div className="flex items-center font-medium"><Calendar size={12} className="mr-1.5" /> Expires: {med.expirationDate}</div>
-                    <div className="font-medium">Added: {med.addedDate}</div>
+                    <div className="flex items-center font-medium"><Calendar size={12} className="mr-1.5" /> Expiră: {med.expirationDate}</div>
+                    <div className="font-medium">Adăugat: {med.addedDate}</div>
                   </div>
                   {med.notes && <div className="mt-3 p-3 bg-gray-50 rounded-xl text-xs text-gray-600 italic">"{med.notes}"</div>}
                 </div>
@@ -267,7 +272,7 @@ export default function MedicineCabinet() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50 p-4">
           <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom duration-300">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xl font-bold text-gray-800">{editingMedicine ? 'Edit Medicine' : 'Add to Cabinet'}</h2>
+              <h2 className="text-xl font-bold text-gray-800">{editingMedicine ? 'Editează medicament' : 'Adaugă în cabinet'}</h2>
               <button onClick={() => { setShowAddForm(false); setEditingMedicine(null); resetForm(); }} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"><X size={20} /></button>
             </div>
             {fromScanner && !editingMedicine && (
@@ -279,40 +284,47 @@ export default function MedicineCabinet() {
             {!fromScanner && <div className="mb-6" />}
             <div className="space-y-5">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Medicine Name</label>
-                <input type="text" placeholder="e.g. Paracetamol" value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
+                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Denumire</label>
+                <input type="text" placeholder="ex: Paracetamol" value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Generic / Active Ingredient</label>
-                <input type="text" placeholder="e.g. Acetaminophen" value={formData.genericName} onChange={e => setFormData(p => ({ ...p, genericName: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
+                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Substanță activă (DCI)</label>
+                <input type="text" placeholder="ex: Paracetamolum" value={formData.genericName} onChange={e => setFormData(p => ({ ...p, genericName: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Dosage</label>
+                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Concentrație</label>
                   <input type="text" placeholder="500mg" value={formData.dosage} onChange={e => setFormData(p => ({ ...p, dosage: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Form</label>
+                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Formă</label>
                   <select value={formData.type} onChange={e => setFormData(p => ({ ...p, type: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium appearance-none">
-                    {['tablet', 'capsule', 'liquid', 'cream', 'injection', 'other'].map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
+                    {[
+                      { v: 'tablet', l: 'Comprimat' },
+                      { v: 'capsule', l: 'Capsulă' },
+                      { v: 'liquid', l: 'Sirop / soluție' },
+                      { v: 'cream', l: 'Cremă / unguent' },
+                      { v: 'injection', l: 'Injectabil' },
+                      { v: 'other', l: 'Alta' },
+                    ].map(({ v, l }) => <option key={v} value={v}>{l}</option>)}
                   </select>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Quantity</label>
+                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Cantitate</label>
                   <input type="number" value={formData.quantity} onChange={e => setFormData(p => ({ ...p, quantity: parseInt(e.target.value) || 1 }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Expiry Date</label>
+                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Data expirării</label>
                   <input type="date" value={formData.expirationDate} onChange={e => setFormData(p => ({ ...p, expirationDate: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Private Notes</label>
-                <textarea placeholder="e.g. Take after meal" value={formData.notes} onChange={e => setFormData(p => ({ ...p, notes: e.target.value }))} rows={2} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium resize-none" />
+                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Notițe personale</label>
+                <textarea placeholder="ex: De luat după mese" value={formData.notes} onChange={e => setFormData(p => ({ ...p, notes: e.target.value }))} rows={2} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium resize-none" />
               </div>
-              <button onClick={saveMedicine} className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all active:scale-[0.98] mt-4 uppercase tracking-widest text-sm">{editingMedicine ? 'Update Entry' : 'Add to Cabinet'}</button>
+              <button onClick={saveMedicine} className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all active:scale-[0.98] mt-4 uppercase tracking-widest text-sm">{editingMedicine ? 'Actualizează' : 'Adaugă în cabinet'}</button>
             </div>
           </div>
         </div>
