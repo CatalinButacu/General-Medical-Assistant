@@ -1,0 +1,14 @@
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+# Default rule set is fine; tweak when something noisy emerges.
+select = ["E", "F", "W", "I"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+# main.py must load .env.local before importing modules that read env vars at
+# import time (Gemini client, retrieval, etc), so post-dotenv module imports
+# are intentional and not actually "at the top".
+"med_assist/api/main.py" = ["E402"]
