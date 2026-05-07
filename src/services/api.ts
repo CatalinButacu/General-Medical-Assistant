@@ -14,7 +14,13 @@ import type { ManifestResponse, ScanResponse } from '../types';
 export type ChatRole = 'user' | 'assistant' | 'system';
 export interface ChatTurn { role: ChatRole; text: string; }
 export type ChatEventKind = 'triage' | 'medicines' | 'token' | 'done' | 'error';
-export type ChatEventHandler = (kind: ChatEventKind, payload: any) => void;
+export interface ChatEventPayload {
+    text?: string;
+    message?: string;
+    items?: unknown[];
+    [key: string]: unknown;
+}
+export type ChatEventHandler = (kind: ChatEventKind, payload: ChatEventPayload) => void;
 
 export interface ChatProfilePayload {
     age?: number;

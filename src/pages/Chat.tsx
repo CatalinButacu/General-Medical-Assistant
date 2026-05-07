@@ -163,11 +163,12 @@ export default function Chat() {
                             setIsStreaming(false);
                         }
                     }, controller.signal, profileRef.current);
-                } catch (err: any) {
+                } catch (err) {
                     setIsOnline(false);
                     setIsStreaming(false);
+                    const msg = err instanceof Error ? err.message : 'unknown';
                     setMessages(curr => curr.map(m =>
-                        m.id === aiId ? { ...m, isStreaming: false, error: err?.message ?? 'unknown' } : m
+                        m.id === aiId ? { ...m, isStreaming: false, error: msg } : m
                     ));
                 }
             })();

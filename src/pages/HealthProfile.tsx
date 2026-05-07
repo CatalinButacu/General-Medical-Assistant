@@ -100,7 +100,7 @@ export default function HealthProfile() {
         body: JSON.stringify(payload),
       });
       toast.success('Profil salvat');
-    } catch (error) {
+    } catch {
       toast.error('Salvarea profilului a eșuat');
     } finally {
       setIsSaving(false);
@@ -133,7 +133,7 @@ export default function HealthProfile() {
         }, 1000);
         return;
       }
-    } catch (error) {
+    } catch {
       toast.error('Backend indisponibil pentru verificarea siguranței');
     } finally {
       setIsLoading(false);
@@ -248,8 +248,8 @@ export default function HealthProfile() {
           <div className="space-y-5">
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest leading-none">Data nașterii</label>
-              <input type="date" value={(profile as any).dateOfBirth || ''} onChange={e => setProfile(p => ({ ...p, dateOfBirth: e.target.value } as any))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
-              {(profile as any).dateOfBirth && <p className="text-[10px] font-bold text-blue-500 mt-2 px-1">Vârsta actuală: {calculateAge((profile as any).dateOfBirth)} ani</p>}
+              <input type="date" value={profile.dateOfBirth || ''} onChange={e => setProfile(p => ({ ...p, dateOfBirth: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
+              {profile.dateOfBirth && <p className="text-[10px] font-bold text-blue-500 mt-2 px-1">Vârsta actuală: {calculateAge(profile.dateOfBirth)} ani</p>}
             </div>
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-gray-400 uppercase ml-1 tracking-widest leading-none">Gen</label>
@@ -259,7 +259,7 @@ export default function HealthProfile() {
                   { v: 'male', l: 'Masculin' },
                   { v: 'other', l: 'Altul' },
                 ] as const).map(({ v, l }) => (
-                  <button key={v} onClick={() => setProfile(p => ({ ...p, gender: v as any }))} className={`flex-1 py-3 px-2 rounded-2xl text-xs font-bold transition-all border-2 ${profile.gender === v ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100' : 'bg-gray-50 text-gray-500 border-gray-50 opacity-60 hover:opacity-100'}`}>
+                  <button key={v} onClick={() => setProfile(p => ({ ...p, gender: v }))} className={`flex-1 py-3 px-2 rounded-2xl text-xs font-bold transition-all border-2 ${profile.gender === v ? 'bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-100' : 'bg-gray-50 text-gray-500 border-gray-50 opacity-60 hover:opacity-100'}`}>
                     {l}
                   </button>
                 ))}
@@ -309,7 +309,18 @@ export default function HealthProfile() {
   );
 }
 
-function Section({ title, placeholder, icon, items, onAdd, onRemove, value, onChange }: any) {
+interface SectionProps {
+  title: string;
+  placeholder?: string;
+  icon: React.ReactNode;
+  items: string[];
+  onAdd: () => void;
+  onRemove: (item: string) => void;
+  value: string;
+  onChange: (value: string) => void;
+}
+
+function Section({ title, placeholder, icon, items, onAdd, onRemove, value, onChange }: SectionProps) {
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
       <div className="flex items-center mb-6">
@@ -331,7 +342,7 @@ function Section({ title, placeholder, icon, items, onAdd, onRemove, value, onCh
         {items.length === 0 ? (
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic px-1">Nimic adăugat încă</p>
         ) : (
-          items.map((item: string, i: number) => (
+          items.map((item, i) => (
             <div key={i} className="bg-gray-50 border border-gray-100 px-4 py-2 rounded-2xl flex items-center animate-in zoom-in duration-200">
               <span className="text-xs font-bold text-gray-700">{item}</span>
               <button onClick={() => onRemove(item)} className="ml-2.5 p-1 bg-white text-gray-400 hover:text-red-600 rounded-full transition-colors active:scale-95 shadow-sm"><X size={10} /></button>

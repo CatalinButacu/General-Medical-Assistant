@@ -42,7 +42,7 @@ export default function CameraScanner() {
       });
       setStream(newStream);
       setCameraState('live');
-    } catch (err) {
+    } catch {
       setCameraState('denied');
       setError('Acces camera refuzat sau indisponibil. Folosește încărcarea din galerie.');
       toast.error('Acces camera refuzat');
@@ -98,8 +98,8 @@ export default function CameraScanner() {
       } else {
         toast.error('Nu am putut identifica medicamentul. Reîncearcă cu o imagine mai clară.');
       }
-    } catch (err: any) {
-      setError(err?.message ?? 'Identificare eșuată.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Identificare eșuată.');
       toast.error('Identificare eșuată');
     } finally {
       setIsAnalyzing(false);

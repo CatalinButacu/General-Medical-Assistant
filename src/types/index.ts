@@ -140,6 +140,7 @@ export interface HealthProfile {
     name: string;
     age?: number;
     gender?: 'male' | 'female' | 'other';
+    dateOfBirth?: string;
     isPregnant?: boolean;
     pregnancyDueDate?: string;
     allergies: string[];
