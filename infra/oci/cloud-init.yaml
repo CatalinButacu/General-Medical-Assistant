@@ -1,0 +1,70 @@
+#cloud-config
+# Med Assist DB bootstrap. Runs once on first boot.
+# Logs land in /var/log/medassist-init.log — tail there if Postgres doesn't come up.
+
+package_update: true
+packages:
+  - curl
+  - ca-certificates
+  - gnupg
+  - ufw
+  - iptables-persistent
+  - netfilter-persistent
+
+write_files:
+  - path: /tmp/schema.sql
+    permissions: '0644'
+    content: |
+${indent(6, schema_sql)}
+
+  - path: /tmp/setup-postgres.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      set -euo pipefail
+
+      # PGDG apt repo for current Postgres
+      install -d /usr/share/postgresql-common/pgdg
+      curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+        https://www.postgresql.org/media/keys/ACCC4CF8.asc
+      echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+        > /etc/apt/sources.list.d/pgdg.list
+
+      apt-get update
+      DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql-16
+
+      systemctl enable --now postgresql
+
+      # Create role + database + apply schema (idempotent)
+      sudo -u postgres psql -v ON_ERROR_STOP=1 <<SQL
+      DO \$\$ BEGIN
+        IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '${db_user}') THEN
+          CREATE ROLE ${db_user} WITH LOGIN PASSWORD '${db_password}';
+        END IF;
+      END \$\$;
+      SELECT 'CREATE DATABASE ${db_name} OWNER ${db_user}'
+      WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${db_name}')\gexec
+      GRANT ALL PRIVILEGES ON DATABASE ${db_name} TO ${db_user};
+      SQL
+
+      sudo -u postgres psql -d ${db_name} -v ON_ERROR_STOP=1 -f /tmp/schema.sql
+
+      # Listen on all interfaces, SSL-only remote auth with scram-sha-256
+      sed -i "s/^#listen_addresses.*/listen_addresses = '*'/" /etc/postgresql/16/main/postgresql.conf
+      grep -q "^hostssl ${db_name} ${db_user}" /etc/postgresql/16/main/pg_hba.conf || \
+        echo "hostssl ${db_name} ${db_user} 0.0.0.0/0 scram-sha-256" >> /etc/postgresql/16/main/pg_hba.conf
+
+      systemctl restart postgresql
+
+      # Open the firewall (host UFW + OCI VM iptables)
+      ufw allow OpenSSH
+      ufw allow 5432/tcp
+      ufw --force enable
+
+      iptables -I INPUT 6 -m state --state NEW -p tcp --dport 5432 -j ACCEPT || true
+      netfilter-persistent save || true
+
+      touch /var/lib/medassist-bootstrap-complete
+
+runcmd:
+  - bash /tmp/setup-postgres.sh > /var/log/medassist-init.log 2>&1
