@@ -1,56 +1,56 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { doc, getDoc } from 'firebase/firestore';
 import { Camera, MessageCircle, Shield, Package, Heart, AlertTriangle, LogIn, LogOut, User as UserIcon } from 'lucide-react';
-import { db } from '../config/firebase';
+import { useUserApi } from '../hooks/useUserApi';
+import { userPaths, type ProfileDTO } from '../services/userApi';
 
 export default function Home() {
   const navigate = useNavigate();
   const { loginWithRedirect, logout, user, isAuthenticated, isLoading } = useAuth0();
+  const apiCall = useUserApi();
 
   useEffect(() => {
     if (!isAuthenticated || !user?.sub) return;
     let cancelled = false;
     (async () => {
       try {
-        const snap = await getDoc(doc(db, 'health_profiles', user.sub!));
+        const p = await apiCall<ProfileDTO>(userPaths.profile);
         if (cancelled) return;
-        const onboarded = snap.exists() && snap.data()?.onboarded === true;
-        if (!onboarded) navigate('/onboarding', { replace: true });
+        if (!p.onboarded) navigate('/onboarding', { replace: true });
       } catch (err) {
         console.warn('onboarding-check failed', err);
       }
     })();
     return () => { cancelled = true; };
-  }, [isAuthenticated, user?.sub, navigate]);
+  }, [isAuthenticated, user?.sub, navigate, apiCall]);
 
   const quickActions = [
     {
       icon: Camera,
-      title: 'Scan Medicine',
-      description: 'Take a photo to identify medicine',
+      title: 'Scanează medicament',
+      description: 'Fă o poză pentru identificare',
       color: 'bg-green-500',
       action: () => navigate('/scanner')
     },
     {
       icon: MessageCircle,
-      title: 'Ask AI Assistant',
-      description: 'Get personalized medicine advice',
+      title: 'Asistent AI',
+      description: 'Sfaturi personalizate de farmacie',
       color: 'bg-purple-500',
       action: () => navigate('/chat')
     },
     {
       icon: Package,
-      title: 'Medicine Cabinet',
-      description: 'Manage your medicine inventory',
+      title: 'Cabinet medicamente',
+      description: 'Inventarul tău de medicamente',
       color: 'bg-orange-500',
       action: () => navigate('/cabinet')
     },
     {
       icon: Shield,
-      title: 'Safety Check',
-      description: 'Check medicine safety for you',
+      title: 'Verificare siguranță',
+      description: 'Verifică un medicament pentru tine',
       color: 'bg-red-500',
       action: () => navigate('/profile')
     }
@@ -67,7 +67,7 @@ export default function Home() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-800">MedAssist</h1>
-                <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">AI Pharmacist</p>
+                <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">Asistent farmaceutic AI</p>
               </div>
             </div>
 
@@ -80,7 +80,7 @@ export default function Home() {
                   className="flex items-center space-x-2 p-1 pr-3 bg-gray-50 rounded-full border hover:bg-gray-100 transition-colors"
                 >
                   <img src={user?.picture} alt={user?.name} className="w-7 h-7 rounded-full" />
-                  <span className="text-xs font-semibold text-gray-700 truncate max-w-[80px]">{user?.given_name || 'Profile'}</span>
+                  <span className="text-xs font-semibold text-gray-700 truncate max-w-[80px]">{user?.given_name || 'Profil'}</span>
                 </button>
                 <button
                   onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
@@ -95,7 +95,7 @@ export default function Home() {
                 className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm"
               >
                 <LogIn size={16} />
-                <span>Login</span>
+                <span>Autentificare</span>
               </button>
             )}
           </div>
@@ -104,7 +104,7 @@ export default function Home() {
 
       {/* Educational Disclaimer */}
       <div className="bg-indigo-600 text-white px-4 py-2 text-center text-[10px] font-bold uppercase tracking-[0.2em]">
-        Educational Demo Purposes Only • Not Medical Advice
+        Demo educativ • Nu este sfat medical
       </div>
 
       <div className="max-w-md mx-auto px-4 py-6">
@@ -113,15 +113,15 @@ export default function Home() {
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <UserIcon className="text-blue-600" size={24} />
             </div>
-            <h2 className="text-lg font-bold text-gray-800 mb-2">Save Your Progress</h2>
+            <h2 className="text-lg font-bold text-gray-800 mb-2">Salvează-ți progresul</h2>
             <p className="text-sm text-gray-600 mb-6">
-              Log in to save your health profile and keep track of your medicine cabinet across all devices.
+              Autentifică-te pentru a-ți salva profilul de sănătate și cabinetul de medicamente pe toate dispozitivele.
             </p>
             <button
               onClick={() => loginWithRedirect()}
               className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all active:scale-[0.98]"
             >
-              Sign In to Start
+              Autentifică-te
             </button>
           </div>
         )}
@@ -130,9 +130,9 @@ export default function Home() {
           <div className="flex items-start">
             <AlertTriangle className="text-amber-600 mr-3 mt-0.5" size={20} />
             <div>
-              <h3 className="font-semibold text-amber-800 mb-1 text-sm">Safety First</h3>
+              <h3 className="font-semibold text-amber-800 mb-1 text-sm">Siguranța pe primul loc</h3>
               <p className="text-xs text-amber-700 opacity-80">
-                Always consult healthcare professionals for serious medical concerns. This app provides guidance only.
+                Pentru probleme medicale serioase, consultă întotdeauna un medic sau farmacist. Aplicația oferă doar îndrumare.
               </p>
             </div>
           </div>
@@ -141,7 +141,7 @@ export default function Home() {
         {isAuthenticated && (
           <div className="mb-10">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-800 tracking-tight">Quick Actions</h2>
+              <h2 className="text-xl font-bold text-gray-800 tracking-tight">Acțiuni rapide</h2>
               <div className="h-[2px] w-12 bg-blue-200 rounded-full"></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -157,7 +157,7 @@ export default function Home() {
                       <Icon className="text-white" size={24} />
                     </div>
                     <h3 className="font-bold text-gray-800 mb-1 text-sm">{action.title}</h3>
-                    <p className="text-[10px] text-gray-500 leading-relaxed font-medium uppercase tracking-tighter">Click to open</p>
+                    <p className="text-[10px] text-gray-500 leading-relaxed font-medium uppercase tracking-tighter">Apasă pentru a deschide</p>
                   </button>
                 );
               })}
@@ -168,13 +168,13 @@ export default function Home() {
         <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 mb-10">
           <h2 className="text-lg font-bold text-gray-800 mb-6 flex items-center">
             <div className="w-1 h-5 bg-blue-500 rounded-full mr-3"></div>
-            How It Works
+            Cum funcționează
           </h2>
           <div className="space-y-6">
             {[
-              { num: 1, title: 'Photo Recognition', desc: 'Take photos of medicines for instant identification', bg: 'bg-blue-50', text: 'text-blue-600' },
-              { num: 2, title: 'Personalized Safety', desc: 'Get warnings based on your health profile', bg: 'bg-green-50', text: 'text-green-600' },
-              { num: 3, title: 'AI Assistance', desc: 'Chat with AI for medicine questions and advice', bg: 'bg-purple-50', text: 'text-purple-600' }
+              { num: 1, title: 'Recunoaștere foto', desc: 'Fă o poză cutiei pentru identificare instantă', bg: 'bg-blue-50', text: 'text-blue-600' },
+              { num: 2, title: 'Siguranță personalizată', desc: 'Avertizări pe baza profilului tău de sănătate', bg: 'bg-green-50', text: 'text-green-600' },
+              { num: 3, title: 'Asistență AI', desc: 'Discută cu AI-ul pentru întrebări și sfaturi', bg: 'bg-purple-50', text: 'text-purple-600' }
             ].map((step) => (
               <div key={step.num} className="flex items-start">
                 <div className={`w-10 h-10 ${step.bg} rounded-xl flex-shrink-0 flex items-center justify-center mr-4 mt-0.5`}>

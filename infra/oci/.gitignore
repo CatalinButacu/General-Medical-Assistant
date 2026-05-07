@@ -1,0 +1,15 @@
+# Terraform state and locals — never commit
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+
+# Provider plugins / cache
+.terraform/
+
+# Crash logs
+crash.log
+crash.*.log
+
+# CLI plan artifacts
+*.tfplan

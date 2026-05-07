@@ -5,6 +5,7 @@ export const auth0Config = {
     useRefreshTokens: true,
     authorizationParams: {
         redirect_uri: window.location.origin + import.meta.env.BASE_URL,
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
         scope: 'openid profile email',
     },
 };

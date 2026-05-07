@@ -1,0 +1,26 @@
+# Copy this to terraform.tfvars (gitignored) and fill in.
+# Find these values in the OCI Console:
+#   user-icon (top right) → My profile → API keys → click your key →
+#   "Configuration File Preview" copies them all into a [DEFAULT] block.
+
+tenancy_ocid         = "ocid1.tenancy.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+user_ocid            = "ocid1.user.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+api_key_fingerprint  = "ab:cd:ef:01:23:45:67:89:ab:cd:ef:01:23:45:67:89"
+api_private_key_path = "~/.oci/oci_api_key.pem"
+
+# Same as tenancy_ocid for the root compartment, OR an OCID of a sub-compartment
+compartment_ocid     = "ocid1.tenancy.oc1..xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Region you signed up in. Free-tier resources are locked to one region.
+region               = "eu-frankfurt-1"
+
+# Your SSH public key. Generate with: ssh-keygen -t ed25519 -C "you@example.com"
+# Then paste the contents of ~/.ssh/id_ed25519.pub here.
+ssh_public_key       = "ssh-ed25519 AAAA... your.email@example.com"
+
+# Optional — restrict access to your own IP. Find yours: curl ifconfig.me
+# ingress_cidr_postgres = "1.2.3.4/32"
+# ingress_cidr_ssh      = "1.2.3.4/32"
+
+# If first apply fails with Out-of-capacity, switch AD and re-apply:
+# availability_domain_index = 1   # try 0, 1, or 2

@@ -18,7 +18,7 @@ export default function MobileNavigation() {
     {
       path: '/',
       icon: Home,
-      label: 'Home',
+      label: 'Acasă',
       color: 'text-blue-600'
     },
     {
@@ -42,7 +42,7 @@ export default function MobileNavigation() {
     {
       path: '/profile',
       icon: User,
-      label: 'Profile',
+      label: 'Profil',
       color: 'text-red-600',
       customIcon: isAuthenticated && user?.picture ? (
         <img src={user.picture} alt="Profile" className="w-6 h-6 rounded-full border border-gray-200" />

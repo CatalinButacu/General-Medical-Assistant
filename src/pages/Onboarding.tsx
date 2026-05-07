@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { ArrowLeft, ArrowRight, Check, Heart, Plus, Save, Shield, Sparkles, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { db } from '../config/firebase';
-import type { HealthProfile } from '../types';
+import { useUserApi } from '../hooks/useUserApi';
+import { userPaths, type ProfileDTO } from '../services/userApi';
 
 type Gender = 'male' | 'female' | 'other';
 
@@ -24,6 +23,7 @@ const TOTAL_STEPS = 3;
 export default function Onboarding() {
     const navigate = useNavigate();
     const { user, isAuthenticated, isLoading } = useAuth0();
+    const apiCall = useUserApi();
     const [step, setStep] = useState(0);
     const [draft, setDraft] = useState<DraftProfile>({
         name: '',
@@ -45,28 +45,26 @@ export default function Onboarding() {
         let cancelled = false;
         (async () => {
             try {
-                const snap = await getDoc(doc(db, 'health_profiles', user.sub!));
+                const p = await apiCall<ProfileDTO>(userPaths.profile);
                 if (cancelled) return;
-                if (snap.exists()) {
-                    const p = snap.data() as HealthProfile;
-                    setDraft({
-                        name: p.name || (user.name ?? ''),
-                        age: typeof p.age === 'number' ? p.age : '',
-                        gender: p.gender ?? '',
-                        isPregnant: Boolean(p.isPregnant),
-                        allergies: p.allergies ?? [],
-                        conditions: p.conditions ?? [],
-                        medications: p.medications ?? [],
-                    });
-                } else if (user.name) {
-                    setDraft(prev => ({ ...prev, name: user.name as string }));
-                }
+                setDraft({
+                    name: p.name || (user.name ?? ''),
+                    age: typeof p.age === 'number' ? p.age : '',
+                    gender: (p.gender ?? '') as DraftProfile['gender'],
+                    isPregnant: Boolean(p.isPregnant),
+                    allergies: p.allergies ?? [],
+                    conditions: p.conditions ?? [],
+                    medications: p.medications ?? [],
+                });
             } catch (err) {
                 console.warn('onboarding preload failed', err);
+                if (user.name && !cancelled) {
+                    setDraft(prev => ({ ...prev, name: user.name as string }));
+                }
             }
         })();
         return () => { cancelled = true; };
-    }, [user]);
+    }, [user, apiCall]);
 
     const next = () => setStep(s => Math.min(s + 1, TOTAL_STEPS - 1));
     const back = () => setStep(s => Math.max(s - 1, 0));
@@ -74,20 +72,21 @@ export default function Onboarding() {
     const persist = async (markOnboarded: boolean) => {
         if (!user?.sub) return;
         setIsSaving(true);
-        const payload: HealthProfile & { updatedAt: unknown } = {
-            id: user.sub,
+        const payload: ProfileDTO = {
             name: draft.name || (user.name ?? 'User'),
-            age: typeof draft.age === 'number' ? draft.age : undefined,
-            gender: draft.gender || undefined,
-            isPregnant: draft.gender === 'female' ? draft.isPregnant : undefined,
+            age: typeof draft.age === 'number' ? draft.age : null,
+            gender: (draft.gender || null) as ProfileDTO['gender'],
+            isPregnant: draft.gender === 'female' ? draft.isPregnant : false,
             allergies: draft.allergies,
             conditions: draft.conditions,
             medications: draft.medications,
             onboarded: markOnboarded,
-            updatedAt: serverTimestamp(),
         };
         try {
-            await setDoc(doc(db, 'health_profiles', user.sub), payload, { merge: true });
+            await apiCall<ProfileDTO>(userPaths.profile, {
+                method: 'PUT',
+                body: JSON.stringify(payload),
+            });
             toast.success(markOnboarded ? 'Profil salvat' : 'Salvat — poți completa mai târziu');
             navigate('/', { replace: true });
         } catch (err) {

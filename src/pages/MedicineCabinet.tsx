@@ -1,18 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import {
-  collection, query, where, onSnapshot,
-  addDoc, updateDoc, deleteDoc, doc,
-  serverTimestamp
-} from 'firebase/firestore';
-import { db } from '../config/firebase';
 import {
   Package, Plus, Search, Calendar, AlertTriangle,
   Trash2, Edit3, X, Clock, CheckCircle, Sparkles
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useUserApi } from '../hooks/useUserApi';
+import { userPaths, type CabinetItemDTO } from '../services/userApi';
 import type { CabinetItem, Medicine } from '../types';
+import { Button, FormField, TextInput, Textarea, Select } from '../components/ui';
+
+function dtoToItem(d: CabinetItemDTO): CabinetItem {
+  const today = new Date();
+  const exp = new Date(d.expiration_date);
+  const days = Math.ceil((exp.getTime() - today.getTime()) / (1000 * 3600 * 24));
+  return {
+    id: d.id ?? '',
+    name: d.name,
+    genericName: d.generic_name ?? undefined,
+    dosage: d.dosage ?? undefined,
+    type: d.item_type ?? 'tablet',
+    quantity: d.quantity,
+    expirationDate: d.expiration_date,
+    addedDate: d.added_date ?? new Date().toISOString().split('T')[0],
+    notes: d.notes ?? undefined,
+    isExpired: days < 0,
+    daysUntilExpiration: days,
+  };
+}
 
 export default function MedicineCabinet() {
   const navigate = useNavigate();
@@ -38,37 +54,25 @@ export default function MedicineCabinet() {
     notes: ''
   });
 
+  const apiCall = useUserApi();
+
+  const reloadCabinet = useCallback(async () => {
+    if (!user?.sub) return;
+    try {
+      const items = await apiCall<CabinetItemDTO[]>(userPaths.cabinet);
+      setMedicines(items.map(dtoToItem));
+    } catch (err) {
+      console.error('cabinet load failed', err);
+      toast.error('Încărcarea cabinetului a eșuat');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [apiCall, user?.sub]);
+
   useEffect(() => {
     if (!user?.sub) return;
-
-    const q = query(
-      collection(db, 'medicine_cabinets'),
-      where('userId', '==', user.sub)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const today = new Date();
-      const items = snapshot.docs.map(doc => {
-        const data = doc.data();
-        const expDate = new Date(data.expirationDate);
-        const daysDiff = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
-        return {
-          id: doc.id,
-          ...data,
-          isExpired: daysDiff < 0,
-          daysUntilExpiration: daysDiff
-        } as CabinetItem;
-      });
-      setMedicines(items);
-      setIsLoading(false);
-    }, (error) => {
-      console.error("Firestore error:", error);
-      toast.error('Failed to sync cabinet data');
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [user]);
+    reloadCabinet();
+  }, [user?.sub, reloadCabinet]);
 
   useEffect(() => {
     if (medicineToAdd) {
@@ -87,36 +91,41 @@ export default function MedicineCabinet() {
 
   const saveMedicine = async () => {
     if (!formData.name || !formData.expirationDate || !user?.sub) {
-      toast.error('Missing required fields');
+      toast.error('Completează câmpurile obligatorii');
       return;
     }
 
-    const payload = {
-      userId: user.sub,
+    const payload: CabinetItemDTO = {
       name: formData.name,
-      genericName: formData.genericName,
-      dosage: formData.dosage,
-      type: formData.type,
+      generic_name: formData.genericName || null,
+      dosage: formData.dosage || null,
+      item_type: formData.type,
       quantity: formData.quantity,
-      expirationDate: formData.expirationDate,
-      addedDate: editingMedicine?.addedDate || new Date().toISOString().split('T')[0],
-      notes: formData.notes,
-      updatedAt: serverTimestamp()
+      expiration_date: formData.expirationDate,
+      notes: formData.notes || null,
     };
 
     try {
       if (editingMedicine) {
-        await updateDoc(doc(db, 'medicine_cabinets', editingMedicine.id), payload);
-        toast.success('Medicine updated');
+        await apiCall<CabinetItemDTO>(userPaths.cabinetItem(editingMedicine.id), {
+          method: 'PUT',
+          body: JSON.stringify(payload),
+        });
+        toast.success('Medicament actualizat');
       } else {
-        await addDoc(collection(db, 'medicine_cabinets'), payload);
-        toast.success('Medicine added');
+        await apiCall<CabinetItemDTO>(userPaths.cabinet, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        toast.success('Medicament adăugat');
       }
       setShowAddForm(false);
       setEditingMedicine(null);
       resetForm();
+      await reloadCabinet();
     } catch (e) {
-      toast.error('Failed to save medicine');
+      console.error('save medicine failed', e);
+      toast.error('Salvare eșuată');
     }
   };
 
@@ -138,17 +147,19 @@ export default function MedicineCabinet() {
 
   const deleteMedicine = async (id: string) => {
     try {
-      await deleteDoc(doc(db, 'medicine_cabinets', id));
-      toast.success('Removed from cabinet');
+      await apiCall<void>(userPaths.cabinetItem(id), { method: 'DELETE' });
+      toast.success('Eliminat din cabinet');
+      await reloadCabinet();
     } catch (e) {
-      toast.error('Failed to delete');
+      console.error('delete medicine failed', e);
+      toast.error('Ștergere eșuată');
     }
   };
 
   const getStatus = (item: CabinetItem) => {
-    if (item.isExpired) return { color: 'text-red-600 bg-red-50', label: 'Expired', icon: AlertTriangle };
-    if ((item.daysUntilExpiration ?? 100) <= 30) return { color: 'text-orange-600 bg-orange-50', label: 'Expiring Soon', icon: Clock };
-    return { color: 'text-green-600 bg-green-50', label: 'Active', icon: CheckCircle };
+    if (item.isExpired) return { color: 'text-red-600 bg-red-50', label: 'Expirat', icon: AlertTriangle };
+    if ((item.daysUntilExpiration ?? 100) <= 30) return { color: 'text-orange-600 bg-orange-50', label: 'Expiră curând', icon: Clock };
+    return { color: 'text-green-600 bg-green-50', label: 'Activ', icon: CheckCircle };
   };
 
   const filteredMedicines = medicines.filter(med => {
@@ -169,7 +180,7 @@ export default function MedicineCabinet() {
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <button onClick={() => navigate('/')} className="p-2 hover:bg-gray-100 rounded-lg"><X size={20} /></button>
-            <h1 className="text-lg font-semibold">Medicine Cabinet</h1>
+            <h1 className="text-lg font-semibold">Cabinet medicamente</h1>
             <button onClick={() => setShowAddForm(true)} className="bg-blue-600 text-white p-2 rounded-lg"><Plus size={20} /></button>
           </div>
         </div>
@@ -181,13 +192,13 @@ export default function MedicineCabinet() {
             {expiredCount > 0 && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center">
                 <AlertTriangle className="text-red-600 mr-3" size={20} />
-                <span className="text-red-800 font-semibold">{expiredCount} medicine{expiredCount > 1 ? 's' : ''} expired</span>
+                <span className="text-red-800 font-semibold">{expiredCount} medicament{expiredCount > 1 ? 'e' : ''} expirat{expiredCount > 1 ? 'e' : ''}</span>
               </div>
             )}
             {expiringCount > 0 && (
               <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 flex items-center">
                 <Clock className="text-orange-600 mr-3" size={20} />
-                <span className="text-orange-800 font-semibold">{expiringCount} medicine{expiringCount > 1 ? 's' : ''} expiring soon</span>
+                <span className="text-orange-800 font-semibold">{expiringCount} medicament{expiringCount > 1 ? 'e' : ''} expiră curând</span>
               </div>
             )}
           </div>
@@ -197,19 +208,24 @@ export default function MedicineCabinet() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
-              type="text" placeholder="Search medicines..." value={searchQuery}
+              type="text" placeholder="Caută medicamente…" value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
             />
           </div>
 
           <div className="flex space-x-2 overflow-x-auto pb-1 no-scrollbar">
-            {['all', 'active', 'expiring', 'expired'].map(key => (
+            {([
+              { key: 'all', label: 'Toate' },
+              { key: 'active', label: 'Active' },
+              { key: 'expiring', label: 'Expiră curând' },
+              { key: 'expired', label: 'Expirate' },
+            ] as const).map(({ key, label }) => (
               <button
-                key={key} onClick={() => setFilterType(key as any)}
+                key={key} onClick={() => setFilterType(key)}
                 className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${filterType === key ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200'}`}
               >
-                {key.charAt(0).toUpperCase() + key.slice(1)}
+                {label}
               </button>
             ))}
           </div>
@@ -219,13 +235,13 @@ export default function MedicineCabinet() {
           {isLoading ? (
             <div className="text-center py-20">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-500 font-medium">Syncing with cloud...</p>
+              <p className="mt-4 text-gray-500 font-medium">Sincronizare cu cloud…</p>
             </div>
           ) : filteredMedicines.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
               <Package className="mx-auto mb-4 text-gray-300" size={48} />
-              <p className="text-gray-500 font-medium">No medicines found</p>
-              <button onClick={() => setShowAddForm(true)} className="mt-4 text-blue-600 font-bold">Add Your First Medicine</button>
+              <p className="text-gray-500 font-medium">Niciun medicament</p>
+              <button onClick={() => setShowAddForm(true)} className="mt-4 text-blue-600 font-bold">Adaugă primul medicament</button>
             </div>
           ) : (
             filteredMedicines.map(med => {
@@ -240,7 +256,7 @@ export default function MedicineCabinet() {
                       <div className="flex items-center flex-wrap gap-2 mt-3">
                         <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-bold rounded uppercase tracking-wider">{med.dosage}</span>
                         <span className="px-2 py-0.5 bg-gray-50 text-gray-600 text-[10px] font-bold rounded uppercase tracking-wider">{med.type}</span>
-                        <span className="px-2 py-0.5 bg-gray-50 text-gray-600 text-[10px] font-bold rounded uppercase tracking-wider">Qty: {med.quantity}</span>
+                        <span className="px-2 py-0.5 bg-gray-50 text-gray-600 text-[10px] font-bold rounded uppercase tracking-wider">Cant: {med.quantity}</span>
                       </div>
                     </div>
                     <div className="flex -mr-2">
@@ -249,11 +265,11 @@ export default function MedicineCabinet() {
                     </div>
                   </div>
                   <div className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold border ${status.color}`}>
-                    <StatusIcon size={12} className="mr-1.5" /> {status.label} {!med.isExpired && med.daysUntilExpiration !== undefined && `(${med.daysUntilExpiration} days left)`}
+                    <StatusIcon size={12} className="mr-1.5" /> {status.label} {!med.isExpired && med.daysUntilExpiration !== undefined && `(${med.daysUntilExpiration} zile rămase)`}
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-gray-400 mt-4 pt-4 border-t border-gray-50">
-                    <div className="flex items-center font-medium"><Calendar size={12} className="mr-1.5" /> Expires: {med.expirationDate}</div>
-                    <div className="font-medium">Added: {med.addedDate}</div>
+                    <div className="flex items-center font-medium"><Calendar size={12} className="mr-1.5" /> Expiră: {med.expirationDate}</div>
+                    <div className="font-medium">Adăugat: {med.addedDate}</div>
                   </div>
                   {med.notes && <div className="mt-3 p-3 bg-gray-50 rounded-xl text-xs text-gray-600 italic">"{med.notes}"</div>}
                 </div>
@@ -267,7 +283,7 @@ export default function MedicineCabinet() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end justify-center z-50 p-4">
           <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom duration-300">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-xl font-bold text-gray-800">{editingMedicine ? 'Edit Medicine' : 'Add to Cabinet'}</h2>
+              <h2 className="text-xl font-bold text-gray-800">{editingMedicine ? 'Editează medicament' : 'Adaugă în cabinet'}</h2>
               <button onClick={() => { setShowAddForm(false); setEditingMedicine(null); resetForm(); }} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"><X size={20} /></button>
             </div>
             {fromScanner && !editingMedicine && (
@@ -278,41 +294,43 @@ export default function MedicineCabinet() {
             )}
             {!fromScanner && <div className="mb-6" />}
             <div className="space-y-5">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Medicine Name</label>
-                <input type="text" placeholder="e.g. Paracetamol" value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Generic / Active Ingredient</label>
-                <input type="text" placeholder="e.g. Acetaminophen" value={formData.genericName} onChange={e => setFormData(p => ({ ...p, genericName: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
+              <FormField label="Denumire">
+                <TextInput placeholder="ex: Paracetamol" value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} />
+              </FormField>
+              <FormField label="Substanță activă (DCI)">
+                <TextInput placeholder="ex: Paracetamolum" value={formData.genericName} onChange={e => setFormData(p => ({ ...p, genericName: e.target.value }))} />
+              </FormField>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="Concentrație">
+                  <TextInput placeholder="500mg" value={formData.dosage} onChange={e => setFormData(p => ({ ...p, dosage: e.target.value }))} />
+                </FormField>
+                <FormField label="Formă">
+                  <Select value={formData.type} onChange={e => setFormData(p => ({ ...p, type: e.target.value }))}>
+                    {[
+                      { v: 'tablet', l: 'Comprimat' },
+                      { v: 'capsule', l: 'Capsulă' },
+                      { v: 'liquid', l: 'Sirop / soluție' },
+                      { v: 'cream', l: 'Cremă / unguent' },
+                      { v: 'injection', l: 'Injectabil' },
+                      { v: 'other', l: 'Alta' },
+                    ].map(({ v, l }) => <option key={v} value={v}>{l}</option>)}
+                  </Select>
+                </FormField>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Dosage</label>
-                  <input type="text" placeholder="500mg" value={formData.dosage} onChange={e => setFormData(p => ({ ...p, dosage: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Form</label>
-                  <select value={formData.type} onChange={e => setFormData(p => ({ ...p, type: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium appearance-none">
-                    {['tablet', 'capsule', 'liquid', 'cream', 'injection', 'other'].map(t => <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
-                  </select>
-                </div>
+                <FormField label="Cantitate">
+                  <TextInput type="number" value={formData.quantity} onChange={e => setFormData(p => ({ ...p, quantity: parseInt(e.target.value) || 1 }))} />
+                </FormField>
+                <FormField label="Data expirării">
+                  <TextInput type="date" value={formData.expirationDate} onChange={e => setFormData(p => ({ ...p, expirationDate: e.target.value }))} />
+                </FormField>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Quantity</label>
-                  <input type="number" value={formData.quantity} onChange={e => setFormData(p => ({ ...p, quantity: parseInt(e.target.value) || 1 }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-gray-400 uppercase ml-1">Expiry Date</label>
-                  <input type="date" value={formData.expirationDate} onChange={e => setFormData(p => ({ ...p, expirationDate: e.target.value }))} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium" />
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-400 uppercase ml-1">Private Notes</label>
-                <textarea placeholder="e.g. Take after meal" value={formData.notes} onChange={e => setFormData(p => ({ ...p, notes: e.target.value }))} rows={2} className="w-full p-3.5 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 font-medium resize-none" />
-              </div>
-              <button onClick={saveMedicine} className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all active:scale-[0.98] mt-4 uppercase tracking-widest text-sm">{editingMedicine ? 'Update Entry' : 'Add to Cabinet'}</button>
+              <FormField label="Notițe personale">
+                <Textarea placeholder="ex: De luat după mese" value={formData.notes} onChange={e => setFormData(p => ({ ...p, notes: e.target.value }))} rows={2} />
+              </FormField>
+              <Button onClick={saveMedicine} variant="primary" size="lg" fullWidth className="mt-4 uppercase tracking-widest">
+                {editingMedicine ? 'Actualizează' : 'Adaugă în cabinet'}
+              </Button>
             </div>
           </div>
         </div>

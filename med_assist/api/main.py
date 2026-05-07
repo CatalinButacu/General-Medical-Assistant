@@ -41,15 +41,21 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Med Assist API",
     description="Romanian RAG triage chatbot over the ANMDM nomenclator.",
-    version="0.2.0",
+    version="0.3.0",
 )
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# User-data routes are wired only if Postgres + Auth0 audience are configured.
+# Lets the chat/scan endpoints keep working even before OCI Postgres is up.
+if __import__("os").getenv("DATABASE_URL") and __import__("os").getenv("AUTH0_AUDIENCE"):
+    from med_assist.api.users import router as users_router
+    app.include_router(users_router)
 
 
 _service: Optional[RetrievalService] = None

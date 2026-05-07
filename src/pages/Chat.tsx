@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { doc, getDoc } from 'firebase/firestore';
 import {
     AlertTriangle,
     Bot,
@@ -18,8 +17,9 @@ import {
 } from 'lucide-react';
 import { checkHealth, isApiConfigured, streamChat } from '../services/api';
 import type { ChatProfilePayload, ChatTurn } from '../services/api';
-import { db } from '../config/firebase';
-import type { HealthProfile, MedicineDTO, Message, RedFlagDTO, TriageEvent } from '../types';
+import { useUserApi } from '../hooks/useUserApi';
+import { userPaths, type ProfileDTO } from '../services/userApi';
+import type { MedicineDTO, Message, RedFlagDTO, TriageEvent } from '../types';
 
 const QUICK_QUERIES = [
     { label: 'durere de cap',     query: 'mă doare capul și am febră' },
@@ -59,6 +59,7 @@ export default function Chat() {
         return () => { cancelled = true; abortRef.current?.abort(); };
     }, []);
 
+    const apiCall = useUserApi();
     useEffect(() => {
         if (!user?.sub) {
             profileRef.current = undefined;
@@ -67,13 +68,12 @@ export default function Chat() {
         let cancelled = false;
         (async () => {
             try {
-                const snap = await getDoc(doc(db, 'health_profiles', user.sub!));
-                if (cancelled || !snap.exists()) return;
-                const p = snap.data() as HealthProfile;
+                const p = await apiCall<ProfileDTO>(userPaths.profile);
+                if (cancelled) return;
                 profileRef.current = {
-                    age: p.age,
-                    gender: p.gender,
-                    isPregnant: p.isPregnant,
+                    age: p.age ?? undefined,
+                    gender: p.gender ?? undefined,
+                    isPregnant: p.isPregnant ?? undefined,
                     allergies: p.allergies ?? [],
                     conditions: p.conditions ?? [],
                     medications: p.medications ?? [],
@@ -83,7 +83,7 @@ export default function Chat() {
             }
         })();
         return () => { cancelled = true; };
-    }, [user?.sub]);
+    }, [user?.sub, apiCall]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
