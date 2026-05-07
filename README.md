@@ -59,9 +59,17 @@ FastAPI on HuggingFace Space  ──[verifies JWT vs Auth0 JWKS]──
   │
   │  psycopg over SSL
   ▼
-PostgreSQL 16 on Oracle Cloud (Always Free Ampere A1)
-       provisioned via Terraform + cloud-init
+PostgreSQL 16 (serverless Neon · Frankfurt)
 ```
+
+> **DB host note.** The active demo points at **Neon** (serverless Postgres,
+> autoscale-to-zero free tier). The repo also contains a complete
+> Terraform + cloud-init recipe under `infra/oci/` for **PostgreSQL 16 on
+> Oracle Cloud Always-Free Ampere A1**. The OCI path is the production-grade
+> aspirational target (matches Oracle Cloud certs on CV); switching is a
+> one-line `DATABASE_URL` change because the server-mediated pattern is
+> host-agnostic. OCI was deferred during initial deploy because Always-Free
+> Ampere capacity was exhausted across all 3 Frankfurt ADs.
 
 ```
 src/                       React + Vite + TypeScript (GitHub Pages)
