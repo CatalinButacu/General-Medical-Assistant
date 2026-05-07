@@ -1,19 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import {
-  collection, query, where, onSnapshot,
-  addDoc, updateDoc, deleteDoc, doc,
-  serverTimestamp
-} from 'firebase/firestore';
-import { db } from '../config/firebase';
 import {
   Package, Plus, Search, Calendar, AlertTriangle,
   Trash2, Camera, Edit3, X, Clock, CheckCircle, Sparkles
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useUserApi } from '../hooks/useUserApi';
+import { userPaths, type CabinetItemDTO } from '../services/userApi';
 import type { CabinetItem, Medicine } from '../types';
 import { Button, FormField, TextInput, Textarea, Select } from '../components/ui';
+
+function dtoToItem(d: CabinetItemDTO): CabinetItem {
+  const today = new Date();
+  const exp = new Date(d.expiration_date);
+  const days = Math.ceil((exp.getTime() - today.getTime()) / (1000 * 3600 * 24));
+  return {
+    id: d.id ?? '',
+    name: d.name,
+    genericName: d.generic_name ?? undefined,
+    dosage: d.dosage ?? undefined,
+    type: d.item_type ?? 'tablet',
+    quantity: d.quantity,
+    expirationDate: d.expiration_date,
+    addedDate: d.added_date ?? new Date().toISOString().split('T')[0],
+    notes: d.notes ?? undefined,
+    isExpired: days < 0,
+    daysUntilExpiration: days,
+  };
+}
 
 export default function MedicineCabinet() {
   const navigate = useNavigate();
@@ -39,37 +54,25 @@ export default function MedicineCabinet() {
     notes: ''
   });
 
+  const apiCall = useUserApi();
+
+  const reloadCabinet = useCallback(async () => {
+    if (!user?.sub) return;
+    try {
+      const items = await apiCall<CabinetItemDTO[]>(userPaths.cabinet);
+      setMedicines(items.map(dtoToItem));
+    } catch (err) {
+      console.error('cabinet load failed', err);
+      toast.error('Încărcarea cabinetului a eșuat');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [apiCall, user?.sub]);
+
   useEffect(() => {
     if (!user?.sub) return;
-
-    const q = query(
-      collection(db, 'medicine_cabinets'),
-      where('userId', '==', user.sub)
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const today = new Date();
-      const items = snapshot.docs.map(doc => {
-        const data = doc.data();
-        const expDate = new Date(data.expirationDate);
-        const daysDiff = Math.ceil((expDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
-        return {
-          id: doc.id,
-          ...data,
-          isExpired: daysDiff < 0,
-          daysUntilExpiration: daysDiff
-        } as CabinetItem;
-      });
-      setMedicines(items);
-      setIsLoading(false);
-    }, (error) => {
-      console.error("Firestore error:", error);
-      toast.error('Sincronizare cabinet eșuată');
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [user]);
+    reloadCabinet();
+  }, [user?.sub, reloadCabinet]);
 
   useEffect(() => {
     if (medicineToAdd) {
@@ -92,31 +95,36 @@ export default function MedicineCabinet() {
       return;
     }
 
-    const payload = {
-      userId: user.sub,
+    const payload: CabinetItemDTO = {
       name: formData.name,
-      genericName: formData.genericName,
-      dosage: formData.dosage,
-      type: formData.type,
+      generic_name: formData.genericName || null,
+      dosage: formData.dosage || null,
+      item_type: formData.type,
       quantity: formData.quantity,
-      expirationDate: formData.expirationDate,
-      addedDate: editingMedicine?.addedDate || new Date().toISOString().split('T')[0],
-      notes: formData.notes,
-      updatedAt: serverTimestamp()
+      expiration_date: formData.expirationDate,
+      notes: formData.notes || null,
     };
 
     try {
       if (editingMedicine) {
-        await updateDoc(doc(db, 'medicine_cabinets', editingMedicine.id), payload);
+        await apiCall<CabinetItemDTO>(userPaths.cabinetItem(editingMedicine.id), {
+          method: 'PUT',
+          body: JSON.stringify(payload),
+        });
         toast.success('Medicament actualizat');
       } else {
-        await addDoc(collection(db, 'medicine_cabinets'), payload);
+        await apiCall<CabinetItemDTO>(userPaths.cabinet, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
         toast.success('Medicament adăugat');
       }
       setShowAddForm(false);
       setEditingMedicine(null);
       resetForm();
+      await reloadCabinet();
     } catch (e) {
+      console.error('save medicine failed', e);
       toast.error('Salvare eșuată');
     }
   };
@@ -139,9 +147,11 @@ export default function MedicineCabinet() {
 
   const deleteMedicine = async (id: string) => {
     try {
-      await deleteDoc(doc(db, 'medicine_cabinets', id));
+      await apiCall<void>(userPaths.cabinetItem(id), { method: 'DELETE' });
       toast.success('Eliminat din cabinet');
+      await reloadCabinet();
     } catch (e) {
+      console.error('delete medicine failed', e);
       toast.error('Ștergere eșuată');
     }
   };

@@ -52,23 +52,44 @@ End-to-end ML engineering on a real-world corpus, not a toy dataset:
 ## Architecture
 
 ```
-src/                       React + Vite + TypeScript frontend (GitHub Pages)
-├── pages/Chat.tsx          SSE-streamed chat with profile passthrough
-├── pages/CameraScanner.tsx phone-camera capture + OCR + cabinet handoff
-├── pages/HealthProfile.tsx Firestore-backed user health profile
-└── services/api.ts         /chat (SSE) and /scan (REST) clients
+React (GitHub Pages)
+  │  Authorization: Bearer <Auth0 access token>
+  ▼
+FastAPI on HuggingFace Space  ──[verifies JWT vs Auth0 JWKS]──
+  │
+  │  psycopg over SSL
+  ▼
+PostgreSQL 16 on Oracle Cloud (Always Free Ampere A1)
+       provisioned via Terraform + cloud-init
+```
+
+```
+src/                       React + Vite + TypeScript (GitHub Pages)
+├── pages/                  Chat (SSE) · CameraScanner · HealthProfile · MedicineCabinet · Onboarding
+├── services/api.ts         /chat (SSE) and /scan (REST) clients
+├── services/userApi.ts     /user/profile and /user/cabinet typed clients
+├── hooks/useUserApi.ts     auth-aware fetch (auto-attaches Auth0 access token)
+├── components/ui/          shared primitives (Button, Card, FormField, Badge)
+└── config/auth0.ts         SPA + access token audience config
 
 med_assist/                Python backend (FastAPI on HF Spaces)
 ├── api/main.py             /health /manifest /chat /scan
+├── api/users.py            /user/profile /user/cabinet — auth-required
+├── auth/jwt.py             Auth0 JWT verification (RS256, JWKS-cached)
+├── db/                     SQLAlchemy 2.0 models + lazy-init engine
 ├── conversation.py         confidence-gated followup ↔ recommend orchestrator
 ├── service.py              RetrievalService.advise() — fusion + classifier
 ├── retrieval/              dense (FAISS+MiniLM) · sparse (BM25) · RRF · rerank
 ├── triage/                 17 red-flag rules + three-way classifier
 ├── llm/                    Gemini chat (text) + Gemini Vision (camera scan)
 ├── eval/                   49-case Romanian golden set + metrics
-├── index/builder.py        builds FAISS+BM25 from medicine chunks
-└── data/                   Medicine + Chunk dataclasses
+└── index/builder.py        builds FAISS+BM25 from medicine chunks
 
+infra/oci/                 Terraform — OCI Always-Free Ampere VM + Postgres
+├── main.tf, network.tf, compute.tf, outputs.tf
+└── cloud-init.yaml         PGDG Postgres 16 install + role/db + schema apply
+
+db/schema.sql              Postgres DDL for health_profiles + cabinet_items
 data_acquisition/          ANMDM scraper + RCP parser + auto-update orchestrator
 ```
 
@@ -108,9 +129,9 @@ gives full control over the build (FAISS index baked at image build time,
 
 ## Tech stack
 
-- **Backend**: Python 3.12, FastAPI, sentence-transformers (paraphrase-multilingual-MiniLM-L12-v2), faiss-cpu, rank-bm25, google-genai (Gemini 3 Flash + Vision)
-- **Frontend**: React + Vite + TypeScript, TailwindCSS, Auth0 (Google OAuth), Firestore (user profiles)
-- **Infra**: HuggingFace Spaces (Docker), GitHub Pages, GitHub Actions (orphan-snapshot mirror to HF, GH Pages deploy)
+- **Backend**: Python 3.12, FastAPI, SQLAlchemy 2.0, psycopg, PyJWT (RS256/JWKS), sentence-transformers, faiss-cpu, rank-bm25, google-genai (Gemini 3 Flash + Vision)
+- **Frontend**: React + Vite + TypeScript, TailwindCSS, Auth0 (Google OAuth, access tokens with API audience)
+- **Infra**: HuggingFace Spaces (Docker), GitHub Pages, GitHub Actions (CodeQL + orphan-snapshot mirror + GH Pages deploy), **Oracle Cloud Always Free** (Ampere A1 VM + self-managed Postgres 16, provisioned via Terraform)
 
 ## Disclaimer
 

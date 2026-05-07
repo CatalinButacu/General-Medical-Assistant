@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../config/firebase';
 import {
   User, AlertTriangle, Plus, X, Save, Shield, Baby, Pill, Activity
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useUserApi } from '../hooks/useUserApi';
+import { userPaths, type ProfileDTO } from '../services/userApi';
 import type { HealthProfile as IHealthProfile, Medicine } from '../types';
 
 interface SafetyCheckResult {
@@ -20,6 +20,7 @@ export default function HealthProfile() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth0();
+  const apiCall = useUserApi();
   const medicineForSafetyCheck = location.state?.medicineForSafetyCheck as Medicine;
 
   const [profile, setProfile] = useState<IHealthProfile>({
@@ -51,27 +52,30 @@ export default function HealthProfile() {
   const loadProfile = async (userId: string) => {
     setIsLoading(true);
     try {
-      const docRef = doc(db, 'health_profiles', userId);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        setProfile(docSnap.data() as IHealthProfile);
-      } else {
-        // Initialize with default data if no profile exists
-        const initialProfile: IHealthProfile = {
-          id: userId,
-          name: user?.name || 'User',
-          conditions: [],
-          allergies: [],
-          medications: [],
-          isPregnant: false,
-          pregnancyDueDate: '',
-        };
-        setProfile(initialProfile);
-      }
+      const p = await apiCall<ProfileDTO>(userPaths.profile);
+      setProfile({
+        id: userId,
+        name: p.name || user?.name || 'User',
+        age: p.age ?? undefined,
+        gender: p.gender ?? undefined,
+        isPregnant: p.isPregnant ?? false,
+        pregnancyDueDate: p.pregnancyDueDate ?? '',
+        allergies: p.allergies ?? [],
+        conditions: p.conditions ?? [],
+        medications: p.medications ?? [],
+      });
     } catch (error) {
       console.error("Load error:", error);
       toast.error('Încărcarea profilului a eșuat');
+      setProfile({
+        id: userId,
+        name: user?.name || 'User',
+        conditions: [],
+        allergies: [],
+        medications: [],
+        isPregnant: false,
+        pregnancyDueDate: '',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -81,11 +85,19 @@ export default function HealthProfile() {
     if (!user?.sub) return;
     setIsSaving(true);
     try {
-      const docRef = doc(db, 'health_profiles', user.sub);
-      await setDoc(docRef, {
-        ...profile,
-        id: user.sub,
-        updatedAt: serverTimestamp()
+      const payload: ProfileDTO = {
+        name: profile.name || null,
+        age: profile.age ?? null,
+        gender: profile.gender ?? null,
+        isPregnant: Boolean(profile.isPregnant),
+        pregnancyDueDate: profile.pregnancyDueDate || null,
+        allergies: profile.allergies,
+        conditions: profile.conditions,
+        medications: profile.medications,
+      };
+      await apiCall<ProfileDTO>(userPaths.profile, {
+        method: 'PUT',
+        body: JSON.stringify(payload),
       });
       toast.success('Profil salvat');
     } catch (error) {
