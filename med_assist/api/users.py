@@ -1,9 +1,4 @@
-"""User-scoped endpoints — health profile + medicine cabinet.
-
-All routes require a valid Auth0 access token; the user_id is taken from
-the verified JWT `sub` claim, never from the request body. This means a
-forged user_id in JSON cannot leak another user's data.
-"""
+"""User-scoped endpoints. user_id is taken from the verified JWT, never from the request body."""
 
 from __future__ import annotations
 

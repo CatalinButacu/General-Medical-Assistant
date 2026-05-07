@@ -1,8 +1,4 @@
-/**
- * User-data API client. All endpoints require an Auth0 access token via
- * `useUserApi()` (see hooks/useUserApi.ts). The backend extracts user_id from
- * the verified JWT, so the client never sends it explicitly.
- */
+// Auth via useUserApi(). Backend extracts user_id from the verified JWT.
 
 export interface ProfileDTO {
     user_id?: string;

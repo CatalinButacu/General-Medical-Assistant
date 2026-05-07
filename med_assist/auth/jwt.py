@@ -1,14 +1,4 @@
-"""Auth0 JWT verification.
-
-Validates the Bearer token on incoming requests against Auth0's JWKS endpoint.
-Public keys are cached in-process; every request just verifies the signature
-and the iss/aud/exp claims locally — no network call per request after the
-first JWKS fetch.
-
-Required env:
-  AUTH0_DOMAIN     — e.g. dev-xxx.eu.auth0.com (no scheme, no trailing slash)
-  AUTH0_AUDIENCE   — your Auth0 API identifier, e.g. https://med-assist-api
-"""
+"""Auth0 JWT verification (RS256 vs JWKS, iss/aud/exp checked)."""
 
 from __future__ import annotations
 
@@ -84,7 +74,6 @@ def _verify_token(token: str) -> dict:
 
 
 def current_user_sub(creds: HTTPAuthorizationCredentials = Depends(_bearer_required)) -> str:
-    """FastAPI dependency: extract the Auth0 `sub` from a verified Bearer token."""
     payload = _verify_token(creds.credentials)
     sub = payload.get("sub")
     if not sub:
@@ -95,7 +84,6 @@ def current_user_sub(creds: HTTPAuthorizationCredentials = Depends(_bearer_requi
 def optional_user_sub(
     creds: Optional[HTTPAuthorizationCredentials] = Depends(_bearer_optional),
 ) -> Optional[str]:
-    """Same as `current_user_sub` but returns None when no token is present (instead of 401)."""
     if creds is None:
         return None
     payload = _verify_token(creds.credentials)

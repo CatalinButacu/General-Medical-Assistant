@@ -1,26 +1,13 @@
-"""
-FastAPI service for the med_assist conversational triage chatbot.
-
-Endpoints:
-  GET  /health    liveness probe
-  GET  /manifest  index manifest (model id, dim, chunk count, build time)
-  POST /chat      Server-Sent Events stream — full conversational pipeline
-                  (red-flag triage, follow-up gating, retrieval, grounded LLM)
-
-Run locally:
-  uvicorn med_assist.api.main:app --port 8000 --reload
-.env.local is loaded automatically — no shell sourcing needed.
-"""
+"""FastAPI service: /health /manifest /chat /scan /user/*."""
 
 from __future__ import annotations
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Optional
 
-# Load .env.local before anything that reads env vars (e.g. GOOGLE_API_KEY).
-# Works the same on Windows, macOS, Linux — no shell sourcing needed.
 from dotenv import load_dotenv
 
 _ROOT = Path(__file__).resolve().parents[2]
@@ -39,12 +26,7 @@ from med_assist.service import RetrievalService
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(
-    title="Med Assist API",
-    description="Romanian RAG triage chatbot over the ANMDM nomenclator.",
-    version="0.3.0",
-)
-
+app = FastAPI(title="Med Assist API", version="0.3.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -52,9 +34,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# User-data routes are wired only if Postgres + Auth0 audience are configured.
-# Lets the chat/scan endpoints keep working even before OCI Postgres is up.
-if __import__("os").getenv("DATABASE_URL") and __import__("os").getenv("AUTH0_AUDIENCE"):
+if os.getenv("DATABASE_URL") and os.getenv("AUTH0_AUDIENCE"):
     from med_assist.api.users import router as users_router
     app.include_router(users_router)
 
@@ -119,18 +99,7 @@ class ChatRequest(BaseModel):
 
 @app.post("/chat")
 async def chat(req: ChatRequest):
-    """
-    Server-Sent Events stream. Frontend reads with fetch+ReadableStream
-    and splits on '\\n\\n'.
-
-    Event kinds (one JSON payload per event):
-      triage     emitted first, contains label + red_flags + action
-                 label is 'EMERGENCY' | 'OTC_SAFE' | 'UNCERTAIN' | 'FOLLOWUP'
-      medicines  list of structured medicine cards (skipped on EMERGENCY/FOLLOWUP)
-      token      text fragment from the LLM (skipped on EMERGENCY)
-      done       final event, indicates clean stream end
-      error      on failure
-    """
+    """SSE stream of triage / medicines / token / done / error events."""
     convo = get_conversation()
     history = [ChatMessageIn(role=m.role, text=m.text) for m in req.messages]
     profile_dict = req.profile.model_dump(exclude_none=False) if req.profile else None
@@ -151,12 +120,7 @@ async def chat(req: ChatRequest):
     )
 
 
-# ───────────────── /scan — image -> medicine identification ─────────────────
-
-
 class ScanRequest(BaseModel):
-    # Frontend captures via canvas.toDataURL("image/jpeg") → "data:image/jpeg;base64,...".
-    # We accept either the full data URL or the bare base64.
     image_base64: str = Field(..., min_length=100, max_length=8_000_000)
     mime_type: str = Field("image/jpeg", pattern="^image/(jpeg|png|webp)$")
 
@@ -226,15 +190,7 @@ def _hit_to_match_dto(svc: "RetrievalService", hit) -> Optional[ScanMedicineMatc
 
 @app.post("/scan", response_model=ScanResponse)
 def scan(req: ScanRequest) -> ScanResponse:
-    """
-    Identify a medicine from a captured photo of its packaging.
-
-    Runs Gemini Vision for OCR + structured extraction, then matches the
-    extracted trade name against the ANMDM corpus via the existing sparse
-    retriever (BM25 over title chunks). Returns both the raw extraction
-    and the best authoritative medicine record so the Cabinet add-flow
-    has clean DCI / ATC / Rx-status fields to pre-fill.
-    """
+    """OCR a medicine box and match the trade name back to ANMDM."""
     import base64
     import time
 
@@ -260,19 +216,15 @@ def scan(req: ScanRequest) -> ScanResponse:
     candidates: list[ScanMedicineMatch] = []
     if extraction_dto.trade_name:
         svc = get_service()
-        sparse_hits = svc._dedup_by_medicine(
-            svc.sparse.search(extraction_dto.trade_name, top_k=5)
-        )
+        sparse_hits = svc._dedup_by_medicine(svc.sparse.search(extraction_dto.trade_name, top_k=5))
+        # Retry with dose/form noise stripped — handles partial OCR like "PARACETAMOL ZENTIVA 500MG".
         if not sparse_hits or sparse_hits[0].score < 0.05:
             stripped = _strip_pharma_suffixes(extraction_dto.trade_name)
             if stripped and stripped.upper() != extraction_dto.trade_name.upper():
                 fallback = svc._dedup_by_medicine(svc.sparse.search(stripped, top_k=5))
                 seen = {h.chunk.medicine_id for h in sparse_hits}
-                for fh in fallback:
-                    if fh.chunk.medicine_id not in seen:
-                        sparse_hits.append(fh)
+                sparse_hits.extend(h for h in fallback if h.chunk.medicine_id not in seen)
                 sparse_hits.sort(key=lambda h: -h.score)
-
         for hit in sparse_hits[:3]:
             dto = _hit_to_match_dto(svc, hit)
             if dto is not None:

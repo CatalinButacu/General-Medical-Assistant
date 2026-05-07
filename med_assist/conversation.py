@@ -1,16 +1,4 @@
-"""
-Conversation orchestrator — wraps RetrievalService.advise() with an LLM
-turn that produces natural Romanian text grounded in retrieved evidence.
-
-Flow per user turn:
-  1. Red-flag scan on the latest user message.
-     -> EMERGENCY/URGENT: skip LLM entirely, return decision verbatim.
-  2. Retrieval + classifier on the cumulative user query.
-  3. Decide phase:
-       FOLLOWUP   - keep gathering info (low confidence OR not enough turns yet).
-       RECOMMEND  - classifier says OTC_SAFE, OR we hit the followup cap.
-  4. Stream the LLM response with a phase-appropriate system prompt.
-"""
+"""Conversation orchestrator: red-flag scan -> retrieve -> followup or recommend -> stream LLM."""
 
 from __future__ import annotations
 

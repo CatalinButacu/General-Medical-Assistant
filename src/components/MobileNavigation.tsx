@@ -3,9 +3,8 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { Home, Camera, User, Package, MessageCircle } from 'lucide-react';
 import { cn } from '../lib/utils';
 
-// CameraScanner is the only page that genuinely takes over the whole
-// viewport (full-bleed video preview); everywhere else keeps the nav.
-const FULLSCREEN_ROUTES = new Set(['/scanner']);
+// Routes that take over the full viewport (no bottom nav).
+const FULLSCREEN_ROUTES = new Set(['/scanner', '/onboarding']);
 
 export default function MobileNavigation() {
   const location = useLocation();

@@ -1,23 +1,10 @@
-"""
-Romanian system prompts + grounding template for the Gemini chat layer.
-
-Hard guardrails (recommend phase):
-  - LLM may only mention medicine names from the supplied evidence list.
-  - LLM never gives dosages — refers user to the prospect.
-  - LLM never diagnoses — only discusses symptomatic OTC relief.
-  - LLM closes every recommendation with the standard pharmacist disclaimer.
-
-The triage classifier still runs *before* the LLM and short-circuits
-emergencies — the LLM never sees emergency-class queries.
-"""
+"""Romanian system prompts. LLM may only name medicines from the retrieved evidence."""
 
 from __future__ import annotations
 
 from typing import Any
 
 from med_assist.data.models import MedicineHit
-
-# ───────────────── profile + history formatting ─────────────────
 
 
 def format_profile(profile: dict[str, Any] | None) -> str:
@@ -60,9 +47,6 @@ def has_meaningful_profile(profile: dict[str, Any] | None) -> bool:
         or profile.get("conditions")
         or profile.get("medications")
     )
-
-
-# ───────────────── followup phase ─────────────────
 
 
 SYSTEM_PROMPT_FOLLOWUP_RO = """\
@@ -111,13 +95,6 @@ def system_followup(
     profile: dict[str, Any] | None,
     retrieval_hint: str = "",
 ) -> str:
-    """
-    System prompt for the information-gathering phase.
-
-    `user_history_text` is the list of user messages so far (oldest first).
-    `retrieval_hint` is an optional hint about what categories the retriever
-    already surfaced (helps the LLM ask better questions).
-    """
     parts: list[str] = []
     profile_block = format_profile(profile)
     if profile_block:
@@ -145,9 +122,6 @@ def retrieval_hint_from_hits(hits: list[MedicineHit]) -> str:
             seen.add(cat)
             cats.append(cat)
     return ", ".join(cats)
-
-
-# ───────────────── recommend phase ─────────────────
 
 
 SYSTEM_PROMPT_RECOMMEND_RO = """\

@@ -1,4 +1,4 @@
-"""SQLAlchemy engine + session factory. Lazy-init so the rest of the app works without DATABASE_URL set."""
+"""SQLAlchemy engine + session factory. Lazy: no DATABASE_URL required for chat/scan endpoints."""
 
 from __future__ import annotations
 

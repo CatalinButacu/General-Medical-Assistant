@@ -1,13 +1,4 @@
-"""
-Gemini Flash client wrapper.
-
-Provider-agnostic enough that swapping to OpenAI / Anthropic later means
-implementing the same `LLMClient` protocol — but for now we hardcode the
-google-genai SDK against gemini-3.0-flash on the free tier.
-
-Reads `GOOGLE_API_KEY` from the environment. The frontend posts to /chat
-without ever seeing the key.
-"""
+"""Gemini Flash client. GOOGLE_API_KEY from env, never reaches the frontend."""
 
 from __future__ import annotations
 
@@ -20,9 +11,6 @@ from google.genai import types
 
 log = logging.getLogger(__name__)
 
-# Latest Gemini 3 Flash (preview as of May 2026). Swap to
-# `gemini-flash-latest` for the auto-tracked stable channel,
-# or `gemini-2.5-flash` for the previous GA release.
 DEFAULT_MODEL = "gemini-3-flash-preview"
 
 
@@ -44,10 +32,8 @@ class GeminiClient:
         temperature: float = 0.6,
         max_output_tokens: int = 1024,
     ) -> AsyncIterator[str]:
-        """Yield text chunks from a streaming generation."""
-        # Gemini 2.5+/3 Flash are thinking models — reasoning tokens count
-        # against max_output_tokens by default, which truncates mid-word
-        # on chat-length budgets. Disable thinking for these short replies.
+        # thinking_config disables reasoning tokens (which silently consume max_output_tokens
+        # on Gemini 2.5+/3 Flash). Without this, replies truncate mid-word on chat-length budgets.
         try:
             config = types.GenerateContentConfig(
                 system_instruction=system_instruction,
@@ -79,11 +65,7 @@ class GeminiClient:
 
 
 def build_history(messages: Iterable[dict]) -> list[types.ContentDict]:
-    """
-    Frontend sends a list of {role: 'user'|'assistant', text: str}.
-    Convert to Gemini's ContentDict shape with role 'user'|'model' and
-    parts[{text}]. Drop empty/system messages — system goes via system_instruction.
-    """
+    """Convert {role,text} list to Gemini ContentDict; system goes via system_instruction."""
     out: list[types.ContentDict] = []
     for m in messages:
         role = m.get("role", "")

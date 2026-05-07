@@ -1,13 +1,4 @@
-"""
-Gemini Vision client for medicine-package OCR.
-
-Reuses the same GOOGLE_API_KEY as the chat client. Sends a captured
-image plus a Romanian extraction prompt and asks Gemini to return
-structured JSON: {trade_name, expiration_date, dosage, form, confidence}.
-
-The structured-output mode (response_mime_type="application/json" with
-a JSON schema) eliminates parse-error handling we'd otherwise need.
-"""
+"""Gemini Vision OCR for medicine packages. Returns structured JSON."""
 
 from __future__ import annotations
 
@@ -21,7 +12,6 @@ from google.genai import types
 
 log = logging.getLogger(__name__)
 
-# Use the same model family as chat — Gemini 3 Flash is multimodal.
 DEFAULT_VISION_MODEL = "gemini-3-flash-preview"
 
 EXTRACTION_PROMPT_RO = """\
