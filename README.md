@@ -14,76 +14,124 @@ short_description: Romanian RAG triage chatbot over ANMDM medicines
 
 Romanian pharmacy-triage chatbot grounded on the **official ANMDM nomenclator**
 (7,555 authorized human-use drugs). Streams replies in Romanian, recommends
-only from retrieved evidence, routes emergencies to 112 via deterministic rules
-the LLM cannot override.
+only from retrieved evidence, routes emergencies to 112 via deterministic
+rules the LLM cannot override.
 
 ## Architecture
 
 ```
-React SPA (GitHub Pages)
-   │  Authorization: Bearer <Auth0 access token>
-   ▼
-FastAPI on HuggingFace Space  ── verifies JWT vs Auth0 JWKS ──
-   │
-   │  psycopg over SSL
-   ▼
-PostgreSQL 16 (serverless, Frankfurt)
+┌──────────────────────────┐    Bearer JWT    ┌──────────────────────────┐
+│  React SPA               │  ─────────────►  │  FastAPI                 │
+│  GitHub Pages            │                  │  HuggingFace Space       │
+│  (Auth0 SDK,             │                  │  (Docker, port 7860)     │
+│   localStorage session)  │                  │                          │
+└──────────────────────────┘                  │  - JWT verify (JWKS)     │
+       ▲                                      │  - Retrieval (FAISS+BM25)│
+       │                                      │  - Triage rules          │
+       │ login                                │  - Gemini chat + Vision  │
+       ▼                                      └──────────────────────────┘
+┌──────────────────────────┐                            │
+│  Auth0                   │                            │ psycopg + SSL
+│  - SPA app               │                            ▼
+│  - "Med Assist API"      │                  ┌──────────────────────────┐
+│  - JWKS endpoint         │                  │  Postgres 16 (Neon)      │
+└──────────────────────────┘                  │  - health_profiles       │
+                                              │  - cabinet_items         │
+                                              └──────────────────────────┘
 ```
 
-## Engineering choices worth pointing at
+The frontend never talks to Postgres directly. Every authenticated request
+goes through FastAPI, which verifies the Bearer token against Auth0's signing
+keys before touching the DB.
 
-- **Hybrid retrieval** — FAISS dense + BM25 sparse fused with RRF. Catches
-  semantic queries (*„mă dor articulațiile dimineața"*) and brand-name lookups
-  (*„Aspenter 75"*) that one retriever alone misses.
-- **Rules-first safety layer** — 17 hand-authored red-flag rules scan every
-  user turn before the LLM. Emergency phrases short-circuit to a 112 card.
-  **0% false-negative emergency rate** on the eval set.
-- **Confidence-gated orchestration** — followup-questioning while the
-  classifier is uncertain, recommendation once retrieval is coherent, hard
-  cap at 5 followups. Profile-aware prompting skips questions answered in
-  the user's stored profile.
-- **Grounded recommendation** — LLM may only mention drug names from the
-  retrieved evidence list. Contraindication-aware via profile (gastrită →
-  off ibuprofen, sarcină → off teratogens).
-- **Server-mediated DB pattern** — frontend never sees DB credentials.
-  FastAPI verifies Auth0 JWTs (RS256/JWKS) and uses the verified `sub`
-  for every DB op; this structurally prevents leaked-key attacks.
-- **Vision OCR for cabinet** — Gemini Vision extracts trade name + expiration
-  date from a phone photo, matched back to ANMDM via the sparse retriever.
+## Runtime workflows
 
-## How it works
+### Login + onboarding
 
-### Runtime — what happens on each user action
+1. User clicks **Login** on the home page → Auth0 SDK calls `loginWithRedirect()` with `audience=https://med-assist-api`.
+2. Auth0 hosts the Google login form. After auth, user returns to `/General-Medical-Assistant/` with an authorization code in the URL.
+3. SDK exchanges code for an access token (RS256-signed JWT, contains `sub`, `aud`, `iss`, `exp`) + refresh token. Both stored in localStorage (`useRefreshTokens: true`).
+4. `Home.tsx` mounts a `useEffect` that calls `GET /user/profile`. Backend returns either the existing profile or a default with `onboarded: false`.
+5. If `!profile.onboarded`, frontend redirects to `/onboarding` (3-step wizard: name+age+gender → pregnancy → allergies/conditions/medications).
+6. On finish, `PUT /user/profile` saves to Postgres with `onboarded: true`. Future sessions skip the wizard.
 
-**Chat.** Frontend opens an SSE stream to `POST /chat` with `{messages, profile}`. The orchestrator scans for red flags first; if any fires, it returns an emergency card and the LLM never sees the query. Otherwise it joins the cumulative user turns, runs FAISS+BM25 retrieval, and decides:
-- low classifier confidence → ask one targeted followup question (capped at 4)
-- coherent retrieval → emit medicine cards + stream a Gemini reply grounded in those cards
+### Chat
 
-**Scanner.** Camera frame → base64 JPEG → `POST /scan`. Backend pipes it to Gemini Vision with a JSON schema → returns trade name, dose, form, expiration. The trade name is matched back to ANMDM via BM25 (with a fallback that strips dose/form noise for partial OCR), top-3 candidates returned. User picks one → frontend prefills the cabinet add form including the OCR'd expiration date.
+Frontend opens an SSE stream to `POST /chat` with `{ messages, profile }`. The orchestrator:
 
-**Cabinet & profile.** `GET/POST/PUT/DELETE /user/cabinet` and `GET/PUT /user/profile`. The user's `sub` is taken from the verified JWT, never from the request body — a forged `user_id` in JSON cannot reach another user's data.
+1. **Red-flag scan** on the latest user turn. Any emergency or urgent rule fires → emit a single `triage` event with `label: EMERGENCY` and short-circuit. The LLM never sees emergency-class queries.
+2. **Cumulative retrieval**: concatenate all user turns into one query, run hybrid FAISS+BM25 with reciprocal rank fusion, classifier returns `OTC_SAFE | UNCERTAIN` plus a confidence score.
+3. **Phase decision**:
+   - `user_turns < min_followups` (1 with profile, 2 without) → followup, ask one targeted question
+   - `OTC_SAFE` and `confidence ≥ 0.5` → recommend, emit medicine cards + stream a grounded Gemini reply
+   - `user_turns ≥ 4` (cap) without confidence → recommend with empty evidence, LLM gracefully refuses and suggests pharmacist
+   - else → followup, keep gathering
+4. **Stream**: Gemini 3 Flash with `thinking_budget=0` so reasoning tokens don't eat the visible output. Each chunk arrives as a `token` SSE event; frontend accumulates them into the assistant message and renders triage badge + medicine cards as their events fire.
 
-### Auth + DB security flow
+### Scanner
 
-A request to `/user/*`:
+1. User opens `/scanner`, grants camera permission. The `MediaStream` is attached to a `<video>` element via `useEffect` (must wait until the element is mounted before setting `srcObject`).
+2. Capture button: canvas draws the current video frame, exports as base64 JPEG.
+3. `POST /scan` with `{ image_base64, mime_type }`. Backend pipes the image to Gemini Vision with a JSON-schema response — returns `{ trade_name, expiration_date, dosage, form, confidence }`.
+4. Backend matches the OCR'd `trade_name` against ANMDM titles via BM25. If the score is weak, retries with dose/form noise stripped (`"PARACETAMOL ZENTIVA 500MG"` → `"PARACETAMOL ZENTIVA"`). Returns top-3 candidates plus the raw OCR.
+5. Frontend shows the best match + alternatives. User picks one → navigates to `/cabinet` with state pre-filled (including the OCR'd expiration date).
 
-1. Frontend's `useUserApi()` hook calls Auth0's `getAccessTokenSilently()` → JWT (RS256, signed by Auth0).
-2. Sent as `Authorization: Bearer <jwt>`.
-3. FastAPI's `current_user_sub` dependency verifies signature against JWKS (cached in-process), checks `iss` / `aud` / `exp`, returns the `sub` claim.
-4. The route handler queries Postgres scoped by `user_id == sub` via SQLAlchemy.
+### Cabinet + profile
 
-The DB connection string lives only as an HF Space secret (server-side). Nothing in the browser bundle can reach Postgres directly — by design, not by hope.
-
-### Deployment pipelines (GitHub Actions on `main`)
-
-| Workflow | Trigger | What it does |
+| Method | Path | Purpose |
 |---|---|---|
-| `deploy.yml` | push to main | Vite build with `VITE_*` envs from secrets → upload `dist/` → publish to GitHub Pages |
-| `deploy-hf.yml` | push to main | Orphan-snapshot (drops binaries — HF Xet rejects them; Dockerfile re-fetches via curl) → force-push to the HF Space's git repo → HF rebuilds the Docker image |
-| `quality.yml` | push + PR | ESLint + tsc, Ruff + Pytest. No `continue-on-error` — broken types or red tests block the merge |
-| `codeql.yml` | push + PR + weekly | `security-and-quality` queries for python and javascript-typescript |
+| `GET` | `/user/profile` | Load profile, used for chat context and onboarding-redirect check |
+| `PUT` | `/user/profile` | Save profile from onboarding or HealthProfile page |
+| `GET` | `/user/cabinet` | List user's cabinet items, ordered by expiration date |
+| `POST` | `/user/cabinet` | Add a new item |
+| `PUT` | `/user/cabinet/{id}` | Edit |
+| `DELETE` | `/user/cabinet/{id}` | Remove |
+
+The user's `sub` is **never** sent in the JSON body — it's always extracted from the verified JWT. A forged `user_id` in a request body cannot reach another user's data.
+
+## Auth + DB security flow
+
+A request to any `/user/*` endpoint:
+
+1. Frontend's `useUserApi()` hook calls Auth0's `getAccessTokenSilently()` → returns the cached or silently-refreshed JWT.
+2. Request goes out with `Authorization: Bearer <jwt>`.
+3. FastAPI's `current_user_sub()` dependency:
+   - Decodes the JWT header → extracts `kid`
+   - Fetches JWKS from `https://{AUTH0_DOMAIN}/.well-known/jwks.json` (cached in-process via `@lru_cache`)
+   - Finds the public key matching `kid`, verifies the RS256 signature
+   - Verifies `iss`, `aud`, `exp`
+   - Returns `payload["sub"]`
+4. Any failed check → 401. Otherwise the route handler runs with `sub: str` injected.
+5. SQLAlchemy queries scope every read/write by `user_id == sub`.
+
+The DB connection string lives only as an HF Space secret. The browser bundle is published to GitHub Pages — anything baked at build time (`VITE_BACKEND_URL`, `VITE_AUTH0_DOMAIN`, `VITE_AUTH0_CLIENT_ID`, `VITE_AUTH0_AUDIENCE`) is public by design. Nothing in the bundle can reach Postgres directly.
+
+## CI/CD
+
+Four workflows fire from `main`:
+
+### `deploy.yml` — frontend → GitHub Pages
+Checkout → `npm ci` → `npm run check` (tsc) → `npm run build` (Vite). Build env injects `VITE_*` from secrets. Upload `dist/` as Pages artifact, deploy via `actions/deploy-pages@v4`.
+
+### `deploy-hf.yml` — backend → HuggingFace Space
+1. Checkout main, build an **orphan branch** (`hf-deploy`) — single fresh commit, no history.
+2. Delete binaries (`anmdm_nomenclator.xlsx`, `pdf_links.json`) — HF rejects committed binaries via Xet storage. The Dockerfile re-fetches them from `raw.githubusercontent.com` at build time.
+3. Force-push the orphan to `main` of `huggingface.co/spaces/catalinbutacu/med-assist` using `HF_TOKEN`.
+4. HF detects the push, rebuilds the Docker image (~5–8 min): `pip install` → `06_enrich.py` → `med_assist.index.builder` → multi-stage runtime image.
+5. Container starts, FastAPI binds 7860, health probe goes green.
+
+### `quality.yml` — gating checks (push + PR)
+- **Frontend job:** `npm run lint` (ESLint, no errors allowed) + `npm run check` (`tsc --noEmit`).
+- **Backend job:** install ruff + pytest + minimal deps → `ruff check med_assist/ data_acquisition/scripts/` → `pytest med_assist/tests/`.
+
+No `continue-on-error` — broken types or red tests block the merge.
+
+### `codeql.yml` — security scanning
+Push + PR + weekly: `security-and-quality` query suites for `javascript-typescript` and `python`. Findings appear in **Security → Code scanning**. Repo-level branch protection blocks merges on High+ severity.
 
 ## Eval (`python -m med_assist.cli.eval`)
+
+49-case Romanian golden set:
 
 | Metric | Value |
 |---|---|
@@ -93,15 +141,37 @@ The DB connection string lives only as an HF Space secret (server-side). Nothing
 | MRR | 0.71 |
 | p95 retrieval latency | 88 ms |
 
+Plus 6 pure-Python pytest cases for the red-flag scanner — must-fire (chest pain, anaphylaxis, suicidal ideation), must-not-fire (mild cold, routine headache), and Romanian diacritic robustness.
+
+## Local development
+
+Backend:
+```bash
+pip install -r requirements.txt
+python data_acquisition/scripts/01_parse_anmdm.py    # one-time
+python data_acquisition/scripts/06_enrich.py --allow-missing-rcp
+python -m med_assist.index.builder                   # builds FAISS+BM25
+uvicorn med_assist.api.main:app --port 8000 --reload
+```
+
+Frontend (separate terminal):
+```bash
+npm install
+npm run dev -- --host 0.0.0.0    # --host so phone can connect over WiFi
+```
+
+`.env.local` provides `GOOGLE_API_KEY` (server) + the `VITE_*` envs (client). FastAPI auto-loads it via `python-dotenv` on startup.
+
 ## Layout
 
 ```
 src/                React + Vite + TS · pages, hooks, components/ui, services
 med_assist/         FastAPI · api, auth (JWT), db (SQLAlchemy), conversation,
-                    retrieval, triage, llm (Gemini chat + vision), eval
+                    retrieval, triage, llm (Gemini chat + vision), eval, tests
 infra/oci/          Terraform + cloud-init for Postgres 16 on OCI Ampere VM
 db/schema.sql       Postgres DDL
 data_acquisition/   ANMDM scraper + RCP parser
+.github/workflows/  deploy.yml, deploy-hf.yml, quality.yml, codeql.yml
 ```
 
 > The active demo runs against **Neon** (serverless Postgres free tier).
