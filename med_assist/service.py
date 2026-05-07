@@ -19,8 +19,8 @@ from typing import Optional
 
 import faiss
 
-from med_assist.data.models import Chunk, Medicine, MedicineHit
 from med_assist.data.loader import load_medicines
+from med_assist.data.models import Chunk, Medicine, MedicineHit
 from med_assist.index.builder import INDEX_DIR
 from med_assist.retrieval.dense import DenseRetriever
 from med_assist.retrieval.fusion import reciprocal_rank_fusion

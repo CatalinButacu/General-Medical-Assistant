@@ -88,7 +88,10 @@ def classify(
     if not medicine_hits:
         return TriageDecision(
             label="UNCERTAIN",
-            rationale="Nu am identificat simptome sau medicamente specifice. Vă rugăm să descrieți mai detaliat sau să consultați un farmacist.",
+            rationale=(
+                "Nu am identificat simptome sau medicamente specifice. "
+                "Vă rugăm să descrieți mai detaliat sau să consultați un farmacist."
+            ),
             recommended_action_ro="Consultați un farmacist pentru sfat personalizat.",
         )
 

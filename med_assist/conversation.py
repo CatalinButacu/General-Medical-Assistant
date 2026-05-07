@@ -28,7 +28,8 @@ from med_assist.llm.prompts import (
 )
 from med_assist.service import RetrievalService
 from med_assist.triage.classifier import TriageDecision
-from med_assist.triage.redflags import scan as scan_redflags, has_emergency, has_urgent
+from med_assist.triage.redflags import has_emergency, has_urgent
+from med_assist.triage.redflags import scan as scan_redflags
 
 log = logging.getLogger(__name__)
 

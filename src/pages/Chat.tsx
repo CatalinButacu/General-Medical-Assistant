@@ -132,9 +132,9 @@ export default function Chat() {
                             if (m.id !== aiId) return m;
                             switch (kind) {
                                 case 'triage':
-                                    return { ...m, triage: payload as TriageEvent };
+                                    return { ...m, triage: payload as unknown as TriageEvent };
                                 case 'medicines':
-                                    return { ...m, medicines: (payload?.items ?? []) as MedicineDTO[] };
+                                    return { ...m, medicines: (payload?.items ?? []) as unknown as MedicineDTO[] };
                                 case 'token': {
                                     // Some LLM SDKs (incl. Gemini) sometimes emit
                                     // cumulative chunks where each one includes

@@ -17,7 +17,6 @@ from typing import Any
 
 from med_assist.data.models import MedicineHit
 
-
 # ───────────────── profile + history formatting ─────────────────
 
 
@@ -214,7 +213,8 @@ def system_recommend(
             "REGULI STRICTE pentru acest răspuns:\n"
             "  • NU enumera niciun nume de medicament — nicio denumire comercială, nicio substanță activă.\n"
             "  • Recunoaște limpede, în 1 propoziție empatică, că această problemă necesită o evaluare directă.\n"
-            "  • Recomandă concret: vizită la farmacist (pentru sfat OTC) sau consult medical specialist (dacă pare să iasă din zona OTC).\n"
+            "  • Recomandă concret: vizită la farmacist (pentru sfat OTC) sau consult medical "
+            "specialist (dacă pare să iasă din zona OTC).\n"
             "  • Încheie cu disclaimer-ul standard.\n"
             "Răspunsul total: 2-3 propoziții. Fără liste, fără medicamente."
         )

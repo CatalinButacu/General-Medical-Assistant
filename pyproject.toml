@@ -1,5 +1,7 @@
 [tool.ruff]
-line-length = 120
+# 140 not 120: Romanian medical strings (logs, prompts, classifier rationales)
+# legitimately push past 120 and forcibly wrapping them hurts readability.
+line-length = 140
 target-version = "py312"
 
 [tool.ruff.lint]

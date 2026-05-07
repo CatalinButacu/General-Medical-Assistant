@@ -15,7 +15,6 @@ import time
 
 from med_assist.service import RetrievalService
 
-
 LABEL_COLORS = {
     "EMERGENCY": "\033[91m",
     "OTC_SAFE": "\033[92m",
