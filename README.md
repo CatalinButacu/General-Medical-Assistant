@@ -51,6 +51,38 @@ PostgreSQL 16 (serverless, Frankfurt)
 - **Vision OCR for cabinet** — Gemini Vision extracts trade name + expiration
   date from a phone photo, matched back to ANMDM via the sparse retriever.
 
+## How it works
+
+### Runtime — what happens on each user action
+
+**Chat.** Frontend opens an SSE stream to `POST /chat` with `{messages, profile}`. The orchestrator scans for red flags first; if any fires, it returns an emergency card and the LLM never sees the query. Otherwise it joins the cumulative user turns, runs FAISS+BM25 retrieval, and decides:
+- low classifier confidence → ask one targeted followup question (capped at 4)
+- coherent retrieval → emit medicine cards + stream a Gemini reply grounded in those cards
+
+**Scanner.** Camera frame → base64 JPEG → `POST /scan`. Backend pipes it to Gemini Vision with a JSON schema → returns trade name, dose, form, expiration. The trade name is matched back to ANMDM via BM25 (with a fallback that strips dose/form noise for partial OCR), top-3 candidates returned. User picks one → frontend prefills the cabinet add form including the OCR'd expiration date.
+
+**Cabinet & profile.** `GET/POST/PUT/DELETE /user/cabinet` and `GET/PUT /user/profile`. The user's `sub` is taken from the verified JWT, never from the request body — a forged `user_id` in JSON cannot reach another user's data.
+
+### Auth + DB security flow
+
+A request to `/user/*`:
+
+1. Frontend's `useUserApi()` hook calls Auth0's `getAccessTokenSilently()` → JWT (RS256, signed by Auth0).
+2. Sent as `Authorization: Bearer <jwt>`.
+3. FastAPI's `current_user_sub` dependency verifies signature against JWKS (cached in-process), checks `iss` / `aud` / `exp`, returns the `sub` claim.
+4. The route handler queries Postgres scoped by `user_id == sub` via SQLAlchemy.
+
+The DB connection string lives only as an HF Space secret (server-side). Nothing in the browser bundle can reach Postgres directly — by design, not by hope.
+
+### Deployment pipelines (GitHub Actions on `main`)
+
+| Workflow | Trigger | What it does |
+|---|---|---|
+| `deploy.yml` | push to main | Vite build with `VITE_*` envs from secrets → upload `dist/` → publish to GitHub Pages |
+| `deploy-hf.yml` | push to main | Orphan-snapshot (drops binaries — HF Xet rejects them; Dockerfile re-fetches via curl) → force-push to the HF Space's git repo → HF rebuilds the Docker image |
+| `quality.yml` | push + PR | ESLint + tsc, Ruff + Pytest. No `continue-on-error` — broken types or red tests block the merge |
+| `codeql.yml` | push + PR + weekly | `security-and-quality` queries for python and javascript-typescript |
+
 ## Eval (`python -m med_assist.cli.eval`)
 
 | Metric | Value |
