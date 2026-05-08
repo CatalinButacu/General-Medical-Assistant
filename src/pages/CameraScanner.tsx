@@ -377,6 +377,16 @@ export default function CameraScanner() {
                   {result.extracted.form && <div><span className="text-gray-500">Formă:</span> <b className="capitalize">{result.extracted.form}</b></div>}
                   {result.extracted.expiration_date && <div><span className="text-gray-500">Expiră:</span> <b>{result.extracted.expiration_date}</b></div>}
                 </div>
+                {result.extracted.all_text && (
+                  <details className="mt-3 pt-3 border-t border-amber-200">
+                    <summary className="cursor-pointer text-[11px] font-bold text-amber-700 uppercase tracking-wider">
+                      Text extras din imagine
+                    </summary>
+                    <pre className="mt-2 p-3 bg-white rounded-lg text-[11px] text-gray-700 whitespace-pre-wrap break-words font-mono leading-relaxed max-h-64 overflow-y-auto">
+                      {result.extracted.all_text}
+                    </pre>
+                  </details>
+                )}
               </div>
             )}
 
