@@ -24,7 +24,10 @@ log = logging.getLogger("medassist.chat")
 MAX_HISTORY_TURNS = 8                   # last N turns sent to the LLM
 TOP_K_MEDICINES = 5
 MIN_FOLLOWUPS_NO_PROFILE = 2            # ask at least 2 questions if profile is empty
-MIN_FOLLOWUPS_WITH_PROFILE = 1          # one is enough if we already know allergies/conditions
+MIN_FOLLOWUPS_WITH_PROFILE = 2          # even with a profile, never recommend after a single user turn —
+                                        # the profile knows static allergies/conditions but not what
+                                        # actually triggered the current episode (e.g. allergy → trigger?,
+                                        # rash → contact?, headache → onset?). 2 is the floor.
 MAX_FOLLOWUPS = 4                       # hard cap — recommend even if uncertain after this
 STRONG_CONFIDENCE = 0.5                 # OTC_SAFE label alone isn't enough — need score-backed confidence too
 

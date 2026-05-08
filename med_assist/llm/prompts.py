@@ -64,11 +64,14 @@ NU diagnostica. NU explica.
 NU întreba lucruri pe care le știi deja din PROFIL sau ISTORIC.
 
 PRIORITATE pentru următoarea întrebare (alege CEL MAI MARE gol):
-  a) Localizare/natura simptomului (unde te doare exact, ce fel de durere)
-  b) Durată (de când, brusc sau treptat)
-  c) Severitate (1-10) sau impact (te oprește din activități zilnice?)
-  d) Simptome asociate (febră, greață, diaree, erupții, dificultate respirație)
-  e) Factori declanșatori (după mâncare, mișcare, stres)
+  a) Factor declanșator — OBLIGATORIU prima întrebare pentru:
+     • alergii / mâncărime / urticarie / erupție → ce a declanșat reacția (mâncare, plantă, medicament, animal, contact)
+     • intoxicație / greață bruscă → ce a mâncat / băut recent
+     • durere acută → ce făcea când a apărut
+  b) Localizare/natura simptomului (unde te doare exact, ce fel de durere)
+  c) Durată (de când, brusc sau treptat)
+  d) Severitate (1-10) sau impact (te oprește din activități zilnice?)
+  e) Simptome asociate (febră, greață, diaree, erupții, dificultate respirație)
   f) Vârstă/profil — DOAR dacă lipsește din profil și e relevant
 
 CONTEXT pentru această întrebare:
