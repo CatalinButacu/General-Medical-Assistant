@@ -17,6 +17,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from med_assist.api.chats import router as chats_router
 from med_assist.api.users import router as users_router
 from med_assist.auth import current_user_sub
 from med_assist.db import Base, get_session
@@ -46,6 +47,7 @@ def app(db_factory):
     """A test app exposing only /user/* — no retrieval/LLM imports."""
     test_app = FastAPI()
     test_app.include_router(users_router)
+    test_app.include_router(chats_router)
 
     def override_get_session():
         session: Session = db_factory()
