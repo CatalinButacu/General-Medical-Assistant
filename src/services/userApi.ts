@@ -25,8 +25,34 @@ export interface CabinetItemDTO {
     notes?: string | null;
 }
 
+export interface ChatSessionSummary {
+    id: string;
+    title: string | null;
+    message_count: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ChatMessageDTO {
+    id: string;
+    role: 'user' | 'assistant';
+    text: string;
+    created_at: string;
+}
+
+export interface ChatSessionDetail {
+    id: string;
+    title: string | null;
+    created_at: string;
+    updated_at: string;
+    messages: ChatMessageDTO[];
+}
+
 export const userPaths = {
     profile: '/user/profile',
     cabinet: '/user/cabinet',
     cabinetItem: (id: string) => `/user/cabinet/${id}`,
+    chats: '/user/chats',
+    chat: (id: string) => `/user/chats/${id}`,
+    chatMessages: (id: string) => `/user/chats/${id}/messages`,
 } as const;

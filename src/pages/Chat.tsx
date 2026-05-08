@@ -5,10 +5,13 @@ import {
     AlertTriangle,
     Bot,
     ExternalLink,
+    History,
     Loader2,
     Phone,
+    Plus,
     Send,
     Sparkles,
+    Trash2,
     User as UserIcon,
     Wifi,
     WifiOff,
@@ -18,6 +21,7 @@ import {
 import { checkHealth, isApiConfigured, streamChat } from '../services/api';
 import type { ChatProfilePayload, ChatTurn } from '../services/api';
 import { useUserApi } from '../hooks/useUserApi';
+import { useChatHistory } from '../hooks/useChatHistory';
 import { userPaths, type ProfileDTO } from '../services/userApi';
 import type { MedicineDTO, Message, RedFlagDTO, TriageEvent } from '../types';
 
@@ -44,19 +48,27 @@ export default function Chat() {
     const [inputMessage, setInputMessage] = useState('');
     const [isStreaming, setIsStreaming] = useState(false);
     const [isOnline, setIsOnline] = useState<boolean | null>(null);
+    const [historyOpen, setHistoryOpen] = useState(false);
+
+    const history = useChatHistory();
+    const historyRef = useRef(history);
+    historyRef.current = history;
+
+    const welcomeMessage: Message = {
+        id: 'welcome',
+        sender: 'ai',
+        timestamp: new Date(),
+        text: isApiConfigured()
+            ? 'Salut. Spune-mi ce simptome ai sau ce medicament cauți. Răspund din nomenclatorul ANMDM.'
+            : 'Backend not configured. Set VITE_BACKEND_URL in .env.local.',
+    };
 
     useEffect(() => {
-        setMessages([{
-            id: 'welcome',
-            sender: 'ai',
-            timestamp: new Date(),
-            text: isApiConfigured()
-                ? 'Salut. Spune-mi ce simptome ai sau ce medicament cauți. Răspund din nomenclatorul ANMDM.'
-                : 'Backend not configured. Set VITE_BACKEND_URL in .env.local.',
-        }]);
+        setMessages([welcomeMessage]);
         let cancelled = false;
         checkHealth().then(ok => { if (!cancelled) setIsOnline(ok); });
         return () => { cancelled = true; abortRef.current?.abort(); };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const apiCall = useUserApi();
@@ -110,6 +122,7 @@ export default function Chat() {
         setMessages(prev => [...prev, userMsg, aiMsg]);
         setInputMessage('');
         setIsStreaming(true);
+        void historyRef.current.persistMessage('user', text);
 
         // Build the conversation payload from the freshly-pushed history,
         // dropping the welcome bubble and any in-progress streaming placeholder.
@@ -150,8 +163,11 @@ export default function Chat() {
                                     }
                                     return { ...m, text: existing + incoming };
                                 }
-                                case 'done':
+                                case 'done': {
+                                    const finalText = (m.text ?? '').trim();
+                                    if (finalText) void historyRef.current.persistMessage('assistant', finalText);
                                     return { ...m, isStreaming: false };
+                                }
                                 case 'error':
                                     return { ...m, isStreaming: false, error: payload?.message ?? 'unknown error' };
                                 default:
@@ -216,9 +232,63 @@ export default function Chat() {
                             </div>
                         </div>
                     </div>
-                    <div className="w-9 h-9" />
+                    {history.enabled ? (
+                        <div className="flex items-center gap-1">
+                            <button
+                                onClick={() => { history.startNewSession(); setMessages([welcomeMessage]); }}
+                                className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-800"
+                                aria-label="Conversație nouă"
+                                title="Conversație nouă"
+                                disabled={isStreaming}
+                            >
+                                <Plus size={18} />
+                            </button>
+                            <button
+                                onClick={() => setHistoryOpen(true)}
+                                className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-800 relative"
+                                aria-label="Istoric conversații"
+                                title="Istoric"
+                            >
+                                <History size={18} />
+                                {history.sessions.length > 0 && (
+                                    <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                                )}
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="w-9 h-9" />
+                    )}
                 </div>
             </header>
+
+            {historyOpen && (
+                <ChatHistoryDrawer
+                    sessions={history.sessions}
+                    currentId={history.currentSessionId}
+                    onClose={() => setHistoryOpen(false)}
+                    onPick={async (id) => {
+                        try {
+                            const msgs = await history.loadSession(id);
+                            const loaded: Message[] = msgs.map(m => ({
+                                id: m.id,
+                                sender: m.role === 'user' ? 'user' : 'ai',
+                                timestamp: new Date(m.created_at),
+                                text: m.text,
+                            }));
+                            setMessages(loaded.length > 0 ? loaded : [welcomeMessage]);
+                            setHistoryOpen(false);
+                        } catch (err) {
+                            console.warn('load session failed', err);
+                        }
+                    }}
+                    onDelete={async (id) => {
+                        await history.deleteSession(id);
+                        if (id === history.currentSessionId) {
+                            setMessages([welcomeMessage]);
+                        }
+                    }}
+                />
+            )}
 
             <div className="flex-1 overflow-y-auto">
                 <div className="max-w-md mx-auto px-4 py-6 space-y-4">
@@ -503,6 +573,107 @@ function MedicineRow({ med }: { med: MedicineDTO }) {
                 )}
                 <span className="ml-auto text-[10px] font-mono text-gray-300">{med.score.toFixed(3)}</span>
             </div>
+        </div>
+    );
+}
+
+function ChatHistoryDrawer({
+    sessions,
+    currentId,
+    onClose,
+    onPick,
+    onDelete,
+}: {
+    sessions: import('../services/userApi').ChatSessionSummary[];
+    currentId: string | null;
+    onClose: () => void;
+    onPick: (id: string) => void;
+    onDelete: (id: string) => Promise<void>;
+}) {
+    const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
+    return (
+        <div className="fixed inset-0 z-50 flex">
+            <div
+                className="absolute inset-0 bg-black/40 animate-in fade-in duration-200"
+                onClick={onClose}
+            />
+            <aside className="relative ml-auto w-[85%] max-w-sm h-full bg-white shadow-2xl animate-in slide-in-from-right duration-200 flex flex-col">
+                <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                    <h2 className="text-sm font-bold text-gray-800">Istoric conversații</h2>
+                    <button
+                        onClick={onClose}
+                        className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500"
+                        aria-label="Închide"
+                    >
+                        <X size={18} />
+                    </button>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                    {sessions.length === 0 ? (
+                        <p className="px-4 py-8 text-center text-xs text-gray-400">
+                            Nicio conversație salvată încă.
+                        </p>
+                    ) : (
+                        <ul className="divide-y divide-gray-100">
+                            {sessions.map(s => {
+                                const isCurrent = s.id === currentId;
+                                const isPendingDelete = pendingDeleteId === s.id;
+                                const updated = new Date(s.updated_at).toLocaleString([], {
+                                    month: 'short', day: 'numeric',
+                                    hour: '2-digit', minute: '2-digit',
+                                });
+                                return (
+                                    <li
+                                        key={s.id}
+                                        className={`px-4 py-3 flex items-start gap-3 cursor-pointer transition-colors ${
+                                            isCurrent ? 'bg-blue-50/60' : 'hover:bg-gray-50'
+                                        }`}
+                                        onClick={() => !isPendingDelete && onPick(s.id)}
+                                    >
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-semibold text-gray-800 truncate">
+                                                {s.title ?? 'Conversație fără titlu'}
+                                            </p>
+                                            <p className="text-[11px] text-gray-400 mt-0.5">
+                                                {s.message_count} mesaje · {updated}
+                                            </p>
+                                        </div>
+                                        {isPendingDelete ? (
+                                            <div className="flex items-center gap-1 flex-shrink-0">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); setPendingDeleteId(null); }}
+                                                    className="text-[10px] font-bold text-gray-500 px-2 py-1 rounded hover:bg-gray-100"
+                                                >
+                                                    anulează
+                                                </button>
+                                                <button
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        await onDelete(s.id);
+                                                        setPendingDeleteId(null);
+                                                    }}
+                                                    className="text-[10px] font-bold text-white bg-red-600 hover:bg-red-700 px-2 py-1 rounded"
+                                                >
+                                                    șterge
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); setPendingDeleteId(s.id); }}
+                                                className="p-1.5 rounded text-gray-400 hover:text-red-600 hover:bg-red-50 flex-shrink-0"
+                                                aria-label="Șterge"
+                                            >
+                                                <Trash2 size={14} />
+                                            </button>
+                                        )}
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    )}
+                </div>
+            </aside>
         </div>
     );
 }
