@@ -14,17 +14,31 @@ _ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(_ROOT / ".env.local")
 load_dotenv(_ROOT / ".env")
 
-from fastapi import FastAPI
+from med_assist.api.middleware import RequestIDMiddleware, install_request_id_log_factory
+
+# install_request_id_log_factory must run before basicConfig so the %(request_id)s
+# field is populated on every record from the very first log line.
+install_request_id_log_factory()
+logging.basicConfig(
+    level=os.getenv("LOG_LEVEL", "INFO"),
+    format="%(asctime)s [%(levelname)s] req=%(request_id)s %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
+for noisy in ("httpx", "httpcore", "urllib3", "google.api_core", "google.auth"):
+    logging.getLogger(noisy).setLevel(logging.WARNING)
+
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
+from med_assist.api.ratelimit import chat_limiter, rate_limit, scan_limiter
 from med_assist.conversation import ChatMessageIn, ConversationService
 from med_assist.llm.client import GeminiClient
 from med_assist.llm.vision import VisionClient
 from med_assist.service import RetrievalService
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("medassist.api")
 
 app = FastAPI(title="Med Assist API", version="0.3.0")
 app.add_middleware(
@@ -33,10 +47,14 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
+# Added LAST so it wraps everything else and tags the full request lifecycle.
+app.add_middleware(RequestIDMiddleware)
 
 if os.getenv("DATABASE_URL") and os.getenv("AUTH0_AUDIENCE"):
+    from med_assist.api.chats import router as chats_router
     from med_assist.api.users import router as users_router
     app.include_router(users_router)
+    app.include_router(chats_router)
 
 
 _service: Optional[RetrievalService] = None
@@ -97,7 +115,7 @@ class ChatRequest(BaseModel):
     profile: Optional[ChatProfile] = None
 
 
-@app.post("/chat")
+@app.post("/chat", dependencies=[Depends(rate_limit(chat_limiter, "chat"))])
 async def chat(req: ChatRequest):
     """SSE stream of triage / medicines / token / done / error events."""
     convo = get_conversation()
@@ -228,7 +246,7 @@ def _hit_to_match_dto(svc: "RetrievalService", hit) -> Optional[ScanMedicineMatc
     )
 
 
-@app.post("/scan", response_model=ScanResponse)
+@app.post("/scan", response_model=ScanResponse, dependencies=[Depends(rate_limit(scan_limiter, "scan"))])
 def scan(req: ScanRequest) -> ScanResponse:
     """OCR a medicine box and match the trade name back to ANMDM."""
     import base64

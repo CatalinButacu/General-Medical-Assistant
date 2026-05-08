@@ -13,7 +13,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt.algorithms import RSAAlgorithm
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("medassist.auth")
 
 _bearer_required = HTTPBearer(auto_error=True)
 _bearer_optional = HTTPBearer(auto_error=False)

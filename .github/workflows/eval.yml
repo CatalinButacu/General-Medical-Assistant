@@ -1,4 +1,4 @@
-name: Eval — 49-case Romanian golden set
+name: Eval
 
 on:
   workflow_dispatch:

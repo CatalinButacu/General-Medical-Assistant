@@ -19,7 +19,7 @@ from med_assist.triage.classifier import TriageDecision
 from med_assist.triage.redflags import has_emergency, has_urgent
 from med_assist.triage.redflags import scan as scan_redflags
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("medassist.chat")
 
 MAX_HISTORY_TURNS = 8                   # last N turns sent to the LLM
 TOP_K_MEDICINES = 5

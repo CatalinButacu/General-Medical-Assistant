@@ -10,7 +10,7 @@ from typing import Optional
 from google import genai
 from google.genai import types
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("medassist.vision")
 
 DEFAULT_VISION_MODEL = os.getenv("VISION_MODEL", "gemini-2.5-flash")
 

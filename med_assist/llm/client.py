@@ -9,7 +9,7 @@ from typing import AsyncIterator, Iterable
 from google import genai
 from google.genai import types
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("medassist.llm")
 
 DEFAULT_MODEL = "gemini-3-flash-preview"
 
@@ -33,7 +33,6 @@ class GeminiClient:
         max_output_tokens: int = 1024,
     ) -> AsyncIterator[str]:
         # thinking_config disables reasoning tokens (which silently consume max_output_tokens
-        # on Gemini 2.5+/3 Flash). Without this, replies truncate mid-word on chat-length budgets.
         try:
             config = types.GenerateContentConfig(
                 system_instruction=system_instruction,

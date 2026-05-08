@@ -1,4 +1,4 @@
-name: Deploy backend to HuggingFace Space
+name: Deploy backend
 
 on:
   push:
