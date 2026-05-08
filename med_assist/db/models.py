@@ -5,8 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import Boolean, CheckConstraint, Date, DateTime, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import JSON, Boolean, CheckConstraint, Date, DateTime, Integer, String, Text, Uuid, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -23,9 +22,9 @@ class HealthProfile(Base):
     gender: Mapped[str | None] = mapped_column(String(16))
     is_pregnant: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     pregnancy_due_date: Mapped[date | None] = mapped_column(Date)
-    allergies: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
-    conditions: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
-    medications: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    allergies: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    conditions: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    medications: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
     onboarded: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
@@ -39,7 +38,7 @@ class HealthProfile(Base):
 class CabinetItem(Base):
     __tablename__ = "cabinet_items"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[str] = mapped_column(Text, nullable=False, index=True)
     name: Mapped[str] = mapped_column(Text, nullable=False)
     generic_name: Mapped[str | None] = mapped_column(Text)
