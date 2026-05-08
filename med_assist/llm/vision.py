@@ -12,7 +12,7 @@ from google.genai import types
 
 log = logging.getLogger(__name__)
 
-DEFAULT_VISION_MODEL = "gemini-3-flash-preview"
+DEFAULT_VISION_MODEL = os.getenv("VISION_MODEL", "gemini-2.5-flash")
 
 EXTRACTION_PROMPT_RO = """\
 Ești un asistent care identifică medicamente din fotografia ambalajului.
@@ -60,26 +60,51 @@ class VisionClient:
         self._model_id = model_id
 
     def extract_medicine(self, image_bytes: bytes, mime_type: str = "image/jpeg") -> dict:
-        """Returns {trade_name, expiration_date, dosage, form, confidence, all_text}."""
+        """Returns {trade_name, expiration_date, dosage, form, confidence, all_text}.
+        On API errors or empty responses, surfaces the cause via all_text so the frontend can show it."""
         config = types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=_RESPONSE_SCHEMA,  # type: ignore[arg-type]
             temperature=0.1,
             max_output_tokens=1024,
         )
-        response = self._client.models.generate_content(
-            model=self._model_id,
-            contents=[  # type: ignore[arg-type]
-                types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
-                EXTRACTION_PROMPT_RO,
-            ],
-            config=config,
-        )
         try:
-            return json.loads(response.text or "{}")
-        except json.JSONDecodeError:
-            log.warning("vision returned non-JSON: %s", (response.text or "")[:200])
-            return {
-                "trade_name": None, "expiration_date": None,
-                "dosage": None, "form": None, "confidence": 0.0, "all_text": "",
-            }
+            response = self._client.models.generate_content(
+                model=self._model_id,
+                contents=[  # type: ignore[arg-type]
+                    types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
+                    EXTRACTION_PROMPT_RO,
+                ],
+                config=config,
+            )
+        except Exception as exc:
+            log.exception("Vision API call failed (model=%s)", self._model_id)
+            return _empty_extraction(f"[VISION API ERROR] {type(exc).__name__}: {exc}")
+
+        raw = (response.text or "").strip()
+        log.info("Vision raw response (model=%s, %d chars): %s", self._model_id, len(raw), raw[:600])
+
+        if not raw:
+            finish_reason = ""
+            try:
+                finish_reason = str(response.candidates[0].finish_reason) if response.candidates else ""
+            except Exception:
+                pass
+            return _empty_extraction(f"[VISION EMPTY RESPONSE] model={self._model_id} finish_reason={finish_reason}")
+
+        try:
+            data = json.loads(raw)
+            if not data.get("all_text"):
+                data["all_text"] = raw
+            return data
+        except json.JSONDecodeError as exc:
+            log.warning("vision returned non-JSON: %s", raw[:500])
+            return _empty_extraction(f"[VISION NON-JSON] {exc}\n--- raw response ---\n{raw[:1500]}")
+
+
+def _empty_extraction(diagnostic: str) -> dict:
+    return {
+        "trade_name": None, "expiration_date": None,
+        "dosage": None, "form": None, "confidence": 0.0,
+        "all_text": diagnostic,
+    }
