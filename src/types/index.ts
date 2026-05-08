@@ -79,6 +79,7 @@ export interface ScanExtraction {
     dosage: string | null;
     form: string | null;
     confidence: number;
+    all_text?: string;                // Full OCR dump, used as fallback search query
 }
 
 export interface ScanMedicineMatch {

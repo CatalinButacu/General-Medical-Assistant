@@ -287,9 +287,15 @@ export default function MedicineCabinet() {
               <button onClick={() => { setShowAddForm(false); setEditingMedicine(null); resetForm(); }} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"><X size={20} /></button>
             </div>
             {fromScanner && !editingMedicine && (
-              <div className="flex items-center gap-2 mb-6 px-3 py-2 bg-blue-50 border border-blue-100 rounded-xl text-[11px] font-semibold text-blue-700">
+              <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-blue-50 border border-blue-100 rounded-xl text-[11px] font-semibold text-blue-700">
                 <Sparkles size={12} />
                 <span>Date precompletate din scaner — verifică și ajustează dacă e cazul.</span>
+              </div>
+            )}
+            {fromScanner && !editingMedicine && !formData.expirationDate && (
+              <div className="flex items-start gap-2 mb-6 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-[11px] font-semibold text-amber-800">
+                <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
+                <span>Data expirării nu a fost detectată în imagine — completează-o manual mai jos.</span>
               </div>
             )}
             {!fromScanner && <div className="mb-6" />}
@@ -322,7 +328,12 @@ export default function MedicineCabinet() {
                   <TextInput type="number" value={formData.quantity} onChange={e => setFormData(p => ({ ...p, quantity: parseInt(e.target.value) || 1 }))} />
                 </FormField>
                 <FormField label="Data expirării">
-                  <TextInput type="date" value={formData.expirationDate} onChange={e => setFormData(p => ({ ...p, expirationDate: e.target.value }))} />
+                  <TextInput
+                    type="date"
+                    value={formData.expirationDate}
+                    onChange={e => setFormData(p => ({ ...p, expirationDate: e.target.value }))}
+                    className={fromScanner && !editingMedicine && !formData.expirationDate ? 'ring-2 ring-amber-400 bg-amber-50' : ''}
+                  />
                 </FormField>
               </div>
               <FormField label="Notițe personale">

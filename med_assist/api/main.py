@@ -131,6 +131,7 @@ class ScanExtraction(BaseModel):
     dosage: Optional[str]
     form: Optional[str]
     confidence: float
+    all_text: str = ""
 
 
 class ScanMedicineMatch(BaseModel):
@@ -167,6 +168,45 @@ def _strip_pharma_suffixes(name: str) -> str:
     s = re.sub(r"\b\d+([\.,]\d+)?\s*(mg/ml|mg|ml|mcg|μg|g|ui|iu)\b", " ", name, flags=re.I)
     s = re.sub(r"\b(comprimate|capsule|sirop|unguent|drajeuri|filmate|orala|suspensie|crema|sol\.?)\b", " ", s, flags=re.I)
     return re.sub(r"\s+", " ", s).strip()
+
+
+# Romanian + English stopwords + pharma packaging boilerplate that adds noise to OCR-text matching.
+_OCR_STOPWORDS = frozenset({
+    "de", "la", "cu", "si", "in", "pe", "din", "sau", "pentru", "fara", "intre", "doar",
+    "the", "and", "of", "for", "with", "to", "in",
+    "lot", "exp", "expirare", "valabil", "pana", "fabricat", "import", "importator",
+    "produs", "prospect", "rcp", "atc", "anmdm", "comprimate", "capsule", "filmate",
+    "sirop", "unguent", "crema", "drajeuri", "orala", "soluție", "suspensie", "sol",
+    "mg", "ml", "mcg", "ui", "iu", "ug", "tablete", "ambalaj", "buc", "buc.",
+})
+
+
+def _ocr_query_phrases(all_text: str) -> list[str]:
+    """Extract candidate query strings from OCR dump: per-line phrases + 2-3-word substrings,
+    filtered down to phrases that are mostly alphabetic and not entirely stopwords."""
+    import re
+    phrases: list[str] = []
+    seen: set[str] = set()
+    for line in all_text.splitlines():
+        cleaned = re.sub(r"[^A-Za-zĂÂÎȘȚăâîșț0-9 \-]", " ", line)
+        cleaned = re.sub(r"\s+", " ", cleaned).strip()
+        if not cleaned:
+            continue
+        words = [w for w in cleaned.split() if len(w) >= 3 and not w.isdigit() and w.lower() not in _OCR_STOPWORDS]
+        if not words:
+            continue
+        full = " ".join(words)
+        if full not in seen:
+            seen.add(full)
+            phrases.append(full)
+        # add 2- and 3-word windows as additional candidate queries
+        for n in (3, 2):
+            for i in range(len(words) - n + 1):
+                window = " ".join(words[i:i + n])
+                if window not in seen:
+                    seen.add(window)
+                    phrases.append(window)
+    return phrases[:25]  # cap so a verbose OCR doesn't run hundreds of searches
 
 
 def _hit_to_match_dto(svc: "RetrievalService", hit) -> Optional[ScanMedicineMatch]:
@@ -207,30 +247,41 @@ def scan(req: ScanRequest) -> ScanResponse:
         dosage=extracted.get("dosage"),
         form=extracted.get("form"),
         confidence=float(extracted.get("confidence") or 0.0),
+        all_text=extracted.get("all_text") or "",
     )
 
-    # Match against ANMDM via sparse retrieval over title chunks. If the raw
-    # OCR'd name returns nothing strong, retry with dose/form noise stripped
-    # ("PARACETAMOL ZENTIVA 500MG" -> "PARACETAMOL ZENTIVA").
-    matched: Optional[ScanMedicineMatch] = None
-    candidates: list[ScanMedicineMatch] = []
+    # Two-stage match: (1) Gemini's chosen trade_name + dose-stripped variant.
+    # (2) If still weak, sweep the full OCR dump as multi-word queries, merge.
+    # The all_text fallback handles cases where Gemini misidentifies which
+    # text on the box is the actual brand name.
+    svc = get_service()
+    best_by_id: dict = {}  # medicine_id -> best RetrievalHit so far
+
+    def _record(hits):
+        for h in hits:
+            mid = h.chunk.medicine_id
+            prev = best_by_id.get(mid)
+            if prev is None or h.score > prev.score:
+                best_by_id[mid] = h
+
     if extraction_dto.trade_name:
-        svc = get_service()
-        sparse_hits = svc._dedup_by_medicine(svc.sparse.search(extraction_dto.trade_name, top_k=5))
-        # Retry with dose/form noise stripped — handles partial OCR like "PARACETAMOL ZENTIVA 500MG".
-        if not sparse_hits or sparse_hits[0].score < 0.05:
-            stripped = _strip_pharma_suffixes(extraction_dto.trade_name)
-            if stripped and stripped.upper() != extraction_dto.trade_name.upper():
-                fallback = svc._dedup_by_medicine(svc.sparse.search(stripped, top_k=5))
-                seen = {h.chunk.medicine_id for h in sparse_hits}
-                sparse_hits.extend(h for h in fallback if h.chunk.medicine_id not in seen)
-                sparse_hits.sort(key=lambda h: -h.score)
-        for hit in sparse_hits[:3]:
-            dto = _hit_to_match_dto(svc, hit)
-            if dto is not None:
-                candidates.append(dto)
-        if candidates:
-            matched = candidates[0]
+        _record(svc._dedup_by_medicine(svc.sparse.search(extraction_dto.trade_name, top_k=5)))
+        stripped = _strip_pharma_suffixes(extraction_dto.trade_name)
+        if stripped and stripped.upper() != extraction_dto.trade_name.upper():
+            _record(svc._dedup_by_medicine(svc.sparse.search(stripped, top_k=5)))
+
+    top_so_far = max((h.score for h in best_by_id.values()), default=0.0)
+    if top_so_far < 0.05 and extraction_dto.all_text:
+        for phrase in _ocr_query_phrases(extraction_dto.all_text):
+            _record(svc._dedup_by_medicine(svc.sparse.search(phrase, top_k=3)))
+
+    sorted_hits = sorted(best_by_id.values(), key=lambda h: -h.score)
+    candidates: list[ScanMedicineMatch] = []
+    for hit in sorted_hits[:3]:
+        dto = _hit_to_match_dto(svc, hit)
+        if dto is not None:
+            candidates.append(dto)
+    matched: Optional[ScanMedicineMatch] = candidates[0] if candidates else None
 
     return ScanResponse(
         extracted=extraction_dto,
