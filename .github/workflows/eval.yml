@@ -1,0 +1,43 @@
+name: Eval — 49-case Romanian golden set
+
+on:
+  workflow_dispatch:
+
+jobs:
+  eval:
+    name: Run RetrievalService.advise() against the golden set
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install backend deps
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Build corpus + FAISS/BM25 index
+        run: |
+          python data_acquisition/scripts/06_enrich.py --allow-missing-rcp
+          python -m med_assist.index.builder
+
+      - name: Run eval
+        run: |
+          python -m med_assist.cli.eval --json eval-results.json | tee eval-summary.txt
+          echo "## Eval results" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat eval-summary.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: |
+            eval-results.json
+            eval-summary.txt
+          retention-days: 90
