@@ -97,8 +97,13 @@ def system_followup(
     user_history_text: list[str],
     profile: dict[str, Any] | None,
     retrieval_hint: str = "",
+    forced_topic: str | None = None,
 ) -> str:
     parts: list[str] = []
+    # forced_topic must come first and be unambiguous — it overrides the
+    # priority list inside SYSTEM_PROMPT_FOLLOWUP_RO for the current turn.
+    if forced_topic:
+        parts.append("DIRECTIVĂ STRICTĂ — IGNORĂ ORICE ALTĂ PRIORITATE:\n" + forced_topic)
     profile_block = format_profile(profile)
     if profile_block:
         parts.append(profile_block)

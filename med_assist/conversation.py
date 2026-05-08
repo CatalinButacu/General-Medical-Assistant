@@ -23,13 +23,30 @@ log = logging.getLogger("medassist.chat")
 
 MAX_HISTORY_TURNS = 8                   # last N turns sent to the LLM
 TOP_K_MEDICINES = 5
-MIN_FOLLOWUPS_NO_PROFILE = 2            # ask at least 2 questions if profile is empty
+MIN_FOLLOWUPS_NO_PROFILE = 3            # anonymous user — we know nothing static, so collect more.
 MIN_FOLLOWUPS_WITH_PROFILE = 2          # even with a profile, never recommend after a single user turn —
                                         # the profile knows static allergies/conditions but not what
                                         # actually triggered the current episode (e.g. allergy → trigger?,
                                         # rash → contact?, headache → onset?). 2 is the floor.
 MAX_FOLLOWUPS = 4                       # hard cap — recommend even if uncertain after this
 STRONG_CONFIDENCE = 0.5                 # OTC_SAFE label alone isn't enough — need score-backed confidence too
+
+
+# When the FIRST user turn lands in one of these categories, force the first
+# followup question to ask about the trigger / context of *this* episode
+# rather than letting the LLM pick. Static profile data (known allergens,
+# chronic conditions) is not enough — what matters is what happened today.
+# Match is case-insensitive, substring on the retrieved medicines' category.
+FORCED_FIRST_FOLLOWUP_BY_CATEGORY: dict[str, str] = {
+    "alergii": (
+        "Întrebare OBLIGATORIE: ce a declanșat reacția alergică acum — mâncare, plantă "
+        "(polen, păr de animal), medicament, înțepătură de insectă, sau contact cu "
+        "o substanță (detergent, cosmetic)? Fără această informație nu putem decide "
+        "între un antihistaminic OTC și o evaluare medicală urgentă. Dacă utilizatorul "
+        "menționează deja respirație dificilă, umflare a feței/gâtului, sau amețeală, "
+        "NU întreba despre trigger — direcționează imediat la 112."
+    ),
+}
 
 
 @dataclass
@@ -121,10 +138,16 @@ class ConversationService:
                 "red_flags": [_redflag_dto(f) for f in decision.red_flags],
             })
             user_history_text = [m.text for m in user_messages]
+            forced_topic = (
+                _forced_first_followup(decision.medicine_hits)
+                if user_turn_count == 1
+                else None
+            )
             system = system_followup(
                 user_history_text=user_history_text,
                 profile=profile,
                 retrieval_hint=retrieval_hint_from_hits(decision.medicine_hits),
+                forced_topic=forced_topic,
             )
             async for ev in self._stream_llm_yielding(history=history, system=system):
                 yield ev
@@ -172,6 +195,19 @@ class ConversationService:
         except Exception as exc:
             log.exception("LLM stream failed")
             yield ChatStreamEvent("error", {"message": str(exc)[:200]})
+
+
+def _forced_first_followup(hits: list[MedicineHit]) -> str | None:
+    """Return the override directive if the top hits land in a category we have
+    a hard rule for. Substring match so 'Alergii sezoniere' still matches 'alergii'."""
+    for hit in hits[:3]:
+        cat = (hit.medicine.category or "").lower()
+        if not cat:
+            continue
+        for key, directive in FORCED_FIRST_FOLLOWUP_BY_CATEGORY.items():
+            if key in cat:
+                return directive
+    return None
 
 
 def _redflag_dto(rf) -> dict:
