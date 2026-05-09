@@ -17,6 +17,15 @@ Romanian pharmacy-triage chatbot grounded on the **official ANMDM nomenclator**
 only from retrieved evidence, routes emergencies to 112 via deterministic
 rules the LLM cannot override.
 
+| Capability | Number |
+|---|---|
+| Indexed medicines | 7,555 |
+| Triage accuracy (49-case golden set) | 93.9% |
+| False-negative emergency rate | **0%** |
+| Retrieval recall@5 | 89.7% |
+| MRR | 0.71 |
+| p95 retrieval latency | 88 ms |
+
 ## Architecture
 
 ```
@@ -26,17 +35,20 @@ rules the LLM cannot override.
 │  (Auth0 SDK,             │                  │  (Docker, port 7860)     │
 │   localStorage session)  │                  │                          │
 └──────────────────────────┘                  │  - JWT verify (JWKS)     │
-       ▲                                      │  - Retrieval (FAISS+BM25)│
-       │                                      │  - Triage rules          │
-       │ login                                │  - Gemini chat + Vision  │
-       ▼                                      └──────────────────────────┘
-┌──────────────────────────┐                            │
-│  Auth0                   │                            │ psycopg + SSL
-│  - SPA app               │                            ▼
-│  - "Med Assist API"      │                  ┌──────────────────────────┐
-│  - JWKS endpoint         │                  │  Postgres 16 (Neon)      │
-└──────────────────────────┘                  │  - health_profiles       │
+       ▲                                      │  - Rate limit + req-IDs  │
+       │                                      │  - Retrieval (FAISS+BM25)│
+       │ login                                │  - Triage rules          │
+       ▼                                      │  - Gemini chat + Vision  │
+┌──────────────────────────┐                  └──────────────────────────┘
+│  Auth0                   │                            │
+│  - SPA app               │                            │ psycopg + SSL
+│  - "Med Assist API"      │                            ▼
+│  - JWKS endpoint         │                  ┌──────────────────────────┐
+└──────────────────────────┘                  │  Postgres 16 (Neon)      │
+                                              │  - health_profiles       │
                                               │  - cabinet_items         │
+                                              │  - chat_sessions         │
+                                              │  - chat_messages         │
                                               └──────────────────────────┘
 ```
 
@@ -44,12 +56,16 @@ The frontend never talks to Postgres directly. Every authenticated request
 goes through FastAPI, which verifies the Bearer token against Auth0's signing
 keys before touching the DB.
 
+## Tech stack
+
+Python 3.12 · FastAPI · SQLAlchemy 2.0 · PyJWT · sentence-transformers · faiss-cpu · rank-bm25 · Gemini 3 Flash + Vision · React 19 + Vite + TS · TailwindCSS · Auth0 · HuggingFace Spaces · GitHub Pages · GitHub Actions (CodeQL + Quality + Eval) · Terraform (OCI)
+
 ## Runtime workflows
 
 ### Login + onboarding
 
 1. User clicks **Login** on the home page → Auth0 SDK calls `loginWithRedirect()` with `audience=https://med-assist-api`.
-2. Auth0 hosts the Google login form. After auth, user returns to `/General-Medical-Assistant/` with an authorization code in the URL.
+2. Auth0 hosts the Google login form. After auth, user returns with an authorization code in the URL.
 3. SDK exchanges code for an access token (RS256-signed JWT, contains `sub`, `aud`, `iss`, `exp`) + refresh token. Both stored in localStorage (`useRefreshTokens: true`).
 4. `Home.tsx` mounts a `useEffect` that calls `GET /user/profile`. Backend returns either the existing profile or a default with `onboarded: false`.
 5. If `!profile.onboarded`, frontend redirects to `/onboarding` (3-step wizard: name+age+gender → pregnancy → allergies/conditions/medications).
@@ -60,32 +76,50 @@ keys before touching the DB.
 Frontend opens an SSE stream to `POST /chat` with `{ messages, profile }`. The orchestrator:
 
 1. **Red-flag scan** on the latest user turn. Any emergency or urgent rule fires → emit a single `triage` event with `label: EMERGENCY` and short-circuit. The LLM never sees emergency-class queries.
-2. **Cumulative retrieval**: concatenate all user turns into one query, run hybrid FAISS+BM25 with reciprocal rank fusion, classifier returns `OTC_SAFE | UNCERTAIN` plus a confidence score.
-3. **Phase decision**:
-   - `user_turns < min_followups` (1 with profile, 2 without) → followup, ask one targeted question
+2. **Cumulative retrieval** — concatenate all user turns into one query, run hybrid FAISS+BM25 with reciprocal rank fusion. Classifier returns `OTC_SAFE | UNCERTAIN` plus a confidence score.
+3. **Phase decision** — `MIN_FOLLOWUPS_WITH_PROFILE = 2`, `MIN_FOLLOWUPS_NO_PROFILE = 3`, `MAX_FOLLOWUPS = 4`:
+   - `user_turns < min_followups` → followup, ask one targeted question
    - `OTC_SAFE` and `confidence ≥ 0.5` → recommend, emit medicine cards + stream a grounded Gemini reply
    - `user_turns ≥ 4` (cap) without confidence → recommend with empty evidence, LLM gracefully refuses and suggests pharmacist
    - else → followup, keep gathering
-4. **Stream**: Gemini 3 Flash with `thinking_budget=0` so reasoning tokens don't eat the visible output. Each chunk arrives as a `token` SSE event; frontend accumulates them into the assistant message and renders triage badge + medicine cards as their events fire.
+4. **Category-driven first-question override** — if retrieval lands in `Alergii`, the first followup is hard-coded to ask about the trigger (food/pollen/drug/contact) instead of letting the LLM pick. Prevents recommending an antihistamine for an unknown trigger that might be anaphylactic.
+5. **Stream** — Gemini 3 Flash with `thinking_budget=0` so reasoning tokens don't eat the visible output. Each chunk arrives as a `token` SSE event; frontend accumulates them into the assistant message and renders triage badge + medicine cards as their events fire.
 
 ### Scanner
 
 1. User opens `/scanner`, grants camera permission. The `MediaStream` is attached to a `<video>` element via `useEffect` (must wait until the element is mounted before setting `srcObject`).
 2. Capture button: canvas draws the current video frame, exports as base64 JPEG.
-3. `POST /scan` with `{ image_base64, mime_type }`. Backend pipes the image to Gemini Vision with a JSON-schema response — returns `{ trade_name, expiration_date, dosage, form, confidence }`.
-4. Backend matches the OCR'd `trade_name` against ANMDM titles via BM25. If the score is weak, retries with dose/form noise stripped (`"PARACETAMOL ZENTIVA 500MG"` → `"PARACETAMOL ZENTIVA"`). Returns top-3 candidates plus the raw OCR.
+3. `POST /scan` with `{ image_base64, mime_type }`. Backend pipes the image to Gemini Vision with a JSON-schema response — returns `{ trade_name, expiration_date, dosage, form, confidence, all_text }`.
+4. Backend matches the OCR'd `trade_name` against ANMDM titles via BM25. If the score is weak, retries with dose/form noise stripped (`"PARACETAMOL ZENTIVA 500MG"` → `"PARACETAMOL ZENTIVA"`). If still weak, falls back to multi-word tokens from the full OCR dump. Returns top-3 candidates plus the raw OCR for transparency.
 5. Frontend shows the best match + alternatives. User picks one → navigates to `/cabinet` with state pre-filled (including the OCR'd expiration date).
+
+### Chat history (auth'd users only)
+
+- Sessions auto-save: every user message creates the session if needed and persists. Every assistant reply is persisted on stream `done`.
+- Header has a **+** (start new session) and **clock** (open drawer) button.
+- Drawer lists past sessions ordered by `updated_at`, with title (auto-derived from first user turn, ≤80 chars), message count, and timestamp.
+- Click a row → loads the session into the chat view. Click trash → confirm-then-delete; cascades all messages.
+- `/chat` itself stays stateless and unauthenticated — anonymous chats are ephemeral. Persistence is purely the frontend's responsibility once it has a token.
 
 ### Cabinet + profile
 
 | Method | Path | Purpose |
 |---|---|---|
-| `GET` | `/user/profile` | Load profile, used for chat context and onboarding-redirect check |
+| `GET` | `/user/profile` | Load profile; used for chat context and onboarding-redirect check |
 | `PUT` | `/user/profile` | Save profile from onboarding or HealthProfile page |
 | `GET` | `/user/cabinet` | List user's cabinet items, ordered by expiration date |
 | `POST` | `/user/cabinet` | Add a new item |
 | `PUT` | `/user/cabinet/{id}` | Edit |
 | `DELETE` | `/user/cabinet/{id}` | Remove |
+| `POST` | `/user/chats` | Create a chat session |
+| `GET` | `/user/chats` | List sessions (with `message_count`) |
+| `GET` | `/user/chats/{id}` | Session + ordered messages |
+| `POST` | `/user/chats/{id}/messages` | Append a `{role, text}` message |
+| `DELETE` | `/user/chats/{id}` | Drop session + cascade messages |
+| `POST` | `/chat` | SSE stream: triage / medicines / token / done / error events |
+| `POST` | `/scan` | OCR a medicine box (Gemini Vision) and match to ANMDM |
+| `GET`  | `/health` | Liveness probe |
+| `GET`  | `/manifest` | Index manifest (counts, embedding dim, build time) |
 
 The user's `sub` is **never** sent in the JSON body — it's always extracted from the verified JWT. A forged `user_id` in a request body cannot reach another user's data.
 
@@ -106,42 +140,39 @@ A request to any `/user/*` endpoint:
 
 The DB connection string lives only as an HF Space secret. The browser bundle is published to GitHub Pages — anything baked at build time (`VITE_BACKEND_URL`, `VITE_AUTH0_DOMAIN`, `VITE_AUTH0_CLIENT_ID`, `VITE_AUTH0_AUDIENCE`) is public by design. Nothing in the bundle can reach Postgres directly.
 
+## Production hardening
+
+Beyond auth, three middleware-level concerns run on every request:
+
+- **Rate limiting** (`api/ratelimit.py`) — in-memory token bucket per `X-Forwarded-For` IP. `/chat` capped at 30/min (burst 10), `/scan` at 10/min (burst 3). Returns `429` with `Retry-After` header.
+- **Request IDs** (`api/middleware.py`) — every request gets a 12-char UUID, returned as `X-Request-ID`. Honored if the client sends one, otherwise generated. Injected into every `LogRecord` via `setLogRecordFactory` so `docker logs | grep req=abcd1234e5f6` traces the full lifecycle of one request.
+- **Structured access log** — one line per request: `13:42:07 [INFO] req=a3f1b2c4d5e6 medassist.access: POST /chat -> 200 (412.3 ms)`. Logger names are namespaced `medassist.{api,auth,chat,vision,llm,access,ratelimit}` — grep-stable across module renames.
+
 ## CI/CD
 
-Four workflows fire from `main`:
+Five workflows fire from `main`:
 
-### `deploy.yml` — frontend → GitHub Pages
+### `deploy.yml` — "Deploy frontend" (push to main, GitHub Pages)
 Checkout → `npm ci` → `npm run check` (tsc) → `npm run build` (Vite). Build env injects `VITE_*` from secrets. Upload `dist/` as Pages artifact, deploy via `actions/deploy-pages@v4`.
 
-### `deploy-hf.yml` — backend → HuggingFace Space
+### `deploy-hf.yml` — "Deploy backend" (push to main, HuggingFace Space)
 1. Checkout main, build an **orphan branch** (`hf-deploy`) — single fresh commit, no history.
 2. Delete binaries (`anmdm_nomenclator.xlsx`, `pdf_links.json`) — HF rejects committed binaries via Xet storage. The Dockerfile re-fetches them from `raw.githubusercontent.com` at build time.
 3. Force-push the orphan to `main` of `huggingface.co/spaces/catalinbutacu/med-assist` using `HF_TOKEN`.
 4. HF detects the push, rebuilds the Docker image (~5–8 min): `pip install` → `06_enrich.py` → `med_assist.index.builder` → multi-stage runtime image.
 5. Container starts, FastAPI binds 7860, health probe goes green.
 
-### `quality.yml` — gating checks (push + PR)
+### `quality.yml` — "Quality" (push + PR)
 - **Frontend job:** `npm run lint` (ESLint, no errors allowed) + `npm run check` (`tsc --noEmit`).
-- **Backend job:** install ruff + pytest + minimal deps → `ruff check med_assist/ data_acquisition/scripts/` → `pytest med_assist/tests/`.
+- **Backend job:** install ruff + pytest + minimal deps → `ruff check med_assist/ data_acquisition/scripts/` → `pytest med_assist/tests/` (38 tests at last count).
 
 No `continue-on-error` — broken types or red tests block the merge.
 
-### `codeql.yml` — security scanning
-Push + PR + weekly: `security-and-quality` query suites for `javascript-typescript` and `python`. Findings appear in **Security → Code scanning**. Repo-level branch protection blocks merges on High+ severity.
+### `eval.yml` — "Eval" (`workflow_dispatch` only)
+Manual trigger from the Actions tab. Builds the corpus + index from scratch, runs `python -m med_assist.cli.eval` against the 49-case Romanian golden set, uploads `eval-results.json` and a markdown summary as artifacts.
 
-## Eval (`python -m med_assist.cli.eval`)
-
-49-case Romanian golden set:
-
-| Metric | Value |
-|---|---|
-| Triage accuracy | 93.9% |
-| False-negative emergency rate | **0%** |
-| Retrieval recall@5 | 89.7% |
-| MRR | 0.71 |
-| p95 retrieval latency | 88 ms |
-
-Plus 6 pure-Python pytest cases for the red-flag scanner — must-fire (chest pain, anaphylaxis, suicidal ideation), must-not-fire (mild cold, routine headache), and Romanian diacritic robustness.
+### `codeql.yml` — "CodeQL" (push + PR + weekly)
+`security-and-quality` query suites for `javascript-typescript` and `python`. Findings appear in **Security → Code scanning**. Repo-level branch protection blocks merges on High+ severity.
 
 ## Local development
 
@@ -162,25 +193,112 @@ npm run dev -- --host 0.0.0.0    # --host so phone can connect over WiFi
 
 `.env.local` provides `GOOGLE_API_KEY` (server) + the `VITE_*` envs (client). FastAPI auto-loads it via `python-dotenv` on startup.
 
-## Layout
-
-```
-src/                React + Vite + TS · pages, hooks, components/ui, services
-med_assist/         FastAPI · api, auth (JWT), db (SQLAlchemy), conversation,
-                    retrieval, triage, llm (Gemini chat + vision), eval, tests
-infra/oci/          Terraform + cloud-init for Postgres 16 on OCI Ampere VM
-db/schema.sql       Postgres DDL
-data_acquisition/   ANMDM scraper + RCP parser
-.github/workflows/  deploy.yml, deploy-hf.yml, quality.yml, codeql.yml
+DB schema:
+```bash
+psql "$DATABASE_URL" -f db/schema.sql   # idempotent — safe to re-run
 ```
 
-> The active demo runs against **Neon** (serverless Postgres free tier).
-> `infra/oci/` is a complete IaC recipe for the same schema on **OCI
-> Always-Free Ampere VM** — switching is a one-line `DATABASE_URL` change.
+Tests:
+```bash
+python -m pytest med_assist/tests/ -q   # 38 tests, all in-memory SQLite
+```
 
-## Tech stack
+## Project layout
 
-Python 3.12 · FastAPI · SQLAlchemy 2.0 · PyJWT · sentence-transformers · faiss-cpu · rank-bm25 · Gemini 3 Flash + Vision · React + Vite + TS · TailwindCSS · Auth0 · HuggingFace Spaces · GitHub Pages · GitHub Actions (CodeQL + Quality gates) · Terraform (OCI)
+```
+General-Medical-Assistant/
+├── README.md                           ← this file
+├── Dockerfile                          ← multi-stage HF Space image
+├── requirements.txt                    ← Python deps
+├── package.json                        ← frontend deps + scripts
+├── vite.config.ts, tsconfig.json       ← Vite + TS config
+├── eslint.config.js                    ← ESLint flat config
+│
+├── src/                                ← React frontend
+│   ├── App.tsx, main.tsx               ← root + router
+│   ├── config/auth0.ts                 ← Auth0 SDK config (audience pinned)
+│   ├── components/
+│   │   ├── AuthGuard.tsx               ← redirects to /login if no token
+│   │   ├── MobileNavigation.tsx        ← bottom tab bar
+│   │   └── ui/{Button,FormField}.tsx   ← typed primitives
+│   ├── hooks/
+│   │   ├── useUserApi.ts               ← fetch wrapper that injects Bearer
+│   │   └── useChatHistory.ts           ← session list + persist + load
+│   ├── pages/
+│   │   ├── Home.tsx                    ← landing + onboarding redirect
+│   │   ├── Onboarding.tsx              ← 3-step wizard
+│   │   ├── HealthProfile.tsx           ← profile editor + safety check
+│   │   ├── Chat.tsx                    ← SSE chat + history drawer
+│   │   ├── CameraScanner.tsx           ← video capture + /scan
+│   │   └── MedicineCabinet.tsx         ← cabinet CRUD UI
+│   ├── services/
+│   │   ├── api.ts                      ← /chat, /scan, /health, /manifest
+│   │   └── userApi.ts                  ← /user/* DTOs + path constants
+│   ├── types/index.ts                  ← shared DTO types
+│   └── lib/utils.ts                    ← cn() classname helper
+│
+├── med_assist/                         ← FastAPI backend (Python package)
+│   ├── api/
+│   │   ├── main.py                     ← FastAPI app + lifecycle
+│   │   ├── users.py                    ← /user/profile + /user/cabinet
+│   │   ├── chats.py                    ← /user/chats + messages
+│   │   ├── middleware.py               ← RequestIDMiddleware + log factory
+│   │   └── ratelimit.py                ← TokenBucketLimiter + dependency
+│   ├── auth/jwt.py                     ← Auth0 JWKS verification
+│   ├── db/
+│   │   ├── models.py                   ← SQLAlchemy 2.0 declarative
+│   │   └── session.py                  ← engine + session factory
+│   ├── conversation.py                 ← orchestrator (red-flag→retrieve→phase)
+│   ├── llm/
+│   │   ├── client.py                   ← Gemini chat (streaming)
+│   │   ├── vision.py                   ← Gemini Vision OCR
+│   │   └── prompts.py                  ← Romanian system prompts
+│   ├── retrieval/                      ← FAISS dense + BM25 sparse + RRF fusion
+│   ├── triage/
+│   │   ├── redflags.py                 ← 17 deterministic emergency rules
+│   │   └── classifier.py               ← OTC_SAFE | UNCERTAIN decision
+│   ├── data/                           ← models + chunker + loader
+│   ├── service.py                      ← RetrievalService (advise + scan match)
+│   ├── index/builder.py                ← rebuild FAISS + BM25 indices
+│   ├── eval/                           ← golden-set runner + metrics
+│   ├── cli/{advise,eval}.py            ← `python -m` entrypoints
+│   └── tests/                          ← pytest suite (38 tests)
+│
+├── data_acquisition/                   ← ANMDM scraper + RCP parser
+│   ├── scripts/                        ← 01_parse_anmdm → 06_enrich
+│   └── processed/                      ← built corpus (gitignored)
+│
+├── db/schema.sql                       ← Postgres DDL (idempotent)
+│
+├── infra/oci/                          ← Terraform + cloud-init for OCI
+│                                         (capacity-deferred, Neon active)
+│
+└── .github/workflows/
+    ├── deploy.yml                      ← "Deploy frontend"
+    ├── deploy-hf.yml                   ← "Deploy backend"
+    ├── quality.yml                     ← "Quality"
+    ├── eval.yml                        ← "Eval" (manual)
+    └── codeql.yml                      ← "CodeQL"
+```
+
+## Database
+
+The active demo runs against **Neon** (serverless Postgres free tier, Frankfurt). Schema in `db/schema.sql`:
+
+| Table | Purpose | PK |
+|---|---|---|
+| `health_profiles` | one row per Auth0 `sub` — age, gender, allergies (JSONB), conditions, medications, onboarded flag | `user_id` |
+| `cabinet_items` | medicines the user owns — name, expiration_date, quantity | `id (UUID)` |
+| `chat_sessions` | one row per saved conversation | `id (UUID)` |
+| `chat_messages` | role + text, ordered by `created_at`, FK to session | `id (UUID)` |
+
+`infra/oci/` is a complete Terraform recipe for the same schema on **OCI Always-Free Ampere VM** — switching is a one-line `DATABASE_URL` change. The network layer applied cleanly in production; the compute half hit Always-Free capacity exhaustion in Frankfurt and was deferred. Kept in repo as IaC capability proof.
+
+## Eval
+
+49-case Romanian golden set covering OTC scenarios, ambiguity, profile constraints, and emergency red flags. The headline numbers above come from `python -m med_assist.cli.eval`. To run in CI: open Actions → "Eval" → Run workflow.
+
+Plus 6 pure-Python pytest cases for the red-flag scanner — must-fire (chest pain, anaphylaxis, suicidal ideation), must-not-fire (mild cold, routine headache), and Romanian diacritic robustness.
 
 ## Disclaimer
 

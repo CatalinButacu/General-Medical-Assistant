@@ -53,3 +53,19 @@ MANIFEST
 *.sln
 *.sw?
 .vite
+
+# Windows / cygwin crash dumps
+*.stackdump
+
+# Python tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Local data + indices (rebuilt by data_acquisition + builder scripts)
+data_acquisition/processed/
+med_assist/index/.cache/
+
+# Eval / CI artifacts
+eval-results.json
+eval-summary.txt

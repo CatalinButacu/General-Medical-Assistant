@@ -47,6 +47,7 @@ export default function HealthProfile() {
       loadProfile(user.sub);
     }
     if (medicineForSafetyCheck) setShowSafetyCheck(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, medicineForSafetyCheck]);
 
   const loadProfile = async (userId: string) => {
