@@ -1,15 +1,3 @@
----
-title: Med Assist
-emoji: 💊
-colorFrom: blue
-colorTo: indigo
-sdk: docker
-app_port: 7860
-pinned: false
-license: mit
-short_description: Romanian RAG triage chatbot over ANMDM medicines
----
-
 # 💊 Med Assist
 
 Romanian pharmacy-triage chatbot grounded on the **official ANMDM nomenclator**
