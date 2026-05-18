@@ -6,7 +6,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from med_assist.conversation import _forced_first_followup
-from med_assist.llm.prompts import system_followup
+from med_assist.llm.prompts import render_followup
 
 
 @dataclass
@@ -62,8 +62,8 @@ def test_forced_topic_only_inspects_top_3_hits():
     assert result is None
 
 
-def test_system_followup_includes_directive_at_top():
-    prompt = system_followup(
+def test_render_followup_includes_directive_at_top():
+    prompt = render_followup(
         user_history_text=["alergie cu mâncărime"],
         profile=None,
         retrieval_hint="Alergii",
@@ -76,8 +76,8 @@ def test_system_followup_includes_directive_at_top():
     assert directive_pos < history_pos  # directive comes before history block
 
 
-def test_system_followup_omits_directive_when_none():
-    prompt = system_followup(
+def test_render_followup_omits_directive_when_none():
+    prompt = render_followup(
         user_history_text=["mă doare capul"],
         profile=None,
         retrieval_hint="",

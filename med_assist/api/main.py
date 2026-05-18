@@ -36,6 +36,7 @@ from med_assist.api.ratelimit import chat_limiter, rate_limit, scan_limiter
 from med_assist.conversation import ChatMessageIn, ConversationService
 from med_assist.llm.client import GeminiClient
 from med_assist.llm.vision import VisionClient
+from med_assist.profile import UserProfile
 from med_assist.service import RetrievalService
 
 logger = logging.getLogger("medassist.api")
@@ -101,30 +102,20 @@ class ChatMessage(BaseModel):
     text: str = Field(..., min_length=1, max_length=2000)
 
 
-class ChatProfile(BaseModel):
-    age: Optional[int] = Field(None, ge=0, le=120)
-    gender: Optional[str] = Field(None, pattern="^(male|female|other)$")
-    isPregnant: Optional[bool] = None
-    allergies: list[str] = Field(default_factory=list)
-    conditions: list[str] = Field(default_factory=list)
-    medications: list[str] = Field(default_factory=list)
-
-
 class ChatRequest(BaseModel):
     messages: list[ChatMessage] = Field(..., min_length=1, max_length=20)
-    profile: Optional[ChatProfile] = None
+    profile: Optional[UserProfile] = None
 
 
 @app.post("/chat", dependencies=[Depends(rate_limit(chat_limiter, "chat"))])
 async def chat(req: ChatRequest):
-    """SSE stream of triage / medicines / token / done / error events."""
+    """SSE stream of intent / triage / medicines / token / done / error events."""
     convo = get_conversation()
     history = [ChatMessageIn(role=m.role, text=m.text) for m in req.messages]
-    profile_dict = req.profile.model_dump(exclude_none=False) if req.profile else None
 
     async def sse_stream():
         try:
-            async for event in convo.stream_turn(history, profile=profile_dict):
+            async for event in convo.stream_turn(history, profile=req.profile):
                 yield f"event: {event.kind}\ndata: {json.dumps(event.payload, ensure_ascii=False)}\n\n"
         except Exception:
             logger.exception("Unhandled error while streaming /chat SSE response")

@@ -5,12 +5,17 @@ A `Medicine` is the unit the chatbot recommends and cites.
 A `Chunk` is a unit of retrieval — usually a paragraph-sized excerpt
 of a medicine's text, indexed independently and traceable back to the
 parent medicine via `medicine_id`.
+
+Pydantic v2 models give us boundary validation (FastAPI request bodies,
+template render contexts) and a single source of truth for the chatbot's
+data contract.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field
 
 ChunkType = Literal[
     "title",
@@ -25,22 +30,23 @@ ChunkType = Literal[
 RxStatus = Literal["OTC", "RX", "RESTRICTED", "MIXED", "UNKNOWN"]
 
 
-@dataclass
-class Medicine:
-    id: str                     # CIM code, e.g. "W43451001"
+class Medicine(BaseModel):
+    model_config = ConfigDict(frozen=False)
+
+    id: str
     trade_name: str
-    dci: str                    # active substance (INN)
+    dci: str
     form: str
     concentration: str
     atc_code: str
     rx_status: RxStatus
-    category: str               # patient-friendly Romanian category
-    lay_description: str        # short Romanian description
-    lay_symptoms: list[str]     # lay-Romanian symptom strings
-    rcp_sections: dict[str, str]  # {indications, contraindications, warnings, interactions, side_effects}
+    category: str
+    lay_description: str
+    lay_symptoms: list[str] = Field(default_factory=list)
+    rcp_sections: dict[str, str] = Field(default_factory=dict)
     rcp_url: str
     prospect_url: str
-    therapeutic_action: str     # raw regulatory text (uppercase)
+    therapeutic_action: str
     has_rcp_text: bool
     has_curated_atc: bool
 
@@ -49,27 +55,31 @@ class Medicine:
         return f"{self.trade_name} ({self.concentration}, {self.form.lower()})"
 
 
-@dataclass
-class Chunk:
-    id: str                     # e.g. "W43451001#rcp_indications"
-    medicine_id: str            # CIM code
-    text: str                   # the searchable text body
+class Chunk(BaseModel):
+    model_config = ConfigDict(frozen=False)
+
+    id: str
+    medicine_id: str
+    text: str
     chunk_type: ChunkType
-    metadata: dict = field(default_factory=dict)  # rx_status, atc_prefix, etc. for filtering
+    metadata: dict = Field(default_factory=dict)
 
 
-@dataclass
-class RetrievalHit:
+class RetrievalHit(BaseModel):
+    model_config = ConfigDict(frozen=False, arbitrary_types_allowed=True)
+
     chunk: Chunk
     score: float
-    source: str                 # which retriever produced it: "dense", "sparse", "fusion", "rerank"
+    source: str
     rank: int = 0
 
 
-@dataclass
-class MedicineHit:
+class MedicineHit(BaseModel):
     """De-duplicated, medicine-level result with the best supporting chunk."""
+
+    model_config = ConfigDict(frozen=False, arbitrary_types_allowed=True)
+
     medicine: Medicine
     score: float
     best_chunk: Chunk
-    supporting_chunks: list[Chunk] = field(default_factory=list)
+    supporting_chunks: list[Chunk] = Field(default_factory=list)

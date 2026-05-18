@@ -8,6 +8,7 @@ import {
     History,
     Loader2,
     Phone,
+    Pill,
     Plus,
     Send,
     Sparkles,
@@ -23,7 +24,7 @@ import type { ChatProfilePayload, ChatTurn } from '../services/api';
 import { useUserApi } from '../hooks/useUserApi';
 import { useChatHistory } from '../hooks/useChatHistory';
 import { userPaths, type ProfileDTO } from '../services/userApi';
-import type { MedicineDTO, Message, RedFlagDTO, TriageEvent } from '../types';
+import type { IntentEvent, MedicineDTO, Message, RedFlagDTO, TriageEvent } from '../types';
 
 const QUICK_QUERIES = [
     { label: 'durere de cap',     query: 'mă doare capul și am febră' },
@@ -144,6 +145,8 @@ export default function Chat() {
                         setMessages(curr => curr.map(m => {
                             if (m.id !== aiId) return m;
                             switch (kind) {
+                                case 'intent':
+                                    return { ...m, intent: payload as unknown as IntentEvent };
                                 case 'triage':
                                     return { ...m, triage: payload as unknown as TriageEvent };
                                 case 'medicines':
@@ -408,6 +411,7 @@ function AssistantMessage({ message }: { message: Message }) {
 
     return (
         <>
+            {message.intent && <IntentPill intent={message.intent} />}
             {/* The LLM text bubble. Always visible (even if just a typing indicator). */}
             <TextBubble
                 text={message.text}
@@ -421,6 +425,19 @@ function AssistantMessage({ message }: { message: Message }) {
                 <MedicineGrid medicines={message.medicines} />
             )}
         </>
+    );
+}
+
+function IntentPill({ intent }: { intent: IntentEvent }) {
+    // Symptom triage is the default and would be noisy as a pill. We
+    // only surface the routing decision when the backend took the
+    // explain branch (or attempted to and lacked a name).
+    if (intent.label !== 'MEDICINE_LOOKUP') return null;
+    return (
+        <div className="inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded-full px-2.5 py-1 text-[10px] font-semibold text-blue-700">
+            <Pill size={10} />
+            <span>Explicare medicament{intent.medicine_trade_name ? `: ${intent.medicine_trade_name}` : ''}</span>
+        </div>
     );
 }
 

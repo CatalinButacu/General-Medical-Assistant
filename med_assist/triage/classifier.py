@@ -14,8 +14,9 @@ Phase 3 add-on; for now we trust the rule engine + retrieval scores.
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import dataclass, field
 from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field
 
 from med_assist.data.models import MedicineHit
 from med_assist.triage.redflags import RedFlag, has_emergency, has_urgent, scan
@@ -23,14 +24,15 @@ from med_assist.triage.redflags import RedFlag, has_emergency, has_urgent, scan
 TriageLabel = Literal["EMERGENCY", "OTC_SAFE", "UNCERTAIN"]
 
 
-@dataclass
-class TriageDecision:
+class TriageDecision(BaseModel):
+    model_config = ConfigDict(frozen=False, arbitrary_types_allowed=True)
+
     label: TriageLabel
-    rationale: str                              # human-readable RO explanation
-    red_flags: list[RedFlag] = field(default_factory=list)
+    rationale: str
+    red_flags: list[RedFlag] = Field(default_factory=list)
     recommended_action_ro: str = ""
-    medicine_hits: list[MedicineHit] = field(default_factory=list)
-    confidence: float = 0.0                     # 0.0–1.0
+    medicine_hits: list[MedicineHit] = Field(default_factory=list)
+    confidence: float = 0.0
 
 
 # Two parallel paths qualify a query as OTC_SAFE:

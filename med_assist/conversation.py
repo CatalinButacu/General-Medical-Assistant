@@ -1,19 +1,38 @@
-"""Conversation orchestrator: red-flag scan -> retrieve -> followup or recommend -> stream LLM."""
+"""Conversation orchestrator.
+
+Flow (top to bottom):
+
+  1. Red-flag scan on the last user message. Emergencies short-circuit.
+  2. Intent classification. Two branches:
+       • MEDICINE_LOOKUP → explain branch: emit the matched medicine and
+         have the LLM describe it using only its RCP sections. NO symptom
+         questions — this is the bug `IntentClassifier` exists to fix.
+       • SYMPTOM_TRIAGE  → existing followup-or-recommend loop.
+
+  3. Inside SYMPTOM_TRIAGE: cumulative-query retrieval, then either ask
+     the next followup or recommend an OTC.
+
+Each branch yields the same event vocabulary so the SSE consumer can stay
+naive: `intent`, `triage`, `medicines`, `token`, `done`, `error`.
+"""
 
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
 from typing import Any, AsyncIterator, Optional
 
-from med_assist.data.models import MedicineHit
+from pydantic import BaseModel, ConfigDict, Field
+
+from med_assist.data.models import Medicine, MedicineHit
+from med_assist.intent import IntentClassifier, IntentResult
 from med_assist.llm.client import GeminiClient, build_history
 from med_assist.llm.prompts import (
-    has_meaningful_profile,
+    render_explain,
+    render_followup,
+    render_recommend,
     retrieval_hint_from_hits,
-    system_followup,
-    system_recommend,
 )
+from med_assist.profile import UserProfile
 from med_assist.service import RetrievalService
 from med_assist.triage.classifier import TriageDecision
 from med_assist.triage.redflags import has_emergency, has_urgent
@@ -21,22 +40,18 @@ from med_assist.triage.redflags import scan as scan_redflags
 
 log = logging.getLogger("medassist.chat")
 
-MAX_HISTORY_TURNS = 8                   # last N turns sent to the LLM
+MAX_HISTORY_TURNS = 8
 TOP_K_MEDICINES = 5
-MIN_FOLLOWUPS_NO_PROFILE = 3            # anonymous user — we know nothing static, so collect more.
-MIN_FOLLOWUPS_WITH_PROFILE = 2          # even with a profile, never recommend after a single user turn —
-                                        # the profile knows static allergies/conditions but not what
-                                        # actually triggered the current episode (e.g. allergy → trigger?,
-                                        # rash → contact?, headache → onset?). 2 is the floor.
-MAX_FOLLOWUPS = 4                       # hard cap — recommend even if uncertain after this
-STRONG_CONFIDENCE = 0.5                 # OTC_SAFE label alone isn't enough — need score-backed confidence too
+MIN_FOLLOWUPS_NO_PROFILE = 3
+MIN_FOLLOWUPS_WITH_PROFILE = 2
+MAX_FOLLOWUPS = 4
+STRONG_CONFIDENCE = 0.5
+MEDICINE_LOOKUP_MIN_CONFIDENCE = 0.7
 
 
-# When the FIRST user turn lands in one of these categories, force the first
-# followup question to ask about the trigger / context of *this* episode
-# rather than letting the LLM pick. Static profile data (known allergens,
-# chronic conditions) is not enough — what matters is what happened today.
-# Match is case-insensitive, substring on the retrieved medicines' category.
+# When the first user turn lands in one of these categories, force the
+# first followup question to ask about the trigger of this episode rather
+# than letting the LLM pick.
 FORCED_FIRST_FOLLOWUP_BY_CATEGORY: dict[str, str] = {
     "alergii": (
         "Întrebare OBLIGATORIE: ce a declanșat reacția alergică acum — mâncare, plantă "
@@ -49,31 +64,51 @@ FORCED_FIRST_FOLLOWUP_BY_CATEGORY: dict[str, str] = {
 }
 
 
-@dataclass
-class ChatMessageIn:
-    role: str       # 'user' | 'assistant'
+class ChatMessageIn(BaseModel):
+    role: str
     text: str
 
 
-@dataclass
-class ChatStreamEvent:
-    kind: str       # 'triage' | 'token' | 'medicines' | 'done' | 'error'
-    payload: dict
+class ChatStreamEvent(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    kind: str
+    payload: dict[str, Any] = Field(default_factory=dict)
 
 
-@dataclass
-class ConversationOutcome:
+class ConversationOutcome(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     triage: TriageDecision
-    medicines: list[MedicineHit] = field(default_factory=list)
+    medicines: list[MedicineHit] = Field(default_factory=list)
     full_text: str = ""
     used_llm: bool = True
     error: Optional[str] = None
 
 
+def _coerce_profile(profile: Any) -> Optional[UserProfile]:
+    """Accept None, a UserProfile, or a raw dict (legacy callers)."""
+    if profile is None:
+        return None
+    if isinstance(profile, UserProfile):
+        return profile
+    if isinstance(profile, dict):
+        return UserProfile.model_validate(profile)
+    raise TypeError(f"Unsupported profile type: {type(profile).__name__}")
+
+
 class ConversationService:
-    def __init__(self, retrieval: RetrievalService, llm: GeminiClient):
+    def __init__(
+        self,
+        retrieval: RetrievalService,
+        llm: GeminiClient,
+        intent: Optional[IntentClassifier] = None,
+    ):
         self.retrieval = retrieval
         self.llm = llm
+        # The intent classifier needs the medicine catalogue; pull it
+        # from the retrieval service so callers don't have to thread it.
+        self.intent = intent or IntentClassifier(retrieval._medicines_by_id.values())
 
     @staticmethod
     def _trim_history(messages: list[ChatMessageIn]) -> list[ChatMessageIn]:
@@ -82,36 +117,85 @@ class ConversationService:
     async def stream_turn(
         self,
         history: list[ChatMessageIn],
-        profile: dict[str, Any] | None = None,
+        profile: Any = None,
     ) -> AsyncIterator[ChatStreamEvent]:
         if not history:
-            yield ChatStreamEvent("error", {"message": "empty history"})
+            yield ChatStreamEvent(kind="error", payload={"message": "empty history"})
             return
 
         last_user = next((m for m in reversed(history) if m.role == "user"), None)
         if last_user is None or not last_user.text.strip():
-            yield ChatStreamEvent("error", {"message": "no user message in history"})
+            yield ChatStreamEvent(kind="error", payload={"message": "no user message in history"})
             return
 
-        user_messages = [m for m in history if m.role == "user"]
-        user_turn_count = len(user_messages)
+        typed_profile = _coerce_profile(profile)
 
-        # Step 1: red flags short-circuit everything.
+        # Step 1: red-flag scan ALWAYS runs first — even a medicine-lookup
+        # query gets the emergency layer because a user could write
+        # "am luat Aspirin si nu pot respira".
         flags = scan_redflags(last_user.text)
         if has_emergency(flags) or has_urgent(flags):
             primary = next(f for f in flags if f.severity in ("emergency", "urgent"))
-            yield ChatStreamEvent("triage", {
+            yield ChatStreamEvent(kind="triage", payload={
                 "label": "EMERGENCY",
                 "rationale": f"Detectat: {primary.description}.",
                 "recommended_action_ro": primary.action_ro,
                 "confidence": 0.0,
                 "red_flags": [_redflag_dto(f) for f in flags],
             })
-            yield ChatStreamEvent("done", {"used_llm": False, "phase": "emergency"})
+            yield ChatStreamEvent(kind="done", payload={"used_llm": False, "phase": "emergency"})
             return
 
-        # Step 2: cumulative retrieval. Joins ALL user turns so we don't lose
-        # earlier context like the original symptom when later turns add detail.
+        # Step 2: intent classification on the LAST user turn.
+        intent_result = self.intent.classify(last_user.text)
+        yield ChatStreamEvent(kind="intent", payload=_intent_dto(intent_result))
+
+        if (
+            intent_result.label == "MEDICINE_LOOKUP"
+            and intent_result.medicine is not None
+            and intent_result.confidence >= MEDICINE_LOOKUP_MIN_CONFIDENCE
+        ):
+            async for ev in self._handle_explain(
+                history=history,
+                medicine=intent_result.medicine,
+                profile=typed_profile,
+            ):
+                yield ev
+            return
+
+        # Step 3: symptom-triage branch (legacy flow).
+        async for ev in self._handle_symptom_triage(
+            history=history,
+            profile=typed_profile,
+        ):
+            yield ev
+
+    async def _handle_explain(
+        self,
+        *,
+        history: list[ChatMessageIn],
+        medicine: Medicine,
+        profile: Optional[UserProfile],
+    ) -> AsyncIterator[ChatStreamEvent]:
+        """Emit the medicine card and stream a grounded explanation."""
+        yield ChatStreamEvent(kind="medicines", payload={
+            "items": [_medicine_only_dto(medicine)],
+        })
+
+        system = render_explain(medicine=medicine, profile=profile)
+        async for ev in self._stream_llm_yielding(history=history, system=system):
+            yield ev
+        yield ChatStreamEvent(kind="done", payload={"used_llm": True, "phase": "explain"})
+
+    async def _handle_symptom_triage(
+        self,
+        *,
+        history: list[ChatMessageIn],
+        profile: Optional[UserProfile],
+    ) -> AsyncIterator[ChatStreamEvent]:
+        user_messages = [m for m in history if m.role == "user"]
+        user_turn_count = len(user_messages)
+
         cumulative_query = " ".join(m.text for m in user_messages).strip()
         decision = self.retrieval.advise(
             cumulative_query,
@@ -119,18 +203,14 @@ class ConversationService:
             otc_only=True,
         )
 
-        # Step 3: decide phase.
-        min_followups = MIN_FOLLOWUPS_WITH_PROFILE if has_meaningful_profile(profile) else MIN_FOLLOWUPS_NO_PROFILE
+        has_profile = profile is not None and profile.has_meaningful_data()
+        min_followups = MIN_FOLLOWUPS_WITH_PROFILE if has_profile else MIN_FOLLOWUPS_NO_PROFILE
         strong_match = decision.label == "OTC_SAFE" and decision.confidence >= STRONG_CONFIDENCE
         hit_cap = user_turn_count >= MAX_FOLLOWUPS
-
-        in_followup_phase = (
-            user_turn_count < min_followups
-            or not (strong_match or hit_cap)
-        )
+        in_followup_phase = user_turn_count < min_followups or not (strong_match or hit_cap)
 
         if in_followup_phase:
-            yield ChatStreamEvent("triage", {
+            yield ChatStreamEvent(kind="triage", payload={
                 "label": "FOLLOWUP",
                 "rationale": f"Colectare informații (întrebarea {user_turn_count}, prag {min_followups}).",
                 "recommended_action_ro": "",
@@ -143,7 +223,7 @@ class ConversationService:
                 if user_turn_count == 1
                 else None
             )
-            system = system_followup(
+            system = render_followup(
                 user_history_text=user_history_text,
                 profile=profile,
                 retrieval_hint=retrieval_hint_from_hits(decision.medicine_hits),
@@ -151,13 +231,10 @@ class ConversationService:
             )
             async for ev in self._stream_llm_yielding(history=history, system=system):
                 yield ev
-            yield ChatStreamEvent("done", {"used_llm": True, "phase": "followup"})
+            yield ChatStreamEvent(kind="done", payload={"used_llm": True, "phase": "followup"})
             return
 
-        # Step 4: recommend. Two sub-cases:
-        # - strong_match: emit medicine cards + grounded recommend prompt.
-        # - hit_cap without strong_match: skip cards, force a graceful refusal.
-        yield ChatStreamEvent("triage", {
+        yield ChatStreamEvent(kind="triage", payload={
             "label": decision.label,
             "rationale": decision.rationale,
             "recommended_action_ro": decision.recommended_action_ro,
@@ -166,21 +243,21 @@ class ConversationService:
         })
         if strong_match:
             medicines_payload = [_medicine_to_dto(h) for h in decision.medicine_hits]
-            yield ChatStreamEvent("medicines", {"items": medicines_payload})
-            system = system_recommend(
+            yield ChatStreamEvent(kind="medicines", payload={"items": medicines_payload})
+            system = render_recommend(
                 hits=decision.medicine_hits,
                 profile=profile,
                 forced_low_confidence=False,
             )
         else:
-            system = system_recommend(
+            system = render_recommend(
                 hits=[],
                 profile=profile,
                 forced_low_confidence=True,
             )
         async for ev in self._stream_llm_yielding(history=history, system=system):
             yield ev
-        yield ChatStreamEvent("done", {"used_llm": True, "phase": "recommend"})
+        yield ChatStreamEvent(kind="done", payload={"used_llm": True, "phase": "recommend"})
 
     async def _stream_llm_yielding(
         self,
@@ -191,15 +268,14 @@ class ConversationService:
         contents = build_history([{"role": m.role, "text": m.text} for m in trimmed])
         try:
             async for chunk in self.llm.stream(system_instruction=system, contents=contents):
-                yield ChatStreamEvent("token", {"text": chunk})
+                yield ChatStreamEvent(kind="token", payload={"text": chunk})
         except Exception as exc:
             log.exception("LLM stream failed")
-            yield ChatStreamEvent("error", {"message": str(exc)[:200]})
+            yield ChatStreamEvent(kind="error", payload={"message": str(exc)[:200]})
 
 
 def _forced_first_followup(hits: list[MedicineHit]) -> str | None:
-    """Return the override directive if the top hits land in a category we have
-    a hard rule for. Substring match so 'Alergii sezoniere' still matches 'alergii'."""
+    """Substring match on the top-3 medicines' category (case-insensitive)."""
     for hit in hits[:3]:
         cat = (hit.medicine.category or "").lower()
         if not cat:
@@ -218,6 +294,16 @@ def _redflag_dto(rf) -> dict:
     }
 
 
+def _intent_dto(intent: IntentResult) -> dict:
+    return {
+        "label": intent.label,
+        "confidence": float(intent.confidence),
+        "matched_terms": list(intent.matched_terms),
+        "rationale": intent.rationale,
+        "medicine_trade_name": intent.medicine.trade_name if intent.medicine else None,
+    }
+
+
 def _medicine_to_dto(hit: MedicineHit) -> dict:
     med = hit.medicine
     return {
@@ -228,10 +314,29 @@ def _medicine_to_dto(hit: MedicineHit) -> dict:
         "atc_code": med.atc_code,
         "rx_status": med.rx_status,
         "category": med.category,
-        "lay_symptoms": med.lay_symptoms,
-        "score": hit.score,
+        "lay_symptoms": list(med.lay_symptoms),
+        "score": float(hit.score),
         "best_chunk_type": hit.best_chunk.chunk_type,
         "best_chunk_snippet": hit.best_chunk.text[:300],
+        "rcp_url": med.rcp_url,
+        "prospect_url": med.prospect_url,
+    }
+
+
+def _medicine_only_dto(med: Medicine) -> dict:
+    """Compact card shape for the explain branch (no retrieval score)."""
+    return {
+        "trade_name": med.trade_name,
+        "dci": med.dci,
+        "form": med.form,
+        "concentration": med.concentration,
+        "atc_code": med.atc_code,
+        "rx_status": med.rx_status,
+        "category": med.category,
+        "lay_symptoms": list(med.lay_symptoms),
+        "score": 1.0,
+        "best_chunk_type": "lay_summary",
+        "best_chunk_snippet": (med.lay_description or "")[:300],
         "rcp_url": med.rcp_url,
         "prospect_url": med.prospect_url,
     }

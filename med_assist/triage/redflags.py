@@ -26,11 +26,14 @@ import unicodedata
 from dataclasses import dataclass
 from typing import Literal
 
+from pydantic import BaseModel, ConfigDict
+
 Severity = Literal["emergency", "urgent", "see_doctor"]
 
 
-@dataclass
-class RedFlag:
+class RedFlag(BaseModel):
+    model_config = ConfigDict(frozen=False)
+
     name: str
     category: str
     description: str

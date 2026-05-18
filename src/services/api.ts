@@ -4,7 +4,7 @@ import type { ManifestResponse, ScanResponse } from '../types';
 
 export type ChatRole = 'user' | 'assistant' | 'system';
 export interface ChatTurn { role: ChatRole; text: string; }
-export type ChatEventKind = 'triage' | 'medicines' | 'token' | 'done' | 'error';
+export type ChatEventKind = 'intent' | 'triage' | 'medicines' | 'token' | 'done' | 'error';
 export interface ChatEventPayload {
     text?: string;
     message?: string;

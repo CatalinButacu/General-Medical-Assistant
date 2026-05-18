@@ -6,7 +6,8 @@
 /**
  * Chat message structure (UI-only). Assistant messages are populated
  * incrementally from the /chat SSE stream:
- *   - `triage`     arrives first (label, red_flags, recommended_action)
+ *   - `intent`     arrives first on non-emergency turns (routing decision)
+ *   - `triage`     arrives next on symptom-triage turns (skipped on explain branch)
  *   - `medicines`  arrives next (skipped on EMERGENCY)
  *   - `text`       grows token-by-token from `token` events
  *   - `isStreaming` flips false on `done`
@@ -16,10 +17,25 @@ export interface Message {
     sender: 'user' | 'ai';
     timestamp: Date;
     text?: string;
+    intent?: IntentEvent;
     triage?: TriageEvent;
     medicines?: MedicineDTO[];
     isStreaming?: boolean;
     error?: string;
+}
+
+/**
+ * Intent classifier output — tells the UI which conversational branch
+ * the backend picked for this turn. `MEDICINE_LOOKUP` means the explain
+ * flow runs (no symptom questions); `SYMPTOM_TRIAGE` is the default
+ * followup-or-recommend loop.
+ */
+export interface IntentEvent {
+    label: 'SYMPTOM_TRIAGE' | 'MEDICINE_LOOKUP' | 'OUT_OF_SCOPE';
+    confidence: number;
+    matched_terms: string[];
+    rationale: string;
+    medicine_trade_name: string | null;
 }
 
 /**

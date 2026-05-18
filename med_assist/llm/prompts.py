@@ -1,125 +1,93 @@
-"""Romanian system prompts. LLM may only name medicines from the retrieved evidence."""
+"""Prompt assembly via a Jinja2 template registry.
+
+The chatbot has three system-prompt families:
+
+  • followup.ro.j2                  — gather one more piece of info from the user
+  • recommend.ro.j2 / recommend_low_confidence.ro.j2
+                                    — recommend an OTC medicine, or refuse if retrieval is weak
+  • explain_medicine.ro.j2          — explain a medicine the user named (no symptom triage)
+
+Each template is paired with a Pydantic context model — missing variables
+raise at render time (Jinja2 ``StrictUndefined``) instead of producing a
+malformed prompt the LLM would then "creatively" interpret. The render
+functions exposed at the bottom of this module are the only public
+entry-points; callers never touch raw template names.
+"""
 
 from __future__ import annotations
 
-from typing import Any
+from pathlib import Path
+from typing import Any, Optional
 
-from med_assist.data.models import MedicineHit
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from pydantic import BaseModel, ConfigDict, Field
+
+from med_assist.data.models import Medicine, MedicineHit
+from med_assist.profile import UserProfile
+
+_TEMPLATES_DIR = Path(__file__).parent / "templates"
 
 
-def format_profile(profile: dict[str, Any] | None) -> str:
-    """Return a compact 'what we already know' block, or empty string if no profile."""
-    if not profile:
+class PromptRegistry:
+    """Loads templates once, renders many times.
+
+    Templates are addressed by filename so adding a new conversation
+    phase is a matter of dropping a `.j2` file and wiring a context
+    model — no Python prompt-string refactoring required.
+    """
+
+    def __init__(self, templates_dir: Path = _TEMPLATES_DIR):
+        self._env = Environment(
+            loader=FileSystemLoader(str(templates_dir)),
+            autoescape=False,
+            keep_trailing_newline=True,
+            undefined=StrictUndefined,
+        )
+
+    def render(self, template_name: str, context: BaseModel) -> str:
+        tmpl = self._env.get_template(template_name)
+        fields = {name: getattr(context, name) for name in type(context).model_fields}
+        return tmpl.render(**fields)
+
+
+# ---------- profile rendering ----------------------------------------------
+
+def format_profile_block(profile: Optional[UserProfile]) -> str:
+    """Render the user profile as a compact 'already-known' Romanian block.
+
+    Kept as Python (not Jinja) because the formatting rules are noisy and
+    Jinja-side conditionals would harm readability of the templates.
+    """
+    if profile is None or not profile.has_meaningful_data():
         return ""
     lines: list[str] = []
-    if profile.get("age"):
-        lines.append(f"- Vârstă: {profile['age']}")
-    gender = profile.get("gender")
-    pregnant = profile.get("isPregnant")
-    if gender or pregnant:
-        gender_ro = {"male": "masculin", "female": "feminin", "other": "altul"}.get(gender or "", gender or "")
+    if profile.age:
+        lines.append(f"- Vârstă: {profile.age}")
+    if profile.gender or profile.isPregnant:
+        gender_ro = {
+            "male": "masculin", "female": "feminin", "other": "altul",
+        }.get(profile.gender or "", profile.gender or "")
         bits = [gender_ro] if gender_ro else []
-        if pregnant:
+        if profile.isPregnant:
             bits.append("gravidă: DA")
-        lines.append(f"- Gen: {', '.join(bits)}")
-    allergies = [a for a in (profile.get("allergies") or []) if a]
-    if allergies:
-        lines.append(f"- Alergii: {', '.join(allergies)}")
-    conditions = [c for c in (profile.get("conditions") or []) if c]
-    if conditions:
-        lines.append(f"- Condiții cronice: {', '.join(conditions)}")
-    meds = [m for m in (profile.get("medications") or []) if m]
-    if meds:
-        lines.append(f"- Medicamente curente: {', '.join(meds)}")
+        if bits:
+            lines.append(f"- Gen: {', '.join(bits)}")
+    if profile.allergies:
+        lines.append(f"- Alergii: {', '.join(profile.allergies)}")
+    if profile.conditions:
+        lines.append(f"- Condiții cronice: {', '.join(profile.conditions)}")
+    if profile.medications:
+        lines.append(f"- Medicamente curente: {', '.join(profile.medications)}")
     if not lines:
         return ""
-    return "PROFIL UTILIZATOR (deja cunoscut — NU întreba din nou aceste lucruri):\n" + "\n".join(lines)
-
-
-def has_meaningful_profile(profile: dict[str, Any] | None) -> bool:
-    if not profile:
-        return False
-    return bool(
-        profile.get("age")
-        or profile.get("gender")
-        or profile.get("isPregnant")
-        or profile.get("allergies")
-        or profile.get("conditions")
-        or profile.get("medications")
+    return (
+        "PROFIL UTILIZATOR (deja cunoscut — NU întreba din nou aceste lucruri):\n"
+        + "\n".join(lines)
     )
 
 
-SYSTEM_PROMPT_FOLLOWUP_RO = """\
-Ești un asistent farmaceutic virtual pentru utilizatori din România.
-Vorbești în română, conversațional, empatic, scurt.
-
-ACEASTA ESTE FAZA DE COLECTARE DE INFORMAȚII. Reguli STRICTE:
-
-STRUCTURA RĂSPUNSULUI (exact 2 propoziții):
-  1. Empatie scurtă (max 8 cuvinte) — recunoaște ce a spus utilizatorul.
-  2. O ÎNTREBARE CONCRETĂ și UTILĂ care se termină cu „?".
-
-NU recomanda niciun medicament. Nicio substanță activă, nicio denumire.
-NU diagnostica. NU explica.
-NU întreba lucruri pe care le știi deja din PROFIL sau ISTORIC.
-
-PRIORITATE pentru următoarea întrebare (alege CEL MAI MARE gol):
-  a) Factor declanșator — OBLIGATORIU prima întrebare pentru:
-     • alergii / mâncărime / urticarie / erupție → ce a declanșat reacția (mâncare, plantă, medicament, animal, contact)
-     • intoxicație / greață bruscă → ce a mâncat / băut recent
-     • durere acută → ce făcea când a apărut
-  b) Localizare/natura simptomului (unde te doare exact, ce fel de durere)
-  c) Durată (de când, brusc sau treptat)
-  d) Severitate (1-10) sau impact (te oprește din activități zilnice?)
-  e) Simptome asociate (febră, greață, diaree, erupții, dificultate respirație)
-  f) Vârstă/profil — DOAR dacă lipsește din profil și e relevant
-
-CONTEXT pentru această întrebare:
-{context_block}
-
-EXEMPLE de răspuns CORECT:
-
-Utilizator: „mă simt rău"
-Tu: „Îmi pare rău că nu te simți bine. Ce anume te deranjează — durere, febră, oboseală, sau altceva?"
-
-Utilizator: „mă doare burta"
-Tu: „Înțeleg, e neplăcut. De cât timp ai durerea și unde exact — sus, jos, sau în jurul buricului?"
-
-Utilizator: „de două zile, intens" (după întrebarea de mai sus)
-Tu: „Mulțumesc. Ai și greață, diaree, sau febră alături de durere?"
-
-Răspunde acum: 1 propoziție empatică + 1 întrebare clară cu „?".
-"""
-
-
-def system_followup(
-    *,
-    user_history_text: list[str],
-    profile: dict[str, Any] | None,
-    retrieval_hint: str = "",
-    forced_topic: str | None = None,
-) -> str:
-    parts: list[str] = []
-    # forced_topic must come first and be unambiguous — it overrides the
-    # priority list inside SYSTEM_PROMPT_FOLLOWUP_RO for the current turn.
-    if forced_topic:
-        parts.append("DIRECTIVĂ STRICTĂ — IGNORĂ ORICE ALTĂ PRIORITATE:\n" + forced_topic)
-    profile_block = format_profile(profile)
-    if profile_block:
-        parts.append(profile_block)
-    if user_history_text:
-        gathered = "\n".join(f"- „{t}”" for t in user_history_text)
-        parts.append(f"SIMPTOME / DETALII deja spuse de utilizator:\n{gathered}")
-    if retrieval_hint:
-        parts.append(f"INDICIU RETRIEVAL (categorii apropiate, nu menționa direct):\n{retrieval_hint}")
-    if not parts:
-        parts.append("(Niciun context suplimentar — utilizatorul tocmai a deschis conversația.)")
-    context_block = "\n\n".join(parts)
-    return SYSTEM_PROMPT_FOLLOWUP_RO.format(context_block=context_block)
-
-
 def retrieval_hint_from_hits(hits: list[MedicineHit]) -> str:
-    """Compact category summary used to nudge the followup LLM toward useful questions."""
+    """Compact category summary used to nudge the followup LLM."""
     if not hits:
         return ""
     cats: list[str] = []
@@ -132,74 +100,127 @@ def retrieval_hint_from_hits(hits: list[MedicineHit]) -> str:
     return ", ".join(cats)
 
 
-SYSTEM_PROMPT_RECOMMEND_RO = """\
-Ești un asistent farmaceutic virtual pentru utilizatori din România.
-Vorbești în română, conversațional, empatic, decis (max 100 de cuvinte).
+# ---------- context models -------------------------------------------------
 
-ACUM TREBUIE SĂ RECOMANZI. Nu mai pune întrebări de clarificare.
-
-REGULI:
-1. Recomandă DOAR medicamente din lista „MEDICAMENTE DISPONIBILE" de mai jos.
-   Folosește exact denumirile din listă. NU inventa nume.
-2. Alege 1–2 opțiuni concrete și spune CARE pentru CE simptom.
-3. Începe cu o recapitulare scurtă (1 propoziție) a ce ai înțeles.
-4. Țin cont de PROFILUL utilizatorului dacă există: evită substanțe la care
-   are alergie sau care contraindică condițiile lui (ex: ibuprofen la
-   gastrită, paracetamol peste limita la afectare hepatică, evită A la
-   gravide etc). Dacă o opțiune din listă e contraindicată, mergi la alta.
-5. NU da doze — spune „vezi prospectul pentru doza corectă".
-6. NU pune diagnostic. Vorbești despre tratament simptomatic OTC.
-7. Închide cu o variantă a frazei: „Dacă simptomele persistă peste 48h,
-   se agravează, sau apar simptome noi, consultați medicul sau farmacistul."
-
-DACĂ lista e complet goală sau nicio opțiune nu se potrivește din cauza
-profilului, spune asta cinstit și recomandă consult la farmacist.
-
-STIL:
-- Cuvinte simple, fără jargon medical.
-- 2-4 propoziții fluide, fără bullet-uri.
-- Tonul: pragmatic și liniștitor, nu robotic.
-"""
+class FollowupContext(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    profile_block: str = ""
+    user_history_text: list[str] = Field(default_factory=list)
+    retrieval_hint: str = ""
+    forced_topic: Optional[str] = None
 
 
-def format_evidence(hits: list[MedicineHit]) -> str:
-    if not hits:
-        return "MEDICAMENTE DISPONIBILE: (niciun rezultat din retrieval)"
-    lines = ["MEDICAMENTE DISPONIBILE pentru această întrebare:"]
-    for i, hit in enumerate(hits, start=1):
-        med = hit.medicine
-        symptoms = ", ".join(med.lay_symptoms[:4]) if med.lay_symptoms else "—"
-        rx_label = "OTC" if med.rx_status in ("OTC", "MIXED") else med.rx_status
-        lines.append(
-            f"{i}. {med.trade_name} ({med.dci}, {med.atc_code}) — {rx_label}\n"
-            f"   categorie: {med.category}\n"
-            f"   pentru: {symptoms}"
-        )
-    return "\n".join(lines)
+class RecommendContext(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    profile_block: str = ""
+    hits: list[dict[str, Any]] = Field(default_factory=list)
 
 
-def system_recommend(
+class LowConfidenceContext(BaseModel):
+    profile_block: str = ""
+
+
+class ExplainContext(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    profile_block: str = ""
+    medicine: Medicine
+    rx_label: str
+    indications: str = ""
+    contraindications: str = ""
+
+
+# ---------- helpers --------------------------------------------------------
+
+def _rx_label(rx_status: str) -> str:
+    return {
+        "OTC": "fără prescripție (OTC)",
+        "MIXED": "parțial fără prescripție",
+        "RX": "doar cu prescripție medicală (RX)",
+        "RESTRICTED": "eliberare restricționată",
+        "UNKNOWN": "status necunoscut",
+    }.get(rx_status, rx_status)
+
+
+def _hit_for_template(hit: MedicineHit) -> dict[str, Any]:
+    med = hit.medicine
+    rx = "OTC" if med.rx_status in ("OTC", "MIXED") else med.rx_status
+    symptoms = ", ".join(med.lay_symptoms[:4]) if med.lay_symptoms else "—"
+    return {
+        "trade_name": med.trade_name,
+        "dci": med.dci,
+        "atc_code": med.atc_code,
+        "category": med.category,
+        "rx_label": rx,
+        "lay_symptoms_joined": symptoms,
+    }
+
+
+# ---------- module-level registry (one instance is plenty) -----------------
+
+_DEFAULT_REGISTRY: Optional[PromptRegistry] = None
+
+
+def default_registry() -> PromptRegistry:
+    global _DEFAULT_REGISTRY
+    if _DEFAULT_REGISTRY is None:
+        _DEFAULT_REGISTRY = PromptRegistry()
+    return _DEFAULT_REGISTRY
+
+
+# ---------- public render entry-points -------------------------------------
+
+def render_followup(
+    *,
+    user_history_text: list[str],
+    profile: Optional[UserProfile],
+    retrieval_hint: str = "",
+    forced_topic: Optional[str] = None,
+    registry: Optional[PromptRegistry] = None,
+) -> str:
+    reg = registry or default_registry()
+    ctx = FollowupContext(
+        profile_block=format_profile_block(profile),
+        user_history_text=list(user_history_text),
+        retrieval_hint=retrieval_hint,
+        forced_topic=forced_topic,
+    )
+    return reg.render("followup.ro.j2", ctx)
+
+
+def render_recommend(
     *,
     hits: list[MedicineHit],
-    profile: dict[str, Any] | None,
+    profile: Optional[UserProfile],
     forced_low_confidence: bool = False,
+    registry: Optional[PromptRegistry] = None,
 ) -> str:
-    parts: list[str] = [SYSTEM_PROMPT_RECOMMEND_RO]
-    profile_block = format_profile(profile)
-    if profile_block:
-        parts.append(profile_block)
+    reg = registry or default_registry()
+    profile_block = format_profile_block(profile)
     if forced_low_confidence or not hits:
-        parts.append(
-            "IMPORTANT — RETRIEVAL FĂRĂ POTRIVIRE:\n"
-            "Nu am găsit medicamente OTC potrivite pentru această problemă în baza ANMDM.\n"
-            "REGULI STRICTE pentru acest răspuns:\n"
-            "  • NU enumera niciun nume de medicament — nicio denumire comercială, nicio substanță activă.\n"
-            "  • Recunoaște limpede, în 1 propoziție empatică, că această problemă necesită o evaluare directă.\n"
-            "  • Recomandă concret: vizită la farmacist (pentru sfat OTC) sau consult medical "
-            "specialist (dacă pare să iasă din zona OTC).\n"
-            "  • Încheie cu disclaimer-ul standard.\n"
-            "Răspunsul total: 2-3 propoziții. Fără liste, fără medicamente."
+        return reg.render(
+            "recommend_low_confidence.ro.j2",
+            LowConfidenceContext(profile_block=profile_block),
         )
-    else:
-        parts.append(format_evidence(hits))
-    return "\n\n".join(parts)
+    ctx = RecommendContext(
+        profile_block=profile_block,
+        hits=[_hit_for_template(h) for h in hits],
+    )
+    return reg.render("recommend.ro.j2", ctx)
+
+
+def render_explain(
+    *,
+    medicine: Medicine,
+    profile: Optional[UserProfile],
+    registry: Optional[PromptRegistry] = None,
+) -> str:
+    reg = registry or default_registry()
+    sections = medicine.rcp_sections or {}
+    ctx = ExplainContext(
+        profile_block=format_profile_block(profile),
+        medicine=medicine,
+        rx_label=_rx_label(medicine.rx_status),
+        indications=(sections.get("indications", "") or "").strip(),
+        contraindications=(sections.get("contraindications", "") or "").strip(),
+    )
+    return reg.render("explain_medicine.ro.j2", ctx)
