@@ -10,6 +10,12 @@ import { useUserApi } from '../hooks/useUserApi';
 import { userPaths, type CabinetItemDTO } from '../services/userApi';
 import type { CabinetAddState } from '../types';
 import { Button, FormField, TextInput, Textarea, Select } from '../components/ui';
+import {
+  fireExpiryNotifications,
+  hasAskedForPermission,
+  requestNotificationPermission,
+} from '../lib/cabinetExpiry';
+import { Bell } from 'lucide-react';
 
 // Local UI shape: server fields from CabinetItemDTO normalized to camelCase +
 // derived isExpired / daysUntilExpiration for the row badge. Lives next to the
@@ -90,6 +96,31 @@ export default function MedicineCabinet() {
     if (!user?.sub) return;
     reloadCabinet();
   }, [user?.sub, reloadCabinet]);
+
+  // Fire any pending expiry notifications whenever the cabinet list changes.
+  // The library is deduped per (item, day) so re-renders don't spam the user.
+  useEffect(() => {
+    if (medicines.length === 0) return;
+    void fireExpiryNotifications(medicines.map(m => ({
+      id: m.id,
+      name: m.name,
+      daysUntilExpiration: m.daysUntilExpiration,
+      isExpired: m.isExpired,
+    })));
+  }, [medicines]);
+
+  const [notifPrompt, setNotifPrompt] = useState(
+    () => !hasAskedForPermission() && typeof Notification !== 'undefined' && Notification.permission === 'default'
+  );
+  const handleEnableNotifications = async () => {
+    const result = await requestNotificationPermission();
+    setNotifPrompt(false);
+    if (result === 'granted') {
+      toast.success('Notificările sunt activate');
+    } else if (result === 'denied') {
+      toast.info('Notificările au fost refuzate — le poți activa din setările browserului.');
+    }
+  };
 
   useEffect(() => {
     if (medicineToAdd) {
@@ -204,6 +235,33 @@ export default function MedicineCabinet() {
       </div>
 
       <div className="max-w-md mx-auto p-4">
+        {notifPrompt && (
+          <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+            <Bell className="text-blue-600 mt-0.5 flex-shrink-0" size={20} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-blue-900">Vrei notificări pentru expirări?</p>
+              <p className="text-xs text-blue-700 mt-1 leading-relaxed">
+                Te anunțăm când un medicament din cabinet se apropie de data expirării.
+                Notificările sunt locale și nu părăsesc dispozitivul.
+              </p>
+              <div className="flex gap-2 mt-3">
+                <button
+                  onClick={handleEnableNotifications}
+                  className="bg-blue-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm hover:bg-blue-700"
+                >
+                  Activează
+                </button>
+                <button
+                  onClick={() => setNotifPrompt(false)}
+                  className="text-blue-700 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-blue-100"
+                >
+                  Mai târziu
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {(expiredCount > 0 || expiringCount > 0) && (
           <div className="mb-6 space-y-2">
             {expiredCount > 0 && (
