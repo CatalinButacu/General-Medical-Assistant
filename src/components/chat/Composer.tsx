@@ -46,6 +46,7 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
                             }
                         }}
                         placeholder={speech.isListening ? 'Ascult…' : 'Descrie simptomele…'}
+                        aria-label="Mesaj către asistent"
                         className={`w-full ${speech.isSupported ? 'pl-12' : 'pl-4'} pr-12 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 text-sm resize-none transition-all placeholder:text-gray-400`}
                         disabled={isStreaming}
                     />

@@ -285,9 +285,14 @@ function TextBubble({
     const phaseLabel = phase && PHASE_LABEL[phase];
     if (!text && isStreaming) {
         return (
-            <div className="rounded-2xl px-4 py-3 shadow-sm bg-white border border-gray-100">
+            <div
+                className="rounded-2xl px-4 py-3 shadow-sm bg-white border border-gray-100"
+                role="status"
+                aria-live="polite"
+                aria-label={phaseLabel ?? 'Asistentul scrie un răspuns'}
+            >
                 <div className="flex items-center space-x-2">
-                    <div className="flex space-x-1">
+                    <div className="flex space-x-1" aria-hidden="true">
                         <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" />
                         <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:0.2s]" />
                         <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:0.4s]" />
@@ -302,10 +307,13 @@ function TextBubble({
         );
     }
     return (
-        <div className="rounded-2xl px-4 py-3 shadow-sm bg-white border border-gray-100 text-gray-800">
+        <div
+            className="rounded-2xl px-4 py-3 shadow-sm bg-white border border-gray-100 text-gray-800"
+            aria-live={isStreaming ? 'polite' : undefined}
+        >
             <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">
                 {text}
-                {isStreaming && <span className="inline-block w-1 h-4 ml-0.5 bg-blue-500 align-middle animate-pulse" />}
+                {isStreaming && <span className="inline-block w-1 h-4 ml-0.5 bg-blue-500 align-middle animate-pulse" aria-hidden="true" />}
             </p>
         </div>
     );
@@ -326,7 +334,11 @@ function EmergencyCard({ triage }: { triage: TriageEvent }) {
     }, []);
 
     return (
-        <div className="rounded-2xl border-2 border-red-300 bg-gradient-to-br from-red-50 to-white shadow-md overflow-hidden">
+        <div
+            role="alert"
+            aria-live="assertive"
+            className="rounded-2xl border-2 border-red-300 bg-gradient-to-br from-red-50 to-white shadow-md overflow-hidden"
+        >
             <div className="bg-red-600 text-white px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                     <AlertTriangle size={20} />

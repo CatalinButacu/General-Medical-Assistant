@@ -18,14 +18,16 @@ export function HistoryDrawer({
     const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
     return (
-        <div className="fixed inset-0 z-50 flex">
-            <div
+        <div className="fixed inset-0 z-50 flex" role="dialog" aria-modal="true" aria-labelledby="history-drawer-title">
+            <button
+                type="button"
+                aria-label="Închide istoricul"
                 className="absolute inset-0 bg-black/40 animate-in fade-in duration-200"
                 onClick={onClose}
             />
             <aside className="relative ml-auto w-[85%] max-w-sm h-full bg-white shadow-2xl animate-in slide-in-from-right duration-200 flex flex-col">
                 <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-                    <h2 className="text-sm font-bold text-gray-800">Istoric conversații</h2>
+                    <h2 id="history-drawer-title" className="text-sm font-bold text-gray-800">Istoric conversații</h2>
                     <button
                         onClick={onClose}
                         className="p-1.5 rounded-full hover:bg-gray-100 text-gray-500"

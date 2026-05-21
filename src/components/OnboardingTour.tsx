@@ -63,18 +63,25 @@ export function OnboardingTour({ onDone }: { onDone: () => void }) {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/50 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="onboarding-tour-title"
+        >
             <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${slide.accent} flex items-center justify-center mb-5 shadow-lg`}>
+                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${slide.accent} flex items-center justify-center mb-5 shadow-lg`} aria-hidden="true">
                     <Icon className="text-white" size={32} />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-2 leading-tight">{slide.title}</h2>
+                <h2 id="onboarding-tour-title" className="text-xl font-bold text-gray-900 mb-2 leading-tight">{slide.title}</h2>
                 <p className="text-sm text-gray-600 leading-relaxed">{slide.body}</p>
                 <div className="flex items-center justify-between mt-7">
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1.5" role="tablist" aria-label={`Pasul ${index + 1} din ${SLIDES.length}`}>
                         {SLIDES.map((_, i) => (
                             <div
                                 key={i}
+                                role="tab"
+                                aria-selected={i === index}
                                 className={`h-1.5 rounded-full transition-all ${
                                     i === index ? 'bg-blue-600 w-6' : 'bg-gray-200 w-1.5'
                                 }`}

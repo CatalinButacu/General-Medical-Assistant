@@ -18,8 +18,15 @@ function App() {
     <Auth0Provider {...auth0Config}>
       <Router>
         <OfflineBanner />
+        {/* Skip-link for keyboard users — invisible until focused. */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-blue-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:font-bold focus:text-sm"
+        >
+          Sari la conținutul principal
+        </a>
         <div className="h-[100dvh] flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden">
-          <main className="flex-1 overflow-y-auto pb-24 relative">
+          <main id="main-content" className="flex-1 overflow-y-auto pb-24 relative">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/scanner" element={
