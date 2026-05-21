@@ -10,8 +10,7 @@
 
 import { useState } from 'react';
 import { ChevronRight, Pill, Phone, ShieldCheck } from 'lucide-react';
-
-const TOUR_DONE_KEY = 'med_assist_onboarding_seen';
+import { TOUR_DONE_KEY } from '../lib/onboarding';
 
 interface Slide {
     icon: typeof Pill;
@@ -106,8 +105,3 @@ export function OnboardingTour({ onDone }: { onDone: () => void }) {
     );
 }
 
-export function shouldShowOnboarding(): boolean {
-    if (typeof window === 'undefined') return false;
-    try { return localStorage.getItem(TOUR_DONE_KEY) !== '1'; }
-    catch { return false; }
-}

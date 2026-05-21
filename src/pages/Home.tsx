@@ -4,7 +4,8 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { Camera, MessageCircle, Shield, Package, Heart, AlertTriangle, LogIn, LogOut, User as UserIcon } from 'lucide-react';
 import { useUserApi } from '../hooks/useUserApi';
 import { userPaths, type ProfileDTO } from '../services/userApi';
-import { OnboardingTour, shouldShowOnboarding } from '../components/OnboardingTour';
+import { OnboardingTour } from '../components/OnboardingTour';
+import { shouldShowOnboarding } from '../lib/onboarding';
 
 export default function Home() {
   const navigate = useNavigate();
