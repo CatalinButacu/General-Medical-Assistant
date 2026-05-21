@@ -33,10 +33,59 @@ function endpoint(path: string): string {
     return API_BASE_URL ? `${API_BASE_URL}${path}` : path;
 }
 
+/**
+ * Map an HTTP failure to a Romanian-language user message + a retry hint.
+ *
+ * - 429 (rate-limited) reads the `Retry-After` header so the UI can show
+ *   "încearcă din nou în N secunde" precisely rather than guessing.
+ * - 5xx is the "we're broken, our fault" bucket. Worth auto-retrying.
+ * - 4xx (other) is the "your request was wrong" bucket. Don't auto-retry.
+ *
+ * Returned `retryAfterSec` is undefined when retry isn't appropriate.
+ */
+export interface HttpProblem {
+    status: number;
+    message: string;
+    retryAfterSec?: number;
+}
+
+export class ApiError extends Error {
+    readonly problem: HttpProblem;
+    constructor(problem: HttpProblem) {
+        super(problem.message);
+        this.problem = problem;
+    }
+}
+
+function explainStatus(status: number, retryAfterHeader: string | null): HttpProblem {
+    if (status === 429) {
+        const sec = Number(retryAfterHeader);
+        const retryAfterSec = Number.isFinite(sec) && sec > 0 ? sec : 30;
+        return {
+            status,
+            retryAfterSec,
+            message: `Prea multe cereri într-un timp scurt. Încearcă din nou în ${retryAfterSec}s.`,
+        };
+    }
+    if (status >= 500) {
+        return {
+            status,
+            retryAfterSec: 2,
+            message: 'Serverul are o problemă temporară. Încercăm din nou…',
+        };
+    }
+    if (status === 401 || status === 403) {
+        return { status, message: 'Sesiunea ta a expirat. Reîncărcă pagina sau autentifică-te din nou.' };
+    }
+    if (status === 400) {
+        return { status, message: 'Cererea nu a putut fi procesată. Verifică ce ai trimis.' };
+    }
+    return { status, message: `Eroare neașteptată (${status}). Reîncearcă peste câteva secunde.` };
+}
+
 async function jsonOrThrow<T>(res: Response): Promise<T> {
     if (!res.ok) {
-        const body = await res.text().catch(() => '');
-        throw new Error(`HTTP ${res.status}: ${body || res.statusText}`);
+        throw new ApiError(explainStatus(res.status, res.headers.get('retry-after')));
     }
     return res.json() as Promise<T>;
 }
@@ -84,10 +133,9 @@ export async function streamChat(
         signal,
     });
     if (!res.ok) {
-        const body = await res.text().catch(() => '');
-        throw new Error(`HTTP ${res.status}: ${body || res.statusText}`);
+        throw new ApiError(explainStatus(res.status, res.headers.get('retry-after')));
     }
-    if (!res.body) throw new Error('streaming response has no body');
+    if (!res.body) throw new Error('Răspunsul streamingului este gol.');
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();

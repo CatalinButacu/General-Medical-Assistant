@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Sparkles } from 'lucide-react';
-import { checkHealth, isApiConfigured, streamChat } from '../services/api';
+import { ApiError, checkHealth, isApiConfigured, streamChat } from '../services/api';
 import type { ChatProfilePayload, ChatTurn } from '../services/api';
 import { useUserApi } from '../hooks/useUserApi';
 import { useChatHistory } from '../hooks/useChatHistory';
@@ -193,9 +193,21 @@ export default function Chat() {
                 } catch (err) {
                     setIsOnline(false);
                     setIsStreaming(false);
-                    const msg = err instanceof Error ? err.message : 'unknown';
+                    // Map the error class to a human-readable Romanian message.
+                    // ApiError already carries a localized message + retry hint;
+                    // anything else is most likely a network outage on the client.
+                    let msg: string;
+                    if (err instanceof ApiError) {
+                        msg = err.problem.message;
+                    } else if (err instanceof Error && err.name === 'AbortError') {
+                        msg = 'Conversație întreruptă.';
+                    } else if (err instanceof Error) {
+                        msg = 'Nu m-am putut conecta la server. Verifică conexiunea și încearcă din nou.';
+                    } else {
+                        msg = 'Eroare necunoscută. Reîncearcă peste câteva secunde.';
+                    }
                     setMessages(curr => curr.map(m =>
-                        m.id === aiId ? { ...m, isStreaming: false, error: msg } : m
+                        m.id === aiId ? { ...m, isStreaming: false, streamPhase: 'done', error: msg } : m
                     ));
                 }
             })();
