@@ -1,20 +1,23 @@
-"""Sparse retrieval: tokenize query, score with BM25Okapi."""
+"""Sparse retrieval: tokenize query, score with BM25Okapi.
+
+`tokenize` lives in the light `med_assist.index` package now — pulling it
+from `med_assist.index.builder` (which has heavy deps) would defeat the
+lazy-import scheme that keeps test collection cheap."""
 
 from __future__ import annotations
 
-import numpy as np
-from rank_bm25 import BM25Okapi
-
 from med_assist.data.models import Chunk, RetrievalHit
-from med_assist.index.builder import tokenize
+from med_assist.index import tokenize
 
 
 class SparseRetriever:
-    def __init__(self, bm25: BM25Okapi, chunks: list[Chunk]):
+    def __init__(self, bm25, chunks: list[Chunk]):
         self.bm25 = bm25
         self.chunks = chunks
 
     def search(self, query: str, top_k: int = 50) -> list[RetrievalHit]:
+        import numpy as np
+
         tokens = tokenize(query)
         if not tokens:
             return []

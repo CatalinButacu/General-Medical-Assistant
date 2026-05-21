@@ -182,6 +182,13 @@ No `continue-on-error` — broken types or red tests block the merge.
 ### `eval.yml` — "Eval" (`workflow_dispatch` only)
 Manual trigger from the Actions tab. Builds the corpus + index from scratch, runs `python -m med_assist.cli.eval` against the 49-case Romanian golden set, uploads `eval-results.json` and a markdown summary as artifacts.
 
+Two boolean inputs on the dispatch form:
+
+| Input | Default | When to flip on |
+|---|---|---|
+| `measure_rerank` | `false` | Whenever you've touched the retrieval pipeline (fusion, rerank, BM25, dense encoder, chunker). Runs the eval twice — once with `RERANK_ENABLED=true`, once `=false` — then diffs every metric. The job summary shows the rerank delta on accuracy, recall@k, MRR, context_precision@k, and p95 latency. Use this to keep the rerank earning its inference cost. |
+| `with_faithfulness` | `false` | When the orchestrator, prompt templates, or retrieval pipeline changed. Runs the LLM-as-judge faithfulness pass — ~2 extra Gemini calls per OTC_SAFE case (~100 calls on the 49-case set, several minutes + quota). Skip for unrelated changes; the deterministic metrics already catch most regressions. |
+
 ### `codeql.yml` — "CodeQL" (push + PR + weekly)
 `security-and-quality` query suites for `javascript-typescript` and `python`. Findings appear in **Security → Code scanning**. Repo-level branch protection blocks merges on High+ severity.
 

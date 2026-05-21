@@ -13,8 +13,6 @@ alternative: cross-encoder/mmarco-mMiniLMv2-L12-H384-v1).
 
 from __future__ import annotations
 
-from sentence_transformers import CrossEncoder
-
 from med_assist.data.models import RetrievalHit
 
 DEFAULT_RERANKER = "cross-encoder/ms-marco-MiniLM-L-6-v2"
@@ -22,6 +20,10 @@ DEFAULT_RERANKER = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
 class Reranker:
     def __init__(self, model_id: str = DEFAULT_RERANKER):
+        # Lazy: tests never instantiate Reranker; the CrossEncoder pull (~80MB
+        # download on first use) only happens when the prod RetrievalService
+        # asks for it on the first /chat after boot.
+        from sentence_transformers import CrossEncoder
         self.model = CrossEncoder(model_id)
 
     def rerank(self, query: str, hits: list[RetrievalHit], top_k: int) -> list[RetrievalHit]:

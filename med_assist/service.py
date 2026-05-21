@@ -19,11 +19,9 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Iterable, Optional
 
-import faiss
-
 from med_assist.data.loader import load_medicines
 from med_assist.data.models import Chunk, Medicine, MedicineHit, RetrievalHit
-from med_assist.index.builder import INDEX_DIR
+from med_assist.index import INDEX_DIR
 from med_assist.observability import observe
 from med_assist.retrieval.dense import DenseRetriever
 from med_assist.retrieval.fusion import reciprocal_rank_fusion
@@ -83,6 +81,10 @@ def _ocr_query_phrases(all_text: str) -> list[str]:
 
 class RetrievalService:
     def __init__(self, index_dir: Path = INDEX_DIR):
+        # Lazy faiss import: tests use _StubRetrieval and shouldn't need to
+        # have a 200MB faiss wheel on PATH for pytest collection.
+        import faiss
+
         self.index_dir = index_dir
         self.manifest = json.loads((index_dir / "manifest.json").read_text(encoding="utf-8"))
         self.chunks = self._load_chunks(index_dir / "chunks.jsonl")

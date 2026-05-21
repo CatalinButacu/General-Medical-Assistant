@@ -2,12 +2,21 @@ name: Eval
 
 on:
   workflow_dispatch:
+    inputs:
+      measure_rerank:
+        description: 'A/B the cross-encoder reranker (runs eval twice: ON then OFF, diffs the deltas in the summary)'
+        type: boolean
+        default: false
+      with_faithfulness:
+        description: 'LLM-as-judge faithfulness grading (slow + Gemini quota; only set true when the orchestrator, prompt templates, or retrieval pipeline changed)'
+        type: boolean
+        default: false
 
 jobs:
   eval:
     name: Run RetrievalService.advise() against the golden set
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
 
@@ -26,12 +35,58 @@ jobs:
           python data_acquisition/scripts/06_enrich.py --allow-missing-rcp
           python -m med_assist.index.builder
 
-      - name: Run eval
+      - name: Run eval (rerank ON)
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          RERANK_ENABLED: 'true'
         run: |
-          python -m med_assist.cli.eval --json eval-results.json | tee eval-summary.txt
-          echo "## Eval results" >> "$GITHUB_STEP_SUMMARY"
+          FAITH_FLAG=""
+          if [ "${{ inputs.with_faithfulness }}" = "true" ]; then FAITH_FLAG="--faithfulness"; fi
+          python -m med_assist.cli.eval --json eval-results.json $FAITH_FLAG | tee eval-summary.txt
+          echo "## Eval results (rerank=ON${FAITH_FLAG:+, faithfulness=ON})" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           cat eval-summary.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run eval (rerank OFF) — only when A/B requested
+        if: inputs.measure_rerank
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          RERANK_ENABLED: 'false'
+        run: |
+          python -m med_assist.cli.eval --json eval-results-no-rerank.json | tee eval-summary-no-rerank.txt
+          echo "## Eval results (rerank=OFF)" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat eval-summary-no-rerank.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Diff rerank deltas
+        if: inputs.measure_rerank
+        run: |
+          python - <<'PY' | tee eval-rerank-diff.txt
+          import json
+          on = json.load(open("eval-results.json"))
+          off = json.load(open("eval-results-no-rerank.json"))
+          print("\n## Rerank A/B (ON vs OFF)\n")
+          def fmt(name, on_val, off_val, pct=True):
+              d = on_val - off_val
+              sign = "+" if d >= 0 else ""
+              if pct:
+                  print(f"  {name:<35} ON={on_val:.1%}  OFF={off_val:.1%}  delta={sign}{d:.1%}")
+              else:
+                  print(f"  {name:<35} ON={on_val:.3f}  OFF={off_val:.3f}  delta={sign}{d:.3f}")
+          fmt("triage_accuracy", on["triage"]["accuracy"], off["triage"]["accuracy"])
+          fmt("false_negative_emergency_rate", on["triage"]["false_negative_emergency_rate"], off["triage"]["false_negative_emergency_rate"])
+          for k in ("1", "3", "5", "10"):
+              fmt(f"recall@{k}", on["retrieval"]["recall_at_k"][k], off["retrieval"]["recall_at_k"][k])
+          fmt("MRR", on["retrieval"]["mrr"], off["retrieval"]["mrr"], pct=False)
+          for k in ("1", "3", "5"):
+              fmt(f"context_precision@{k}", on["retrieval"]["context_precision_at_k"][k], off["retrieval"]["context_precision_at_k"][k])
+          fmt("p95_latency_ms", on["latency"]["p95_ms"], off["latency"]["p95_ms"], pct=False)
+          PY
+          echo "## Rerank A/B diff" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat eval-rerank-diff.txt >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
@@ -40,4 +95,8 @@ jobs:
           path: |
             eval-results.json
             eval-summary.txt
+            eval-results-no-rerank.json
+            eval-summary-no-rerank.txt
+            eval-rerank-diff.txt
           retention-days: 90
+          if-no-files-found: ignore
