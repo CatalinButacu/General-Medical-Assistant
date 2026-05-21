@@ -28,6 +28,14 @@ export interface Message {
      * first token lands. Reset to 'done' on the `done` event.
      */
     streamPhase?: 'scanning' | 'classifying' | 'searching' | 'drafting' | 'done';
+    /**
+     * Backend's post-LLM grounding check: did the streamed answer actually
+     * mention at least one retrieved medicine? `null` when the concept
+     * doesn't apply (followup / emergency). Surfaced as a chip under the
+     * bubble so users see whether the recommendation is corpus-grounded
+     * or LLM-confabulated.
+     */
+    citationValid?: boolean | null;
 }
 
 /**

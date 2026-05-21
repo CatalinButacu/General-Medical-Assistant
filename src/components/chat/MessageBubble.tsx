@@ -2,9 +2,11 @@ import { useEffect } from 'react';
 import {
     AlertTriangle,
     Bot,
+    CheckCircle2,
     ExternalLink,
     Phone,
     Pill,
+    ShieldAlert,
     Sparkles,
     User as UserIcon,
     Zap,
@@ -60,6 +62,11 @@ function AssistantMessage({ message }: { message: Message }) {
                 error={message.error}
                 phase={message.streamPhase}
             />
+            {/* Citation badge appears only after streaming finishes AND when
+                the concept applies (not on followups, not on emergencies). */}
+            {!message.isStreaming && message.citationValid !== undefined && message.citationValid !== null && (
+                <CitationBadge valid={message.citationValid} />
+            )}
             {triage?.label === 'UNCERTAIN' && triage.recommended_action_ro && (
                 <UncertainAction triage={triage} />
             )}
@@ -67,6 +74,23 @@ function AssistantMessage({ message }: { message: Message }) {
                 <MedicineGrid medicines={message.medicines} />
             )}
         </>
+    );
+}
+
+function CitationBadge({ valid }: { valid: boolean }) {
+    if (valid) {
+        return (
+            <div className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1 text-[10px] font-semibold text-emerald-700">
+                <CheckCircle2 size={10} />
+                <span>Răspuns fundamentat pe nomenclatorul ANMDM</span>
+            </div>
+        );
+    }
+    return (
+        <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1 text-[10px] font-semibold text-amber-800">
+            <ShieldAlert size={10} />
+            <span>Nu am identificat o sursă concretă pentru această recomandare</span>
+        </div>
     );
 }
 

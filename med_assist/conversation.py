@@ -386,7 +386,11 @@ class ConversationService:
                 "citation_valid=False on explain phase (medicine=%s request_id=%s)",
                 medicine.trade_name, audit.request_id,
             )
-        yield ChatStreamEvent(kind="done", payload={"used_llm": True, "phase": "explain"})
+        yield ChatStreamEvent(kind="done", payload={
+            "used_llm": True,
+            "phase": "explain",
+            "citation_valid": audit.citation_valid,
+        })
 
     async def _handle_symptom_triage(
         self,
@@ -482,7 +486,11 @@ class ConversationService:
                 "citation_valid=False on recommend phase — answer doesn't reference retrieved medicines "
                 "(request_id=%s, hits=%d)", audit.request_id, len(decision.medicine_hits),
             )
-        yield ChatStreamEvent(kind="done", payload={"used_llm": True, "phase": "recommend"})
+        yield ChatStreamEvent(kind="done", payload={
+            "used_llm": True,
+            "phase": "recommend",
+            "citation_valid": audit.citation_valid,
+        })
 
     async def _stream_llm_yielding(
         self,

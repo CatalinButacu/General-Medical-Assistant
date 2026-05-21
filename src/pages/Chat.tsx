@@ -172,7 +172,13 @@ export default function Chat() {
                                 case 'done': {
                                     const finalText = (m.text ?? '').trim();
                                     if (finalText) void historyRef.current.persistMessage('assistant', finalText);
-                                    return { ...m, isStreaming: false, streamPhase: 'done' };
+                                    const citationValid = (payload?.citation_valid ?? null) as boolean | null;
+                                    return {
+                                        ...m,
+                                        isStreaming: false,
+                                        streamPhase: 'done',
+                                        citationValid,
+                                    };
                                 }
                                 case 'error':
                                     return {
