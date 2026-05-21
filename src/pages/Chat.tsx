@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { LogIn, Sparkles, X } from 'lucide-react';
+import { ChevronUp, LogIn, Sparkles, X } from 'lucide-react';
 import { ApiError, checkHealth, isApiConfigured, streamChat } from '../services/api';
 import type { ChatProfilePayload, ChatTurn } from '../services/api';
 import { toast } from 'sonner';
@@ -41,6 +41,7 @@ export default function Chat() {
     const [isStreaming, setIsStreaming] = useState(false);
     const [isOnline, setIsOnline] = useState<boolean | null>(null);
     const [historyOpen, setHistoryOpen] = useState(false);
+    const [quickOpen, setQuickOpen] = useState(false);
     const [savePromptDismissed, setSavePromptDismissed] = useState(() => {
         if (typeof window === 'undefined') return false;
         try { return localStorage.getItem(SAVE_PROMPT_DISMISSED_KEY) === '1'; }
@@ -249,6 +250,7 @@ export default function Chat() {
 
     const handleQuickQuery = (q: string) => {
         setInputMessage(q);
+        setQuickOpen(false);
         sendMessage(q);
     };
 
@@ -369,6 +371,45 @@ export default function Chat() {
                     <div ref={messagesEndRef} />
                 </div>
             </div>
+
+            {/* Persistent quick-query bar — gives the user back access to the
+                starter prompts mid-conversation without breaking the layout
+                flow. Hidden in the welcome state (the inline grid above is
+                already visible) and during streaming. */}
+            {messages.length > 1 && !isStreaming && (
+                <div className="bg-white border-t border-gray-100 flex-shrink-0">
+                    <div className="max-w-md mx-auto px-4">
+                        <button
+                            type="button"
+                            onClick={() => setQuickOpen(o => !o)}
+                            className="w-full flex items-center justify-center gap-1.5 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors"
+                            aria-expanded={quickOpen}
+                            aria-controls="quick-queries-panel"
+                        >
+                            <Sparkles size={11} />
+                            <span>Sugestii rapide</span>
+                            <ChevronUp size={11} className={`transition-transform ${quickOpen ? 'rotate-0' : 'rotate-180'}`} />
+                        </button>
+                        {quickOpen && (
+                            <div id="quick-queries-panel" className="grid grid-cols-2 gap-2 pb-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                                {QUICK_QUERIES.map(({ label, query }) => (
+                                    <button
+                                        key={label}
+                                        onClick={() => handleQuickQuery(query)}
+                                        className="text-left p-2.5 bg-gray-50 border border-gray-100 rounded-xl hover:border-blue-200 hover:bg-white transition-all active:scale-[0.98]"
+                                    >
+                                        <div className="flex items-center mb-0.5">
+                                            <Sparkles className="text-blue-500 mr-1.5 flex-shrink-0" size={11} />
+                                            <span className="text-[11px] font-bold text-gray-700 capitalize">{label}</span>
+                                        </div>
+                                        <p className="text-[9px] text-gray-400 font-medium truncate">{query}</p>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             <Composer
                 ref={inputRef}
