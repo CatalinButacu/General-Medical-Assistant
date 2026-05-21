@@ -77,13 +77,23 @@ Frontend opens an SSE stream to `POST /chat` with `{ messages, profile }`. The o
 
 1. **Red-flag scan** on the latest user turn. Any emergency or urgent rule fires → emit a single `triage` event with `label: EMERGENCY` and short-circuit. The LLM never sees emergency-class queries.
 2. **Cumulative retrieval** — concatenate all user turns into one query, run hybrid FAISS+BM25 with reciprocal rank fusion. Classifier returns `OTC_SAFE | UNCERTAIN` plus a confidence score.
-3. **Phase decision** — `MIN_FOLLOWUPS_WITH_PROFILE = 2`, `MIN_FOLLOWUPS_NO_PROFILE = 3`, `MAX_FOLLOWUPS = 4`:
+3. **Phase decision** — `MIN_FOLLOWUPS_WITH_PROFILE = 2`, `MIN_FOLLOWUPS_NO_PROFILE = 2`, `MAX_FOLLOWUPS = 4`:
    - `user_turns < min_followups` → followup, ask one targeted question
    - `OTC_SAFE` and `confidence ≥ 0.5` → recommend, emit medicine cards + stream a grounded Gemini reply
    - `user_turns ≥ 4` (cap) without confidence → recommend with empty evidence, LLM gracefully refuses and suggests pharmacist
    - else → followup, keep gathering
 4. **Category-driven first-question override** — if retrieval lands in `Alergii`, the first followup is hard-coded to ask about the trigger (food/pollen/drug/contact) instead of letting the LLM pick. Prevents recommending an antihistamine for an unknown trigger that might be anaphylactic.
 5. **Stream** — Gemini 3 Flash with `thinking_budget=0` so reasoning tokens don't eat the visible output. Each chunk arrives as a `token` SSE event; frontend accumulates them into the assistant message and renders triage badge + medicine cards as their events fire.
+
+#### Chat UX surfaces
+
+The frontend layers five interaction patterns on top of the SSE stream to keep the followup loop from feeling like an interrogation:
+
+- **Quick-query bar** — `Sugestii rapide` chevron above the composer expands a 2-col chip grid of starter prompts (paracetamol, tuse, alergie, …). Hidden in the welcome state (the bigger inline grid handles that) and while streaming. Persistent across turns so the starter prompts don't vanish after the first message.
+- **Suggested-reply chips on followups** — Followup questions are matched against priority regex rules in `src/lib/suggestedReplies.ts` (one rule per question type in `followup.ro.j2`): `de cât timp` → time-bucket chips, `declanșat` → trigger chips, `unde + doare` → body-region chips, etc. Diacritic-folded match. No protocol change, no extra LLM call. Falls back to free-text typing whenever the regex doesn't match.
+- **`Profil aplicat` header pill** — Small purple `ShieldCheck` pill in the chat header when the loaded profile has meaningful data (pregnancy / allergies / conditions / medications). Mirrors the backend's `UserProfile.has_meaningful_data()` so the pill is honest about what the orchestrator actually considers. Tap → `/profile`.
+- **Post-recommend follow-up chips** — After a recommend/explain reply lands, four chips appear at the bottom of the assistant bubble: `Cât timp?`, `Cu altceva?`, `Efecte adverse?`, `Alternative?`. Gated by `citation_valid != null` so they don't appear on followup or emergency phases.
+- **`Sari direct la sugestii` escape** — On followup bubbles after `user_turn_count >= 2`, an amber button skips the followup loop. Sends `skip_followups=true` to `POST /chat`; the orchestrator flips `in_followup_phase` off and takes the recommend branch with whatever signal it has (low-confidence recommend template). Safety gates (red-flag scan, intent classification) still run — the flag only affects the clarifying-question loop, never emergency routing.
 
 ### Scanner
 
