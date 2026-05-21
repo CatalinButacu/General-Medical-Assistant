@@ -393,6 +393,7 @@ class ConversationService:
             "used_llm": True,
             "phase": "explain",
             "citation_valid": audit.citation_valid,
+            "request_id": audit.request_id,
         })
 
     async def _handle_symptom_triage(
@@ -493,6 +494,7 @@ class ConversationService:
             "used_llm": True,
             "phase": "recommend",
             "citation_valid": audit.citation_valid,
+            "request_id": audit.request_id,
         })
 
     async def _stream_llm_yielding(

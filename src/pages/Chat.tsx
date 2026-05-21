@@ -194,11 +194,13 @@ export default function Chat() {
                                     const finalText = (m.text ?? '').trim();
                                     if (finalText) void historyRef.current.persistMessage('assistant', finalText);
                                     const citationValid = (payload?.citation_valid ?? null) as boolean | null;
+                                    const requestId = (payload?.request_id ?? null) as string | null;
                                     return {
                                         ...m,
                                         isStreaming: false,
                                         streamPhase: 'done',
                                         citationValid,
+                                        requestId,
                                     };
                                 }
                                 case 'error':
@@ -317,7 +319,7 @@ export default function Chat() {
             <div className="flex-1 overflow-y-auto">
                 <div className="max-w-md mx-auto px-4 py-6 space-y-4">
                     {messages.map(message => (
-                        <MessageBubble key={message.id} message={message} />
+                        <MessageBubble key={message.id} message={message} setMessages={setMessages} />
                     ))}
 
                     {messages.length === 1 && !isStreaming && (

@@ -108,4 +108,5 @@ class TriageAuditLog(Base):
     phase: Mapped[str | None] = mapped_column(Text)
     assistant_output: Mapped[str | None] = mapped_column(Text)
     citation_valid: Mapped[bool | None] = mapped_column(Boolean)
+    user_feedback_helpful: Mapped[bool | None] = mapped_column(Boolean)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

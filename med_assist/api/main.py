@@ -188,6 +188,37 @@ def medicine_alternatives(medicine_id: str, limit: int = 5) -> list[AlternativeM
     ]
 
 
+class ChatFeedbackRequest(BaseModel):
+    request_id: str = Field(..., min_length=8, max_length=64)
+    helpful: bool
+
+
+@app.post("/chat/feedback")
+def chat_feedback(req: ChatFeedbackRequest) -> dict:
+    """Persist thumbs up/down for a past /chat turn.
+
+    Looks up the matching `triage_audit_log` row by `request_id` (indexed).
+    Idempotent: re-posting the same value is a no-op; flipping the value
+    overwrites. Returns 404 if the row doesn't exist (e.g. DB disabled or
+    the audit write failed). Anonymous-safe — the request_id is the only
+    handle on the past turn, no auth required.
+    """
+    if not os.getenv("DATABASE_URL"):
+        raise HTTPException(status_code=503, detail="feedback storage not configured")
+    from med_assist.db.models import TriageAuditLog
+    from med_assist.db.session import _session_factory
+    session = _session_factory()()
+    try:
+        row = session.query(TriageAuditLog).filter(TriageAuditLog.request_id == req.request_id).one_or_none()
+        if row is None:
+            raise HTTPException(status_code=404, detail="no audit record for this request_id")
+        row.user_feedback_helpful = req.helpful
+        session.commit()
+    finally:
+        session.close()
+    return {"ok": True}
+
+
 # ───────────────── /chat — streaming conversational endpoint ─────────────────
 
 

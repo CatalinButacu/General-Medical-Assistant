@@ -12,13 +12,20 @@ import {
     Shuffle,
     ShieldAlert,
     Sparkles,
+    ThumbsDown,
+    ThumbsUp,
     User as UserIcon,
     Zap,
 } from 'lucide-react';
-import { fetchAlternatives } from '../../services/api';
+import { fetchAlternatives, submitChatFeedback } from '../../services/api';
 import type { AlternativeMedicineDTO, IntentEvent, MedicineDTO, Message, RedFlagDTO, TriageEvent } from '../../types';
 
-export function MessageBubble({ message }: { message: Message }) {
+// Setter type matches React's setMessages signature in Chat.tsx — exported
+// so the FeedbackButtons callback can update the bubble's optimistic state
+// without re-wiring through more props.
+type SetMessages = (updater: (prev: Message[]) => Message[]) => void;
+
+export function MessageBubble({ message, setMessages }: { message: Message; setMessages?: SetMessages }) {
     const isUser = message.sender === 'user';
     const time = new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -40,7 +47,7 @@ export function MessageBubble({ message }: { message: Message }) {
                             <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">{message.text}</p>
                         </div>
                     ) : (
-                        <AssistantMessage message={message} />
+                        <AssistantMessage message={message} setMessages={setMessages} />
                     )}
                     <div className={`text-[9px] font-bold uppercase tracking-tight text-gray-300 ${isUser ? 'text-right pr-1' : 'pl-1'}`}>
                         {time}
@@ -51,7 +58,7 @@ export function MessageBubble({ message }: { message: Message }) {
     );
 }
 
-function AssistantMessage({ message }: { message: Message }) {
+function AssistantMessage({ message, setMessages }: { message: Message; setMessages?: SetMessages }) {
     const triage = message.triage;
 
     if (triage?.label === 'EMERGENCY') {
@@ -86,7 +93,70 @@ function AssistantMessage({ message }: { message: Message }) {
                 && message.medicines[0].medicine_id && (
                     <AlternativesPanel medicineId={message.medicines[0].medicine_id} />
                 )}
+            {/* Feedback thumbs only on recommend/explain (citation_valid not null
+                = backend produced a grounded reply; followups & emergencies skip). */}
+            {!message.isStreaming
+                && message.requestId
+                && message.citationValid !== undefined
+                && message.citationValid !== null
+                && setMessages && (
+                    <FeedbackButtons message={message} setMessages={setMessages} />
+                )}
         </>
+    );
+}
+
+function FeedbackButtons({ message, setMessages }: { message: Message; setMessages: SetMessages }) {
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const submitted = message.feedbackHelpful !== undefined;
+
+    const submit = async (helpful: boolean) => {
+        if (busy || !message.requestId) return;
+        // Optimistic — flip the local state immediately so the user sees the
+        // selection lock in. Revert if the network call fails.
+        setBusy(true);
+        setError(null);
+        setMessages(curr => curr.map(m => (m.id === message.id ? { ...m, feedbackHelpful: helpful } : m)));
+        try {
+            await submitChatFeedback(message.requestId, helpful);
+        } catch {
+            setError('Nu am putut salva feedback-ul.');
+            setMessages(curr => curr.map(m => (m.id === message.id ? { ...m, feedbackHelpful: undefined } : m)));
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    if (submitted) {
+        return (
+            <p className="text-[10px] text-gray-400 font-semibold italic">
+                Mulțumesc pentru feedback{message.feedbackHelpful ? ' 👍' : ' 👎'}
+            </p>
+        );
+    }
+
+    return (
+        <div className="flex items-center gap-2">
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">A fost util?</span>
+            <button
+                onClick={() => submit(true)}
+                disabled={busy}
+                aria-label="A fost util"
+                className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 disabled:opacity-40 transition-colors"
+            >
+                <ThumbsUp size={12} />
+            </button>
+            <button
+                onClick={() => submit(false)}
+                disabled={busy}
+                aria-label="Nu a fost util"
+                className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 disabled:opacity-40 transition-colors"
+            >
+                <ThumbsDown size={12} />
+            </button>
+            {error && <span className="text-[10px] text-red-500 font-semibold">{error}</span>}
+        </div>
     );
 }
 

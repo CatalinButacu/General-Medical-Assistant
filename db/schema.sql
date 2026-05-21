@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS triage_audit_log (
     phase                TEXT,                                          -- emergency / explain / followup / recommend
     assistant_output     TEXT,                                          -- full streamed reply (NULL for emergency)
     citation_valid       BOOLEAN,                                       -- did the output cite at least one retrieved medicine?
+    user_feedback_helpful BOOLEAN,                                      -- thumbs up/down from the user (nullable: no feedback given yet)
     created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

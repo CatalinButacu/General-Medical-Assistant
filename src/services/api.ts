@@ -114,6 +114,17 @@ export async function fetchAlternatives(medicineId: string, limit = 5): Promise<
     return jsonOrThrow<AlternativeMedicineDTO[]>(res);
 }
 
+export async function submitChatFeedback(requestId: string, helpful: boolean): Promise<void> {
+    const res = await fetch(endpoint('/chat/feedback'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ request_id: requestId, helpful }),
+    });
+    if (!res.ok) {
+        throw new ApiError(explainStatus(res.status, res.headers.get('retry-after')));
+    }
+}
+
 export async function scanMedicine(imageDataUrl: string): Promise<ScanResponse> {
     const mimeMatch = imageDataUrl.match(/^data:(image\/(jpeg|png|webp));base64,/);
     const mime_type = mimeMatch ? mimeMatch[1] : 'image/jpeg';

@@ -36,6 +36,18 @@ export interface Message {
      * or LLM-confabulated.
      */
     citationValid?: boolean | null;
+    /**
+     * Backend's per-turn request ID — used as the key when posting
+     * thumbs feedback to /chat/feedback. Only set on recommend/explain
+     * phases (the SSE done event carries it).
+     */
+    requestId?: string | null;
+    /**
+     * Thumbs-up/down state for this turn — UI-only, optimistic. `true`/
+     * `false` after a successful POST /chat/feedback, undefined until the
+     * user clicks one of the buttons.
+     */
+    feedbackHelpful?: boolean;
 }
 
 /**
