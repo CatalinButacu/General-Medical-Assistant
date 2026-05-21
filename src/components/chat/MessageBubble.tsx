@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
     AlertTriangle,
     Bot,
@@ -109,6 +110,19 @@ function TextBubble({ text, isStreaming, error }: { text?: string; isStreaming: 
 }
 
 function EmergencyCard({ triage }: { triage: TriageEvent }) {
+    // Haptic alert on mount: a short SOS-like pattern. Browser API, mobile-only
+    // effect on most devices. Silently no-ops where unsupported (desktop, iOS
+    // outside PWA). Critical for users glancing at a phone during an episode.
+    useEffect(() => {
+        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+            try {
+                navigator.vibrate([300, 120, 300, 120, 300]);
+            } catch {
+                // Some browsers throw if vibration is disallowed by user-engagement gesture rules.
+            }
+        }
+    }, []);
+
     return (
         <div className="rounded-2xl border-2 border-red-300 bg-gradient-to-br from-red-50 to-white shadow-md overflow-hidden">
             <div className="bg-red-600 text-white px-4 py-3 flex items-center justify-between">
