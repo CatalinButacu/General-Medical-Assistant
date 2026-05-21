@@ -43,7 +43,12 @@ log = logging.getLogger("medassist.chat")
 
 MAX_HISTORY_TURNS = 8
 TOP_K_MEDICINES = 5
-MIN_FOLLOWUPS_NO_PROFILE = 3
+# Both profile and non-profile users now hit the same minimum. The previous
+# 3-turn gate for anonymous users was an over-correction — the 1-turn jump
+# from 2 → 3 forced a 50% interrogation tax for marginal safety gain. The
+# red-flag scan still fires every turn, so emergencies short-circuit either
+# way; the MAX_FOLLOWUPS=4 cap still bounds the loop.
+MIN_FOLLOWUPS_NO_PROFILE = 2
 MIN_FOLLOWUPS_WITH_PROFILE = 2
 MAX_FOLLOWUPS = 4
 STRONG_CONFIDENCE = 0.5
