@@ -10,12 +10,14 @@ import Chat from './pages/Chat';
 import Onboarding from './pages/Onboarding';
 import MobileNavigation from './components/MobileNavigation';
 import AuthGuard from './components/AuthGuard';
+import { OfflineBanner } from './components/OfflineBanner';
 import './index.css';
 
 function App() {
   return (
     <Auth0Provider {...auth0Config}>
       <Router>
+        <OfflineBanner />
         <div className="h-[100dvh] flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100 overflow-hidden">
           <main className="flex-1 overflow-y-auto pb-24 relative">
             <Routes>
