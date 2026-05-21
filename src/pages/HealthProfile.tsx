@@ -7,7 +7,26 @@ import {
 import { toast } from 'sonner';
 import { useUserApi } from '../hooks/useUserApi';
 import { userPaths, type ProfileDTO } from '../services/userApi';
-import type { HealthProfile as IHealthProfile, Medicine } from '../types';
+import type { MedicineSafetyTarget } from '../types';
+
+// Local UI shape: server fields from ProfileDTO + a couple of editor-only
+// extras (`id` for the user_id from Auth0, `dateOfBirth` derived for the age
+// calculator). Kept local rather than in src/types/index.ts since no other
+// component shares it.
+interface LocalProfile {
+  id: string;
+  name: string;
+  age?: number;
+  gender?: 'male' | 'female' | 'other';
+  dateOfBirth?: string;
+  isPregnant?: boolean;
+  pregnancyDueDate?: string;
+  allergies: string[];
+  conditions: string[];
+  medications: string[];
+  notes?: string;
+  onboarded?: boolean;
+}
 
 interface SafetyCheckResult {
   isContraindicated: boolean;
@@ -21,9 +40,9 @@ export default function HealthProfile() {
   const location = useLocation();
   const { user } = useAuth0();
   const apiCall = useUserApi();
-  const medicineForSafetyCheck = location.state?.medicineForSafetyCheck as Medicine;
+  const medicineForSafetyCheck = location.state?.medicineForSafetyCheck as MedicineSafetyTarget | undefined;
 
-  const [profile, setProfile] = useState<IHealthProfile>({
+  const [profile, setProfile] = useState<LocalProfile>({
     id: '',
     name: '',
     conditions: [],
@@ -31,7 +50,7 @@ export default function HealthProfile() {
     medications: [],
     isPregnant: false,
     pregnancyDueDate: '',
-  } as IHealthProfile);
+  });
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);

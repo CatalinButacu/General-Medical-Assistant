@@ -132,46 +132,30 @@ export interface ManifestResponse {
 }
 
 /**
- * Legacy: kept for components that haven't migrated to MedicineDTO yet
- * (MedicineCabinet, HealthProfile, CameraScanner). Do not use for new code.
+ * Router-state payload from CameraScanner → MedicineCabinet (`/cabinet`).
+ * What the cabinet add-form needs to pre-fill itself after an OCR scan.
+ * NOT the on-server DTO — see CabinetItemDTO in services/userApi.ts for that.
  */
-export interface Medicine {
+export interface CabinetAddState {
     name: string;
     genericName?: string;
     dosage?: string;
     type?: string;
-    title?: string;
-    active_substance?: string;
     category?: string;
-    price?: number | string;
-    rx?: boolean;
     prescription_required?: boolean;
-    url?: string;
-    description?: string;
+    rx?: boolean;
     symptoms?: string[];
-    notes?: string;
+    url?: string;
+    expirationDate?: string;
 }
 
-export interface HealthProfile {
-    id: string;
+/**
+ * Router-state payload from CameraScanner → HealthProfile (`/profile`).
+ * The HealthProfile page reads this to display a safety-check banner; it
+ * only needs the identifying fields, not the full DTO.
+ */
+export interface MedicineSafetyTarget {
     name: string;
-    age?: number;
-    gender?: 'male' | 'female' | 'other';
-    dateOfBirth?: string;
-    isPregnant?: boolean;
-    pregnancyDueDate?: string;
-    allergies: string[];
-    conditions: string[];
-    medications: string[];
-    notes?: string;
-    onboarded?: boolean;
-}
-
-export interface CabinetItem extends Medicine {
-    id: string;
-    quantity: number;
-    expirationDate: string;
-    addedDate: string;
-    isExpired?: boolean;
-    daysUntilExpiration?: number;
+    dosage?: string;
+    type?: string;
 }

@@ -8,10 +8,27 @@ import {
 import { toast } from 'sonner';
 import { useUserApi } from '../hooks/useUserApi';
 import { userPaths, type CabinetItemDTO } from '../services/userApi';
-import type { CabinetItem, Medicine } from '../types';
+import type { CabinetAddState } from '../types';
 import { Button, FormField, TextInput, Textarea, Select } from '../components/ui';
 
-function dtoToItem(d: CabinetItemDTO): CabinetItem {
+// Local UI shape: server fields from CabinetItemDTO normalized to camelCase +
+// derived isExpired / daysUntilExpiration for the row badge. Lives next to the
+// only consumer so the API DTO stays the canonical contract.
+interface CabinetItemView {
+  id: string;
+  name: string;
+  genericName?: string;
+  dosage?: string;
+  type?: string;
+  quantity: number;
+  expirationDate: string;
+  addedDate: string;
+  notes?: string;
+  isExpired?: boolean;
+  daysUntilExpiration?: number;
+}
+
+function dtoToItem(d: CabinetItemDTO): CabinetItemView {
   const today = new Date();
   const exp = new Date(d.expiration_date);
   const days = Math.ceil((exp.getTime() - today.getTime()) / (1000 * 3600 * 24));
@@ -34,15 +51,15 @@ export default function MedicineCabinet() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth0();
-  const medicineToAdd = location.state?.addMedicine as (Medicine & { expirationDate?: string }) | undefined;
+  const medicineToAdd = location.state?.addMedicine as CabinetAddState | undefined;
   const fromScanner = Boolean(location.state?.fromScanner);
 
-  const [medicines, setMedicines] = useState<CabinetItem[]>([]);
+  const [medicines, setMedicines] = useState<CabinetItemView[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'expired' | 'expiring' | 'active'>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editingMedicine, setEditingMedicine] = useState<CabinetItem | null>(null);
+  const [editingMedicine, setEditingMedicine] = useState<CabinetItemView | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -131,7 +148,7 @@ export default function MedicineCabinet() {
 
   const resetForm = () => setFormData({ name: '', genericName: '', dosage: '', type: 'tablet', quantity: 1, expirationDate: '', notes: '' });
 
-  const startEdit = (item: CabinetItem) => {
+  const startEdit = (item: CabinetItemView) => {
     setEditingMedicine(item);
     setFormData({
       name: item.name,
@@ -156,7 +173,7 @@ export default function MedicineCabinet() {
     }
   };
 
-  const getStatus = (item: CabinetItem) => {
+  const getStatus = (item: CabinetItemView) => {
     if (item.isExpired) return { color: 'text-red-600 bg-red-50', label: 'Expirat', icon: AlertTriangle };
     if ((item.daysUntilExpiration ?? 100) <= 30) return { color: 'text-orange-600 bg-orange-50', label: 'Expiră curând', icon: Clock };
     return { color: 'text-green-600 bg-green-50', label: 'Activ', icon: CheckCircle };

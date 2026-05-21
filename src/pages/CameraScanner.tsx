@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Camera, X, RotateCcw, Check, Loader2, AlertTriangle, Info, ChevronRight, Image as ImageIcon, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import { scanMedicine } from '../services/api';
-import type { Medicine, ScanMedicineMatch, ScanResponse } from '../types';
+import type { CabinetAddState, MedicineSafetyTarget, ScanMedicineMatch, ScanResponse } from '../types';
 
 type CameraState = 'idle' | 'requesting' | 'live' | 'denied';
 
@@ -110,7 +110,7 @@ export default function CameraScanner() {
     if (!result) return;
     const m: ScanMedicineMatch | null = result.candidates[activeMatchIdx] ?? result.matched;
     const e = result.extracted;
-    const cabinetMedicine: Medicine & { expirationDate?: string } = m
+    const cabinetMedicine: CabinetAddState = m
       ? {
           name: m.trade_name,
           genericName: m.dci,
@@ -392,7 +392,14 @@ export default function CameraScanner() {
 
             <div className="space-y-3">
               {activeMatch && (
-                <button onClick={() => navigate('/profile', { state: { medicineForSafetyCheck: { name: activeMatch.trade_name, dosage: activeMatch.concentration, type: activeMatch.form } } })} className="w-full bg-red-600 text-white py-4 rounded-xl font-semibold">Verifică siguranța</button>
+                <button onClick={() => {
+                  const target: MedicineSafetyTarget = {
+                    name: activeMatch.trade_name,
+                    dosage: activeMatch.concentration,
+                    type: activeMatch.form,
+                  };
+                  navigate('/profile', { state: { medicineForSafetyCheck: target } });
+                }} className="w-full bg-red-600 text-white py-4 rounded-xl font-semibold">Verifică siguranța</button>
               )}
               <button onClick={navigateToCabinet} className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold">Adaugă în Cabinet</button>
               <button onClick={retake} className="w-full bg-gray-200 text-gray-800 py-4 rounded-xl font-semibold">Scanează altul</button>
