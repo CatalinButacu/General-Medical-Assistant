@@ -58,6 +58,7 @@ function AssistantMessage({ message }: { message: Message }) {
                 text={message.text}
                 isStreaming={!!message.isStreaming}
                 error={message.error}
+                phase={message.streamPhase}
             />
             {triage?.label === 'UNCERTAIN' && triage.recommended_action_ro && (
                 <UncertainAction triage={triage} />
@@ -68,6 +69,16 @@ function AssistantMessage({ message }: { message: Message }) {
         </>
     );
 }
+
+// Stream-phase pill copy. Lives next to the bubble so it stays in sync with
+// the phase tags Chat.tsx assigns as each SSE event lands.
+const PHASE_LABEL: Record<NonNullable<Message['streamPhase']>, string | null> = {
+    scanning: 'Verific semnele de urgență…',
+    classifying: 'Aleg fluxul potrivit…',
+    searching: 'Caut în nomenclatorul ANMDM…',
+    drafting: 'Compun răspunsul…',
+    done: null,
+};
 
 function IntentPill({ intent }: { intent: IntentEvent }) {
     // Symptom triage is the default — surfacing it as a pill would be noisy.
@@ -80,7 +91,17 @@ function IntentPill({ intent }: { intent: IntentEvent }) {
     );
 }
 
-function TextBubble({ text, isStreaming, error }: { text?: string; isStreaming: boolean; error?: string }) {
+function TextBubble({
+    text,
+    isStreaming,
+    error,
+    phase,
+}: {
+    text?: string;
+    isStreaming: boolean;
+    error?: string;
+    phase?: Message['streamPhase'];
+}) {
     if (error) {
         return (
             <div className="rounded-2xl px-4 py-3 shadow-sm bg-red-50 border border-red-200 text-red-800 text-sm">
@@ -88,13 +109,21 @@ function TextBubble({ text, isStreaming, error }: { text?: string; isStreaming: 
             </div>
         );
     }
+    const phaseLabel = phase && PHASE_LABEL[phase];
     if (!text && isStreaming) {
         return (
             <div className="rounded-2xl px-4 py-3 shadow-sm bg-white border border-gray-100">
-                <div className="flex space-x-1">
-                    <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" />
-                    <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:0.2s]" />
-                    <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:0.4s]" />
+                <div className="flex items-center space-x-2">
+                    <div className="flex space-x-1">
+                        <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce" />
+                        <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:0.2s]" />
+                        <div className="w-1.5 h-1.5 bg-gray-300 rounded-full animate-bounce [animation-delay:0.4s]" />
+                    </div>
+                    {phaseLabel && (
+                        <span className="text-[11px] text-gray-500 font-medium animate-in fade-in duration-300">
+                            {phaseLabel}
+                        </span>
+                    )}
                 </div>
             </div>
         );

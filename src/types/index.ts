@@ -22,6 +22,12 @@ export interface Message {
     medicines?: MedicineDTO[];
     isStreaming?: boolean;
     error?: string;
+    /**
+     * UI-only — derived as each SSE event arrives. Lets the bubble surface
+     * 'scanning red flags → searching → drafting' breadcrumbs before the
+     * first token lands. Reset to 'done' on the `done` event.
+     */
+    streamPhase?: 'scanning' | 'classifying' | 'searching' | 'drafting' | 'done';
 }
 
 /**

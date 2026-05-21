@@ -106,6 +106,9 @@ export default function Chat() {
             timestamp: new Date(),
             text: '',
             isStreaming: true,
+            // Initial phase before any SSE event lands. Lets the bubble surface
+            // 'Verific semnele de urgență…' immediately rather than typing-dots silence.
+            streamPhase: 'scanning',
         };
         setMessages(prev => [...prev, userMsg, aiMsg]);
         setInputMessage('');
@@ -133,11 +136,25 @@ export default function Chat() {
                             if (m.id !== aiId) return m;
                             switch (kind) {
                                 case 'intent':
-                                    return { ...m, intent: payload as unknown as IntentEvent };
+                                    return {
+                                        ...m,
+                                        intent: payload as unknown as IntentEvent,
+                                        // Intent fired ⇒ red-flag scan didn't short-circuit; we're routing.
+                                        streamPhase: 'classifying',
+                                    };
                                 case 'triage':
-                                    return { ...m, triage: payload as unknown as TriageEvent };
+                                    return {
+                                        ...m,
+                                        triage: payload as unknown as TriageEvent,
+                                        // Triage carries retrieval signal — searching is done by this point.
+                                        streamPhase: (payload?.label === 'EMERGENCY') ? 'done' : 'searching',
+                                    };
                                 case 'medicines':
-                                    return { ...m, medicines: (payload?.items ?? []) as unknown as MedicineDTO[] };
+                                    return {
+                                        ...m,
+                                        medicines: (payload?.items ?? []) as unknown as MedicineDTO[],
+                                        streamPhase: 'drafting',
+                                    };
                                 case 'token': {
                                     // Some LLM SDKs (incl. Gemini) sometimes emit cumulative
                                     // chunks where each one repeats everything so far rather
@@ -148,17 +165,22 @@ export default function Chat() {
                                     const existing = m.text ?? '';
                                     if (!incoming || incoming === existing) return m;
                                     if (incoming.length > existing.length && incoming.startsWith(existing)) {
-                                        return { ...m, text: incoming };
+                                        return { ...m, text: incoming, streamPhase: 'drafting' };
                                     }
-                                    return { ...m, text: existing + incoming };
+                                    return { ...m, text: existing + incoming, streamPhase: 'drafting' };
                                 }
                                 case 'done': {
                                     const finalText = (m.text ?? '').trim();
                                     if (finalText) void historyRef.current.persistMessage('assistant', finalText);
-                                    return { ...m, isStreaming: false };
+                                    return { ...m, isStreaming: false, streamPhase: 'done' };
                                 }
                                 case 'error':
-                                    return { ...m, isStreaming: false, error: (payload?.message as string) ?? 'unknown error' };
+                                    return {
+                                        ...m,
+                                        isStreaming: false,
+                                        streamPhase: 'done',
+                                        error: (payload?.message as string) ?? 'unknown error',
+                                    };
                                 default:
                                     return m;
                             }
