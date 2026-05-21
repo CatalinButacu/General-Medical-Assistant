@@ -54,3 +54,28 @@ CREATE TABLE IF NOT EXISTS chat_messages (
 );
 
 CREATE INDEX IF NOT EXISTS idx_chat_messages_session ON chat_messages(session_id, created_at);
+
+-- One row per /chat turn, written by the orchestrator after the SSE 'done'
+-- event. Captures the inputs, retrieved evidence, and assistant output so a
+-- forensic question ("why did the model say X?") can be answered without
+-- replaying the model. Required for high-risk AI Act audit-log obligations
+-- when this is classified as a medical-device chatbot.
+CREATE TABLE IF NOT EXISTS triage_audit_log (
+    id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id              TEXT,                                          -- nullable: anonymous /chat
+    request_id           TEXT,                                          -- from RequestIDMiddleware
+    user_input           TEXT NOT NULL,
+    retrieved            JSONB NOT NULL DEFAULT '[]'::jsonb,            -- [{medicine_id, trade_name, atc_code, score}, ...]
+    triage_label         TEXT,                                          -- EMERGENCY / OTC_SAFE / UNCERTAIN / FOLLOWUP / NULL
+    red_flags            JSONB NOT NULL DEFAULT '[]'::jsonb,            -- ["chest_pain_acs", ...]
+    intent_label         TEXT,                                          -- MEDICINE_LOOKUP / SYMPTOM_TRIAGE / NULL
+    intent_confidence    REAL,
+    phase                TEXT,                                          -- emergency / explain / followup / recommend
+    assistant_output     TEXT,                                          -- full streamed reply (NULL for emergency)
+    citation_valid       BOOLEAN,                                       -- did the output cite at least one retrieved medicine?
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_audit_log_created ON triage_audit_log(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_user ON triage_audit_log(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_request ON triage_audit_log(request_id);

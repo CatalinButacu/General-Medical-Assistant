@@ -14,7 +14,7 @@ _ROOT = Path(__file__).resolve().parents[2]
 load_dotenv(_ROOT / ".env.local")
 load_dotenv(_ROOT / ".env")
 
-from med_assist.api.middleware import RequestIDMiddleware, install_request_id_log_factory
+from med_assist.api.middleware import RequestIDMiddleware, install_request_id_log_factory, request_id_var
 
 # install_request_id_log_factory must run before basicConfig so the %(request_id)s
 # field is populated on every record from the very first log line.
@@ -27,13 +27,15 @@ logging.basicConfig(
 for noisy in ("httpx", "httpcore", "urllib3", "google.api_core", "google.auth"):
     logging.getLogger(noisy).setLevel(logging.WARNING)
 
+import asyncio
+
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from med_assist.api.ratelimit import chat_limiter, rate_limit, scan_limiter
-from med_assist.conversation import ChatMessageIn, ConversationService
+from med_assist.conversation import AuditRecord, ChatMessageIn, ConversationService
 from med_assist.llm.client import GeminiClient
 from med_assist.llm.vision import VisionClient, VisionExtraction
 from med_assist.profile import UserProfile
@@ -75,10 +77,52 @@ def get_service() -> RetrievalService:
     return _service
 
 
+def _write_audit_to_db(record: AuditRecord) -> None:
+    """Sync writer used by the chat route's audit sink. Lazy import + best-effort
+    semantics — DB failures log a warning but never break the chat experience."""
+    if not os.getenv("DATABASE_URL"):
+        return
+    try:
+        from med_assist.db.models import TriageAuditLog
+        from med_assist.db.session import _session_factory
+        session = _session_factory()()
+        try:
+            row = TriageAuditLog(
+                user_id=record.user_id,
+                request_id=record.request_id,
+                user_input=record.user_input,
+                retrieved=record.retrieved,
+                triage_label=record.triage_label,
+                red_flags=record.red_flags,
+                intent_label=record.intent_label,
+                intent_confidence=record.intent_confidence,
+                phase=record.phase,
+                assistant_output=record.assistant_output,
+                citation_valid=record.citation_valid,
+            )
+            session.add(row)
+            session.commit()
+        finally:
+            session.close()
+    except Exception:
+        logger.exception("audit log write failed (request_id=%s)", record.request_id)
+
+
+async def _audit_sink(record: AuditRecord) -> None:
+    """Async audit sink: write happens off the event loop so streaming isn't
+    blocked by the DB roundtrip. Fire-and-forget — the chat response has
+    already been delivered to the client by the time this runs."""
+    await asyncio.to_thread(_write_audit_to_db, record)
+
+
 def get_conversation() -> ConversationService:
     global _conversation
     if _conversation is None:
-        _conversation = ConversationService(retrieval=get_service(), llm=GeminiClient())
+        _conversation = ConversationService(
+            retrieval=get_service(),
+            llm=GeminiClient(),
+            audit_sink=_audit_sink,
+        )
     return _conversation
 
 
@@ -117,10 +161,15 @@ async def chat(req: ChatRequest):
     """SSE stream of intent / triage / medicines / token / done / error events."""
     convo = get_conversation()
     history = [ChatMessageIn(role=m.role, text=m.text) for m in req.messages]
+    rid = request_id_var.get()
 
     async def sse_stream():
         try:
-            async for event in convo.stream_turn(history, profile=req.profile):
+            async for event in convo.stream_turn(
+                history,
+                profile=req.profile,
+                request_id=rid if rid != "-" else None,
+            ):
                 yield f"event: {event.kind}\ndata: {json.dumps(event.payload, ensure_ascii=False)}\n\n"
         except Exception:
             logger.exception("Unhandled error while streaming /chat SSE response")

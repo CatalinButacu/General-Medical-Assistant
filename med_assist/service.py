@@ -13,10 +13,11 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import pickle
 import re
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import TYPE_CHECKING, Iterable, Optional
 
 import faiss
 
@@ -28,6 +29,11 @@ from med_assist.retrieval.dense import DenseRetriever
 from med_assist.retrieval.fusion import reciprocal_rank_fusion
 from med_assist.retrieval.sparse import SparseRetriever
 from med_assist.triage.classifier import TriageDecision, classify
+
+if TYPE_CHECKING:
+    from med_assist.retrieval.rerank import Reranker
+
+log = logging.getLogger("medassist.service")
 
 # Romanian + English stopwords + pharma packaging boilerplate that adds noise
 # to OCR-text matching. Kept here next to match_by_name() so the BM25-ladder
@@ -89,10 +95,28 @@ class RetrievalService:
         self.sparse = SparseRetriever(self.bm25, self.chunks)
 
         self._medicines_by_id: dict[str, Medicine] = {m.id: m for m in load_medicines()}
+
+        # Cross-encoder reranker is opt-out via env (default on). Lazy-loaded
+        # on first /chat turn so test/import paths don't pay the model load.
+        self._rerank_enabled: bool = os.getenv("RERANK_ENABLED", "true").lower() not in ("0", "false", "no")
+        self._rerank_top_n: int = int(os.getenv("RERANK_TOP_N", "30"))
+        self._reranker: Optional["Reranker"] = None
+
         logging.info(
-            "RetrievalService ready: %d chunks across %d medicines (model=%s)",
+            "RetrievalService ready: %d chunks across %d medicines (model=%s, rerank=%s top_n=%d)",
             len(self.chunks), len(self._medicines_by_id), model_id,
+            "on" if self._rerank_enabled else "off", self._rerank_top_n,
         )
+
+    def _get_reranker(self) -> Optional["Reranker"]:
+        """Lazy-load the cross-encoder. First call downloads / mmaps the model."""
+        if not self._rerank_enabled:
+            return None
+        if self._reranker is None:
+            from med_assist.retrieval.rerank import Reranker
+            log.info("loading cross-encoder reranker (first /chat after boot will be slower)")
+            self._reranker = Reranker()
+        return self._reranker
 
     @staticmethod
     def _load_chunks(path: Path) -> list[Chunk]:
@@ -147,6 +171,14 @@ class RetrievalService:
         fused = reciprocal_rank_fusion([dense_hits, sparse_hits], top_k=top_k_chunks)
         if rx_filter is not None:
             fused = [h for h in fused if h.chunk.metadata.get("rx_status") in rx_filter]
+
+        # Cross-encoder rerank on top-N fused chunks before group-by-medicine.
+        # Empirically the biggest single-step retrieval quality lift on hybrid
+        # pipelines (MRR@3 ~0.43 → 0.61 in the literature). Skipped silently
+        # when RERANK_ENABLED=false or for trivially short result lists.
+        reranker = self._get_reranker()
+        if reranker is not None and len(fused) > 1:
+            fused = reranker.rerank(query, fused, top_k=min(len(fused), self._rerank_top_n))
 
         by_med: dict[str, dict] = {}
         for hit in fused:

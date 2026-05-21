@@ -18,8 +18,9 @@ naive: `intent`, `triage`, `medicines`, `token`, `done`, `error`.
 
 from __future__ import annotations
 
+import asyncio
 import logging
-from typing import Any, AsyncIterator, Optional
+from typing import Any, AsyncIterator, Awaitable, Callable, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -84,6 +85,64 @@ class ConversationOutcome(BaseModel):
     full_text: str = ""
     used_llm: bool = True
     error: Optional[str] = None
+
+
+class AuditRecord(BaseModel):
+    """One turn's full forensic context. Written to `triage_audit_log` for
+    compliance / 'why did the model say X' debugging. Fields mirror the DB
+    schema 1:1; see db/schema.sql."""
+
+    user_id: Optional[str] = None
+    request_id: Optional[str] = None
+    user_input: str
+    retrieved: list[dict] = Field(default_factory=list)
+    triage_label: Optional[str] = None
+    red_flags: list[str] = Field(default_factory=list)
+    intent_label: Optional[str] = None
+    intent_confidence: Optional[float] = None
+    phase: Optional[str] = None
+    assistant_output: Optional[str] = None
+    citation_valid: Optional[bool] = None
+
+
+# A sink that the orchestrator calls once per turn with the populated record.
+# Sync callables get called inline; async ones are awaited. Errors are caught
+# and logged — a broken audit sink must never break the chat.
+AuditSink = Callable[[AuditRecord], Union[None, Awaitable[None]]]
+
+
+def _check_citation(text: Optional[str], medicines: list[Medicine]) -> Optional[bool]:
+    """Did the LLM's reply mention at least one retrieved medicine?
+
+    Substring match (case-insensitive) on trade_name, DCI, or ATC code.
+    Returns None when there are no medicines (followup / emergency), so the
+    caller can leave citation_valid as 'not applicable' in those phases.
+    """
+    if not medicines:
+        return None
+    body = (text or "").lower()
+    if not body.strip():
+        return False
+    for med in medicines:
+        if med.trade_name and med.trade_name.lower() in body:
+            return True
+        if med.dci and len(med.dci) > 3 and med.dci.lower() in body:
+            return True
+        if med.atc_code and med.atc_code.lower() in body:
+            return True
+    return False
+
+
+def _retrieved_for_audit(hits: list[MedicineHit]) -> list[dict]:
+    return [
+        {
+            "medicine_id": h.medicine.id,
+            "trade_name": h.medicine.trade_name,
+            "atc_code": h.medicine.atc_code,
+            "score": float(h.score),
+        }
+        for h in hits
+    ]
 
 
 # SSE payload contracts mirrored 1:1 by src/types/index.ts. Constructing them as
@@ -198,21 +257,36 @@ class ConversationService:
         retrieval: RetrievalService,
         llm: GeminiClient,
         intent: Optional[IntentClassifier] = None,
+        audit_sink: Optional[AuditSink] = None,
     ):
         self.retrieval = retrieval
         self.llm = llm
         # The intent classifier needs the medicine catalogue; pull it
         # from the retrieval service so callers don't have to thread it.
         self.intent = intent or IntentClassifier(retrieval.medicines())
+        self.audit_sink = audit_sink
 
     @staticmethod
     def _trim_history(messages: list[ChatMessageIn]) -> list[ChatMessageIn]:
         return messages[-MAX_HISTORY_TURNS:] if len(messages) > MAX_HISTORY_TURNS else list(messages)
 
+    async def _emit_audit(self, record: AuditRecord) -> None:
+        """Call the audit sink (sync or async). Never raises."""
+        if self.audit_sink is None:
+            return
+        try:
+            result = self.audit_sink(record)
+            if asyncio.iscoroutine(result):
+                await result
+        except Exception:
+            log.exception("audit_sink failed; record dropped (request_id=%s)", record.request_id)
+
     async def stream_turn(
         self,
         history: list[ChatMessageIn],
         profile: Any = None,
+        user_id: Optional[str] = None,
+        request_id: Optional[str] = None,
     ) -> AsyncIterator[ChatStreamEvent]:
         if not history:
             yield ChatStreamEvent(kind="error", payload={"message": "empty history"})
@@ -224,6 +298,11 @@ class ConversationService:
             return
 
         typed_profile = _coerce_profile(profile)
+        audit = AuditRecord(
+            user_id=user_id,
+            request_id=request_id,
+            user_input=last_user.text,
+        )
 
         # Step 1: red-flag scan ALWAYS runs first — even a medicine-lookup
         # query gets the emergency layer because a user could write
@@ -231,6 +310,9 @@ class ConversationService:
         flags = scan_redflags(last_user.text)
         if has_emergency(flags) or has_urgent(flags):
             primary = next(f for f in flags if f.severity in ("emergency", "urgent"))
+            audit.phase = "emergency"
+            audit.triage_label = "EMERGENCY"
+            audit.red_flags = [f.name for f in flags]
             yield ChatStreamEvent(kind="triage", payload={
                 "label": "EMERGENCY",
                 "rationale": f"Detectat: {primary.description}.",
@@ -239,10 +321,13 @@ class ConversationService:
                 "red_flags": [RedFlagPayload.from_red_flag(f).model_dump() for f in flags],
             })
             yield ChatStreamEvent(kind="done", payload={"used_llm": False, "phase": "emergency"})
+            await self._emit_audit(audit)
             return
 
         # Step 2: intent classification on the LAST user turn.
         intent_result = self.intent.classify(last_user.text)
+        audit.intent_label = intent_result.label
+        audit.intent_confidence = float(intent_result.confidence)
         yield ChatStreamEvent(kind="intent", payload=IntentPayload.from_intent(intent_result).model_dump())
 
         if (
@@ -254,16 +339,20 @@ class ConversationService:
                 history=history,
                 medicine=intent_result.medicine,
                 profile=typed_profile,
+                audit=audit,
             ):
                 yield ev
+            await self._emit_audit(audit)
             return
 
         # Step 3: symptom-triage branch (legacy flow).
         async for ev in self._handle_symptom_triage(
             history=history,
             profile=typed_profile,
+            audit=audit,
         ):
             yield ev
+        await self._emit_audit(audit)
 
     async def _handle_explain(
         self,
@@ -271,15 +360,32 @@ class ConversationService:
         history: list[ChatMessageIn],
         medicine: Medicine,
         profile: Optional[UserProfile],
+        audit: AuditRecord,
     ) -> AsyncIterator[ChatStreamEvent]:
         """Emit the medicine card and stream a grounded explanation."""
+        audit.phase = "explain"
+        audit.retrieved = [{
+            "medicine_id": medicine.id,
+            "trade_name": medicine.trade_name,
+            "atc_code": medicine.atc_code,
+            "score": 1.0,
+        }]
+
         yield ChatStreamEvent(kind="medicines", payload={
             "items": [MedicineCardPayload.from_medicine(medicine).model_dump()],
         })
 
         system = render_explain(medicine=medicine, profile=profile)
-        async for ev in self._stream_llm_yielding(history=history, system=system):
+        parts: list[str] = []
+        async for ev in self._stream_llm_yielding(history=history, system=system, output_accumulator=parts):
             yield ev
+        audit.assistant_output = "".join(parts)
+        audit.citation_valid = _check_citation(audit.assistant_output, [medicine])
+        if audit.citation_valid is False:
+            log.warning(
+                "citation_valid=False on explain phase (medicine=%s request_id=%s)",
+                medicine.trade_name, audit.request_id,
+            )
         yield ChatStreamEvent(kind="done", payload={"used_llm": True, "phase": "explain"})
 
     async def _handle_symptom_triage(
@@ -287,6 +393,7 @@ class ConversationService:
         *,
         history: list[ChatMessageIn],
         profile: Optional[UserProfile],
+        audit: AuditRecord,
     ) -> AsyncIterator[ChatStreamEvent]:
         user_messages = [m for m in history if m.role == "user"]
         user_turn_count = len(user_messages)
@@ -297,6 +404,8 @@ class ConversationService:
             top_k_medicines=TOP_K_MEDICINES,
             otc_only=True,
         )
+        audit.retrieved = _retrieved_for_audit(decision.medicine_hits)
+        audit.red_flags = [f.name for f in decision.red_flags]
 
         has_profile = profile is not None and profile.has_meaningful_data()
         min_followups = MIN_FOLLOWUPS_WITH_PROFILE if has_profile else MIN_FOLLOWUPS_NO_PROFILE
@@ -305,6 +414,8 @@ class ConversationService:
         in_followup_phase = user_turn_count < min_followups or not (strong_match or hit_cap)
 
         if in_followup_phase:
+            audit.phase = "followup"
+            audit.triage_label = "FOLLOWUP"
             yield ChatStreamEvent(kind="triage", payload={
                 "label": "FOLLOWUP",
                 "rationale": f"Colectare informații (întrebarea {user_turn_count}, prag {min_followups}).",
@@ -324,11 +435,16 @@ class ConversationService:
                 retrieval_hint=retrieval_hint_from_hits(decision.medicine_hits),
                 forced_topic=forced_topic,
             )
-            async for ev in self._stream_llm_yielding(history=history, system=system):
+            parts: list[str] = []
+            async for ev in self._stream_llm_yielding(history=history, system=system, output_accumulator=parts):
                 yield ev
+            audit.assistant_output = "".join(parts)
+            # Followups don't recommend; citation_valid stays None.
             yield ChatStreamEvent(kind="done", payload={"used_llm": True, "phase": "followup"})
             return
 
+        audit.phase = "recommend"
+        audit.triage_label = decision.label
         yield ChatStreamEvent(kind="triage", payload={
             "label": decision.label,
             "rationale": decision.rationale,
@@ -353,19 +469,33 @@ class ConversationService:
                 profile=profile,
                 forced_low_confidence=True,
             )
-        async for ev in self._stream_llm_yielding(history=history, system=system):
+        parts = []
+        async for ev in self._stream_llm_yielding(history=history, system=system, output_accumulator=parts):
             yield ev
+        audit.assistant_output = "".join(parts)
+        audit.citation_valid = _check_citation(
+            audit.assistant_output,
+            [h.medicine for h in decision.medicine_hits] if strong_match else [],
+        )
+        if strong_match and audit.citation_valid is False:
+            log.warning(
+                "citation_valid=False on recommend phase — answer doesn't reference retrieved medicines "
+                "(request_id=%s, hits=%d)", audit.request_id, len(decision.medicine_hits),
+            )
         yield ChatStreamEvent(kind="done", payload={"used_llm": True, "phase": "recommend"})
 
     async def _stream_llm_yielding(
         self,
         history: list[ChatMessageIn],
         system: str,
+        output_accumulator: Optional[list[str]] = None,
     ) -> AsyncIterator[ChatStreamEvent]:
         trimmed = self._trim_history(history)
         contents = build_history([{"role": m.role, "text": m.text} for m in trimmed])
         try:
             async for chunk in self.llm.stream(system_instruction=system, contents=contents):
+                if output_accumulator is not None:
+                    output_accumulator.append(chunk)
                 yield ChatStreamEvent(kind="token", payload={"text": chunk})
         except Exception as exc:
             log.exception("LLM stream failed")

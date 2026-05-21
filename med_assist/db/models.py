@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import JSON, Boolean, CheckConstraint, Date, DateTime, ForeignKey, Integer, String, Text, Uuid, func
+from sqlalchemy import JSON, Boolean, CheckConstraint, Date, DateTime, Float, ForeignKey, Integer, String, Text, Uuid, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -84,3 +84,28 @@ class ChatMessage(Base):
     __table_args__ = (
         CheckConstraint("role IN ('user','assistant')", name="chat_role_enum"),
     )
+
+
+class TriageAuditLog(Base):
+    """One row per /chat turn — input, retrieved evidence, rule fired, output.
+
+    Written by ConversationService at the end of stream_turn(). Forensic /
+    compliance store: 'why did the model recommend X?' answers from this table
+    without re-running the model. Maps 1:1 to triage_audit_log in schema.sql.
+    """
+
+    __tablename__ = "triage_audit_log"
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[str | None] = mapped_column(Text)
+    request_id: Mapped[str | None] = mapped_column(Text, index=True)
+    user_input: Mapped[str] = mapped_column(Text, nullable=False)
+    retrieved: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    triage_label: Mapped[str | None] = mapped_column(Text)
+    red_flags: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    intent_label: Mapped[str | None] = mapped_column(Text)
+    intent_confidence: Mapped[float | None] = mapped_column(Float)
+    phase: Mapped[str | None] = mapped_column(Text)
+    assistant_output: Mapped[str | None] = mapped_column(Text)
+    citation_valid: Mapped[bool | None] = mapped_column(Boolean)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
