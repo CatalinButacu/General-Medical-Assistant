@@ -31,7 +31,7 @@ export interface Message {
  * followup-or-recommend loop.
  */
 export interface IntentEvent {
-    label: 'SYMPTOM_TRIAGE' | 'MEDICINE_LOOKUP' | 'OUT_OF_SCOPE';
+    label: 'SYMPTOM_TRIAGE' | 'MEDICINE_LOOKUP';
     confidence: number;
     matched_terms: string[];
     rationale: string;

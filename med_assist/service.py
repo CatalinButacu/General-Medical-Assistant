@@ -14,18 +14,65 @@ from __future__ import annotations
 import json
 import logging
 import pickle
+import re
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, Optional
 
 import faiss
 
 from med_assist.data.loader import load_medicines
-from med_assist.data.models import Chunk, Medicine, MedicineHit
+from med_assist.data.models import Chunk, Medicine, MedicineHit, RetrievalHit
 from med_assist.index.builder import INDEX_DIR
+from med_assist.observability import observe
 from med_assist.retrieval.dense import DenseRetriever
 from med_assist.retrieval.fusion import reciprocal_rank_fusion
 from med_assist.retrieval.sparse import SparseRetriever
 from med_assist.triage.classifier import TriageDecision, classify
+
+# Romanian + English stopwords + pharma packaging boilerplate that adds noise
+# to OCR-text matching. Kept here next to match_by_name() so the BM25-ladder
+# logic lives in one place rather than spread between the route and the service.
+_OCR_STOPWORDS = frozenset({
+    "de", "la", "cu", "si", "in", "pe", "din", "sau", "pentru", "fara", "intre", "doar",
+    "the", "and", "of", "for", "with", "to", "in",
+    "lot", "exp", "expirare", "valabil", "pana", "fabricat", "import", "importator",
+    "produs", "prospect", "rcp", "atc", "anmdm", "comprimate", "capsule", "filmate",
+    "sirop", "unguent", "crema", "drajeuri", "orala", "soluție", "suspensie", "sol",
+    "mg", "ml", "mcg", "ui", "iu", "ug", "tablete", "ambalaj", "buc", "buc.",
+})
+
+
+def _strip_pharma_suffixes(name: str) -> str:
+    """Strip dose/form noise so a partial OCR like 'PARACETAMOL ZENTIVA 500MG' still matches."""
+    s = re.sub(r"\b\d+([\.,]\d+)?\s*(mg/ml|mg|ml|mcg|μg|g|ui|iu)\b", " ", name, flags=re.I)
+    s = re.sub(r"\b(comprimate|capsule|sirop|unguent|drajeuri|filmate|orala|suspensie|crema|sol\.?)\b", " ", s, flags=re.I)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def _ocr_query_phrases(all_text: str) -> list[str]:
+    """Per-line phrases + 2-3-word substrings from an OCR dump, filtered down
+    to alphabetic-leaning phrases that aren't entirely stopwords."""
+    phrases: list[str] = []
+    seen: set[str] = set()
+    for line in all_text.splitlines():
+        cleaned = re.sub(r"[^A-Za-zĂÂÎȘȚăâîșț0-9 \-]", " ", line)
+        cleaned = re.sub(r"\s+", " ", cleaned).strip()
+        if not cleaned:
+            continue
+        words = [w for w in cleaned.split() if len(w) >= 3 and not w.isdigit() and w.lower() not in _OCR_STOPWORDS]
+        if not words:
+            continue
+        full = " ".join(words)
+        if full not in seen:
+            seen.add(full)
+            phrases.append(full)
+        for n in (3, 2):
+            for i in range(len(words) - n + 1):
+                window = " ".join(words[i:i + n])
+                if window not in seen:
+                    seen.add(window)
+                    phrases.append(window)
+    return phrases[:25]
 
 
 class RetrievalService:
@@ -60,8 +107,12 @@ class RetrievalService:
                 ))
         return out
 
+    def medicines(self) -> Iterable[Medicine]:
+        """Read-only view of the loaded medicine catalogue."""
+        return self._medicines_by_id.values()
+
     @staticmethod
-    def _dedup_by_medicine(hits: list) -> list:
+    def _dedup_by_medicine(hits: list[RetrievalHit]) -> list[RetrievalHit]:
         """Keep only the single best-scoring chunk per medicine, preserving order.
 
         Without this, near-duplicate SKU chunks (e.g. 3 SINUPRET variants each
@@ -69,7 +120,7 @@ class RetrievalService:
         the second-best medicine.
         """
         seen: set[str] = set()
-        out = []
+        out: list[RetrievalHit] = []
         new_rank = 0
         for h in hits:
             mid = h.chunk.medicine_id
@@ -122,6 +173,7 @@ class RetrievalService:
             ))
         return med_hits, sparse_signal
 
+    @observe(name="retrieval.advise")
     def advise(
         self,
         query: str,
@@ -136,3 +188,50 @@ class RetrievalService:
         rx_filter = {"OTC", "MIXED"} if otc_only else None
         med_hits, sparse_signal = self._retrieve(query, top_k_medicines, rx_filter)
         return classify(query, medicine_hits=med_hits, sparse_signal=sparse_signal)
+
+    @observe(name="retrieval.match_by_name")
+    def match_by_name(
+        self,
+        trade_name: Optional[str],
+        all_text: str = "",
+        top_k_candidates: int = 3,
+    ) -> list[MedicineHit]:
+        """OCR-driven trade-name matcher used by /scan.
+
+        Two-stage BM25 ladder: (1) the chosen `trade_name` plus a dose-stripped
+        variant; (2) if the best score is still weak, sweep multi-word phrases
+        from the full OCR dump. Returns the top-k medicines ordered by score.
+        """
+        best_by_id: dict[str, RetrievalHit] = {}
+
+        def _record(hits: list[RetrievalHit]) -> None:
+            for h in hits:
+                mid = h.chunk.medicine_id
+                prev = best_by_id.get(mid)
+                if prev is None or h.score > prev.score:
+                    best_by_id[mid] = h
+
+        if trade_name:
+            _record(self._dedup_by_medicine(self.sparse.search(trade_name, top_k=5)))
+            stripped = _strip_pharma_suffixes(trade_name)
+            if stripped and stripped.upper() != trade_name.upper():
+                _record(self._dedup_by_medicine(self.sparse.search(stripped, top_k=5)))
+
+        top_so_far = max((h.score for h in best_by_id.values()), default=0.0)
+        if top_so_far < 0.05 and all_text:
+            for phrase in _ocr_query_phrases(all_text):
+                _record(self._dedup_by_medicine(self.sparse.search(phrase, top_k=3)))
+
+        sorted_hits = sorted(best_by_id.values(), key=lambda h: -h.score)[:top_k_candidates]
+        out: list[MedicineHit] = []
+        for hit in sorted_hits:
+            med = self._medicines_by_id.get(hit.chunk.medicine_id)
+            if med is None:
+                continue
+            out.append(MedicineHit(
+                medicine=med,
+                score=hit.score,
+                best_chunk=hit.chunk,
+                supporting_chunks=[hit.chunk],
+            ))
+        return out

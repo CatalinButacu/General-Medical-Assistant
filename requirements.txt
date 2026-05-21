@@ -29,3 +29,9 @@ requests>=2.32.0
 SQLAlchemy>=2.0.0
 psycopg[binary]>=3.1.0
 pyjwt[crypto]>=2.8.0
+
+# --- tracing (optional, opt-in via env vars) ---
+# Langfuse @observe spans light up only when LANGFUSE_PUBLIC_KEY / _SECRET_KEY
+# / _HOST are set; med_assist/observability.py imports defensively so missing
+# the package or the env vars is a no-op rather than a crash.
+langfuse>=3.0.0

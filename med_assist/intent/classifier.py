@@ -23,7 +23,7 @@ from typing import Iterable, Optional
 
 from med_assist.data.models import Medicine
 from med_assist.intent.types import IntentResult
-
+from med_assist.observability import observe
 
 # These tokens are real medicine trade names in ANMDM but also everyday
 # Romanian words, so a bare occurrence is not enough to call MEDICINE_LOOKUP.
@@ -178,6 +178,7 @@ class IntentClassifier:
 
         return None, []
 
+    @observe(name="intent.classify")
     def classify(self, text: str) -> IntentResult:
         folded = _fold(text)
         if not folded.strip():

@@ -9,6 +9,8 @@ from typing import AsyncIterator, Iterable
 from google import genai
 from google.genai import types
 
+from med_assist.observability import observe
+
 log = logging.getLogger("medassist.llm")
 
 DEFAULT_MODEL = "gemini-3-flash-preview"
@@ -25,6 +27,7 @@ class GeminiClient:
         self._client = genai.Client(api_key=key)
         self._model_id = model_id
 
+    @observe(name="gemini.stream", as_type="generation")
     async def stream(
         self,
         system_instruction: str,

@@ -11,7 +11,6 @@ from med_assist.data.models import Medicine
 IntentLabel = Literal[
     "SYMPTOM_TRIAGE",
     "MEDICINE_LOOKUP",
-    "OUT_OF_SCOPE",
 ]
 
 
