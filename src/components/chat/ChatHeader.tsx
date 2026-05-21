@@ -1,4 +1,4 @@
-import { Bot, History, Loader2, Plus, Wifi, WifiOff, X } from 'lucide-react';
+import { Bot, History, Loader2, Plus, Share2, Wifi, WifiOff, X } from 'lucide-react';
 
 interface ChatHeaderProps {
     onBack: () => void;
@@ -6,8 +6,10 @@ interface ChatHeaderProps {
     historyEnabled: boolean;
     sessionsCount: number;
     isStreaming: boolean;
+    canExport: boolean;
     onNewSession: () => void;
     onOpenHistory: () => void;
+    onExport: () => void;
 }
 
 export function ChatHeader({
@@ -16,8 +18,10 @@ export function ChatHeader({
     historyEnabled,
     sessionsCount,
     isStreaming,
+    canExport,
     onNewSession,
     onOpenHistory,
+    onExport,
 }: ChatHeaderProps) {
     return (
         <header className="bg-white border-b border-gray-100 shadow-sm flex-shrink-0">
@@ -52,32 +56,45 @@ export function ChatHeader({
                         </div>
                     </div>
                 </div>
-                {historyEnabled ? (
-                    <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1">
+                    {canExport && (
                         <button
-                            onClick={onNewSession}
+                            onClick={onExport}
                             className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-800"
-                            aria-label="Conversație nouă"
-                            title="Conversație nouă"
+                            aria-label="Descarcă sau partajează conversația"
+                            title="Descarcă sau partajează"
                             disabled={isStreaming}
                         >
-                            <Plus size={18} />
+                            <Share2 size={18} />
                         </button>
-                        <button
-                            onClick={onOpenHistory}
-                            className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-800 relative"
-                            aria-label="Istoric conversații"
-                            title="Istoric"
-                        >
-                            <History size={18} />
-                            {sessionsCount > 0 && (
-                                <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-blue-500 rounded-full" />
-                            )}
-                        </button>
-                    </div>
-                ) : (
-                    <div className="w-9 h-9" />
-                )}
+                    )}
+                    {historyEnabled ? (
+                        <>
+                            <button
+                                onClick={onNewSession}
+                                className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-800"
+                                aria-label="Conversație nouă"
+                                title="Conversație nouă"
+                                disabled={isStreaming}
+                            >
+                                <Plus size={18} />
+                            </button>
+                            <button
+                                onClick={onOpenHistory}
+                                className="p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-800 relative"
+                                aria-label="Istoric conversații"
+                                title="Istoric"
+                            >
+                                <History size={18} />
+                                {sessionsCount > 0 && (
+                                    <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                                )}
+                            </button>
+                        </>
+                    ) : (
+                        !canExport && <div className="w-9 h-9" />
+                    )}
+                </div>
             </div>
         </header>
     );

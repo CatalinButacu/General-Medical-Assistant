@@ -4,6 +4,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { LogIn, Sparkles, X } from 'lucide-react';
 import { ApiError, checkHealth, isApiConfigured, streamChat } from '../services/api';
 import type { ChatProfilePayload, ChatTurn } from '../services/api';
+import { toast } from 'sonner';
 import { useUserApi } from '../hooks/useUserApi';
 import { useChatHistory } from '../hooks/useChatHistory';
 import { userPaths, type ProfileDTO } from '../services/userApi';
@@ -12,6 +13,7 @@ import { ChatHeader } from '../components/chat/ChatHeader';
 import { HistoryDrawer } from '../components/chat/HistoryDrawer';
 import { MessageBubble } from '../components/chat/MessageBubble';
 import { Composer } from '../components/chat/Composer';
+import { exportConversation } from '../lib/exportConversation';
 
 const QUICK_QUERIES = [
     { label: 'durere de cap',     query: 'mă doare capul și am febră' },
@@ -250,6 +252,20 @@ export default function Chat() {
         sendMessage(q);
     };
 
+    // Only worth offering the export action after at least one real exchange.
+    const realMessageCount = messages.filter(m => m.id !== 'welcome').length;
+    const canExport = realMessageCount >= 2 && !isStreaming;
+
+    const handleExport = async () => {
+        if (!canExport) return;
+        const result = await exportConversation(messages);
+        if (result === 'shared') toast.success('Conversație partajată');
+        else if (result === 'copied') toast.success('Conversația a fost copiată în clipboard');
+        else if (result === 'downloaded') toast.success('Fișierul .md a fost descărcat');
+        else if (result === 'unsupported') toast.error('Browserul nu permite această acțiune');
+        // 'cancelled' is silent — the user explicitly dismissed the share sheet.
+    };
+
     return (
         <div className="h-full flex flex-col">
             <ChatHeader
@@ -258,8 +274,10 @@ export default function Chat() {
                 historyEnabled={history.enabled}
                 sessionsCount={history.sessions.length}
                 isStreaming={isStreaming}
+                canExport={canExport}
                 onNewSession={() => { history.startNewSession(); setMessages([welcomeMessage]); }}
                 onOpenHistory={() => setHistoryOpen(true)}
+                onExport={handleExport}
             />
 
             {historyOpen && (
