@@ -1,14 +1,22 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Camera, MessageCircle, Shield, Package, Heart, AlertTriangle, LogIn, LogOut, User as UserIcon } from 'lucide-react';
 import { useUserApi } from '../hooks/useUserApi';
 import { userPaths, type ProfileDTO } from '../services/userApi';
+import { OnboardingTour, shouldShowOnboarding } from '../components/OnboardingTour';
 
 export default function Home() {
   const navigate = useNavigate();
   const { loginWithRedirect, logout, user, isAuthenticated, isLoading } = useAuth0();
   const apiCall = useUserApi();
+  const [showTour, setShowTour] = useState(false);
+
+  useEffect(() => {
+    // Fire the first-launch tour for any visitor (auth or not) who hasn't
+    // seen it yet. The tour itself sets the localStorage flag on dismiss.
+    setShowTour(shouldShowOnboarding());
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated || !user?.sub) return;
@@ -58,6 +66,7 @@ export default function Home() {
 
   return (
     <div className="min-h-full">
+      {showTour && <OnboardingTour onDone={() => setShowTour(false)} />}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-md mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-2">
