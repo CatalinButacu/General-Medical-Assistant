@@ -1,4 +1,4 @@
-"""Gemini Vision OCR for medicine packages. Returns structured JSON."""
+"""Gemini Vision OCR for medicine packages. Returns a typed VisionExtraction."""
 
 from __future__ import annotations
 
@@ -9,10 +9,26 @@ from typing import Optional
 
 from google import genai
 from google.genai import types
+from pydantic import BaseModel
+
+from med_assist.observability import observe
 
 log = logging.getLogger("medassist.vision")
 
 DEFAULT_VISION_MODEL = os.getenv("VISION_MODEL", "gemini-2.5-flash")
+
+
+class VisionExtraction(BaseModel):
+    """OCR result for a medicine package. Mirrors the SSE `ScanExtraction`
+    shape consumed by the frontend; field names are snake_case to match
+    the JSON schema enforced on Gemini's structured output."""
+
+    trade_name: Optional[str] = None
+    expiration_date: Optional[str] = None
+    dosage: Optional[str] = None
+    form: Optional[str] = None
+    confidence: float = 0.0
+    all_text: str = ""
 
 EXTRACTION_PROMPT_RO = """\
 Ești un asistent care identifică medicamente din fotografia ambalajului.
@@ -59,9 +75,10 @@ class VisionClient:
         self._client = genai.Client(api_key=key)
         self._model_id = model_id
 
-    def extract_medicine(self, image_bytes: bytes, mime_type: str = "image/jpeg") -> dict:
-        """Returns {trade_name, expiration_date, dosage, form, confidence, all_text}.
-        On API errors or empty responses, surfaces the cause via all_text so the frontend can show it."""
+    @observe(name="gemini.vision.extract_medicine")
+    def extract_medicine(self, image_bytes: bytes, mime_type: str = "image/jpeg") -> VisionExtraction:
+        """OCR a medicine package. On API errors or empty responses, the
+        diagnostic is surfaced via `all_text` so the frontend can show it."""
         config = types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=_RESPONSE_SCHEMA,  # type: ignore[arg-type]
@@ -96,15 +113,11 @@ class VisionClient:
             data = json.loads(raw)
             if not data.get("all_text"):
                 data["all_text"] = raw
-            return data
+            return VisionExtraction.model_validate(data)
         except json.JSONDecodeError as exc:
             log.warning("vision returned non-JSON: %s", raw[:500])
             return _empty_extraction(f"[VISION NON-JSON] {exc}\n--- raw response ---\n{raw[:1500]}")
 
 
-def _empty_extraction(diagnostic: str) -> dict:
-    return {
-        "trade_name": None, "expiration_date": None,
-        "dosage": None, "form": None, "confidence": 0.0,
-        "all_text": diagnostic,
-    }
+def _empty_extraction(diagnostic: str) -> VisionExtraction:
+    return VisionExtraction(all_text=diagnostic)

@@ -146,7 +146,18 @@ Beyond auth, three middleware-level concerns run on every request:
 
 - **Rate limiting** (`api/ratelimit.py`) — in-memory token bucket per `X-Forwarded-For` IP. `/chat` capped at 30/min (burst 10), `/scan` at 10/min (burst 3). Returns `429` with `Retry-After` header.
 - **Request IDs** (`api/middleware.py`) — every request gets a 12-char UUID, returned as `X-Request-ID`. Honored if the client sends one, otherwise generated. Injected into every `LogRecord` via `setLogRecordFactory` so `docker logs | grep req=abcd1234e5f6` traces the full lifecycle of one request.
-- **Structured access log** — one line per request: `13:42:07 [INFO] req=a3f1b2c4d5e6 medassist.access: POST /chat -> 200 (412.3 ms)`. Logger names are namespaced `medassist.{api,auth,chat,vision,llm,access,ratelimit}` — grep-stable across module renames.
+- **Structured access log** — one line per request: `13:42:07 [INFO] req=a3f1b2c4d5e6 medassist.access: POST /chat -> 200 (412.3 ms)`. Logger names are namespaced `medassist.{api,auth,chat,vision,llm,access,ratelimit,tracing}` — grep-stable across module renames.
+
+## Tracing (optional)
+
+Per-turn traces light up in [Langfuse](https://langfuse.com) when three env vars are set: `LANGFUSE_HOST`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` (free-tier cloud or self-hosted both work). `med_assist/observability.py` exposes an `@observe` decorator applied to the hot path:
+
+- `IntentClassifier.classify` — routing decision (label, confidence, matched terms).
+- `RetrievalService.advise` and `match_by_name` — query, hits, score.
+- `GeminiClient.stream` — system prompt, contents, model, token output (typed as a `generation` span).
+- `VisionClient.extract_medicine` — OCR input shape and the structured `VisionExtraction` result.
+
+The decorator is a no-op when `langfuse` isn't installed or the env vars are unset, so dev and CI pay zero cost. The orchestration is unchanged: this is observability, not an agent layer. The agent-design research note in this branch documents why a LangGraph migration is deferred until the project genuinely needs the model to choose between tools.
 
 ## CI/CD
 
@@ -164,7 +175,7 @@ Checkout → `npm ci` → `npm run check` (tsc) → `npm run build` (Vite). Buil
 
 ### `quality.yml` — "Quality" (push + PR)
 - **Frontend job:** `npm run lint` (ESLint, no errors allowed) + `npm run check` (`tsc --noEmit`).
-- **Backend job:** install ruff + pytest + minimal deps → `ruff check med_assist/ data_acquisition/scripts/` → `pytest med_assist/tests/` (38 tests at last count).
+- **Backend job:** install ruff + pytest + minimal deps → `ruff check med_assist/ data_acquisition/scripts/` → `pytest med_assist/tests/`.
 
 No `continue-on-error` — broken types or red tests block the merge.
 
@@ -200,7 +211,7 @@ psql "$DATABASE_URL" -f db/schema.sql   # idempotent — safe to re-run
 
 Tests:
 ```bash
-python -m pytest med_assist/tests/ -q   # 38 tests, all in-memory SQLite
+python -m pytest med_assist/tests/ -q   # all tests run against in-memory SQLite
 ```
 
 ## Project layout
@@ -262,7 +273,7 @@ General-Medical-Assistant/
 │   ├── index/builder.py                ← rebuild FAISS + BM25 indices
 │   ├── eval/                           ← golden-set runner + metrics
 │   ├── cli/{advise,eval}.py            ← `python -m` entrypoints
-│   └── tests/                          ← pytest suite (38 tests)
+│   └── tests/                          ← pytest suite
 │
 ├── data_acquisition/                   ← ANMDM scraper + RCP parser
 │   ├── scripts/                        ← 01_parse_anmdm → 06_enrich

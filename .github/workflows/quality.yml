@@ -35,7 +35,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install ruff pytest httpx
-          pip install fastapi uvicorn pydantic python-dotenv numpy
+          pip install fastapi uvicorn pydantic python-dotenv numpy jinja2 google-genai
           pip install "SQLAlchemy>=2.0" "pyjwt[crypto]>=2.8"
       - name: Ruff
         run: ruff check med_assist/ data_acquisition/scripts/

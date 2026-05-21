@@ -35,7 +35,7 @@ from med_assist.llm.prompts import (
 from med_assist.profile import UserProfile
 from med_assist.service import RetrievalService
 from med_assist.triage.classifier import TriageDecision
-from med_assist.triage.redflags import has_emergency, has_urgent
+from med_assist.triage.redflags import RedFlag, has_emergency, has_urgent
 from med_assist.triage.redflags import scan as scan_redflags
 
 log = logging.getLogger("medassist.chat")
@@ -86,6 +86,101 @@ class ConversationOutcome(BaseModel):
     error: Optional[str] = None
 
 
+# SSE payload contracts mirrored 1:1 by src/types/index.ts. Constructing them as
+# typed models (rather than free-form dicts) catches field drift between the
+# orchestrator and the frontend at boundary time, not at the next manual test.
+
+
+class RedFlagPayload(BaseModel):
+    name: str
+    category: str
+    description: str
+    severity: str
+    matched_pattern: str
+
+    @classmethod
+    def from_red_flag(cls, rf: RedFlag) -> "RedFlagPayload":
+        return cls(
+            name=rf.name,
+            category=rf.category,
+            description=rf.description,
+            severity=str(rf.severity),
+            matched_pattern=rf.matched_pattern,
+        )
+
+
+class IntentPayload(BaseModel):
+    label: str
+    confidence: float
+    matched_terms: list[str]
+    rationale: str
+    medicine_trade_name: Optional[str]
+
+    @classmethod
+    def from_intent(cls, intent: IntentResult) -> "IntentPayload":
+        return cls(
+            label=intent.label,
+            confidence=float(intent.confidence),
+            matched_terms=list(intent.matched_terms),
+            rationale=intent.rationale,
+            medicine_trade_name=intent.medicine.trade_name if intent.medicine else None,
+        )
+
+
+class MedicineCardPayload(BaseModel):
+    trade_name: str
+    dci: str
+    form: str
+    concentration: str
+    atc_code: str
+    rx_status: str
+    category: str
+    lay_symptoms: list[str]
+    score: float
+    best_chunk_type: str
+    best_chunk_snippet: str
+    rcp_url: str
+    prospect_url: str
+
+    @classmethod
+    def from_medicine_hit(cls, hit: MedicineHit) -> "MedicineCardPayload":
+        med = hit.medicine
+        return cls(
+            trade_name=med.trade_name,
+            dci=med.dci,
+            form=med.form,
+            concentration=med.concentration,
+            atc_code=med.atc_code,
+            rx_status=med.rx_status,
+            category=med.category,
+            lay_symptoms=list(med.lay_symptoms),
+            score=float(hit.score),
+            best_chunk_type=hit.best_chunk.chunk_type,
+            best_chunk_snippet=hit.best_chunk.text[:300],
+            rcp_url=med.rcp_url,
+            prospect_url=med.prospect_url,
+        )
+
+    @classmethod
+    def from_medicine(cls, med: Medicine) -> "MedicineCardPayload":
+        """Compact card for the explain branch — no retrieval score."""
+        return cls(
+            trade_name=med.trade_name,
+            dci=med.dci,
+            form=med.form,
+            concentration=med.concentration,
+            atc_code=med.atc_code,
+            rx_status=med.rx_status,
+            category=med.category,
+            lay_symptoms=list(med.lay_symptoms),
+            score=1.0,
+            best_chunk_type="lay_summary",
+            best_chunk_snippet=(med.lay_description or "")[:300],
+            rcp_url=med.rcp_url,
+            prospect_url=med.prospect_url,
+        )
+
+
 def _coerce_profile(profile: Any) -> Optional[UserProfile]:
     """Accept None, a UserProfile, or a raw dict (legacy callers)."""
     if profile is None:
@@ -108,7 +203,7 @@ class ConversationService:
         self.llm = llm
         # The intent classifier needs the medicine catalogue; pull it
         # from the retrieval service so callers don't have to thread it.
-        self.intent = intent or IntentClassifier(retrieval._medicines_by_id.values())
+        self.intent = intent or IntentClassifier(retrieval.medicines())
 
     @staticmethod
     def _trim_history(messages: list[ChatMessageIn]) -> list[ChatMessageIn]:
@@ -141,14 +236,14 @@ class ConversationService:
                 "rationale": f"Detectat: {primary.description}.",
                 "recommended_action_ro": primary.action_ro,
                 "confidence": 0.0,
-                "red_flags": [_redflag_dto(f) for f in flags],
+                "red_flags": [RedFlagPayload.from_red_flag(f).model_dump() for f in flags],
             })
             yield ChatStreamEvent(kind="done", payload={"used_llm": False, "phase": "emergency"})
             return
 
         # Step 2: intent classification on the LAST user turn.
         intent_result = self.intent.classify(last_user.text)
-        yield ChatStreamEvent(kind="intent", payload=_intent_dto(intent_result))
+        yield ChatStreamEvent(kind="intent", payload=IntentPayload.from_intent(intent_result).model_dump())
 
         if (
             intent_result.label == "MEDICINE_LOOKUP"
@@ -179,7 +274,7 @@ class ConversationService:
     ) -> AsyncIterator[ChatStreamEvent]:
         """Emit the medicine card and stream a grounded explanation."""
         yield ChatStreamEvent(kind="medicines", payload={
-            "items": [_medicine_only_dto(medicine)],
+            "items": [MedicineCardPayload.from_medicine(medicine).model_dump()],
         })
 
         system = render_explain(medicine=medicine, profile=profile)
@@ -215,7 +310,7 @@ class ConversationService:
                 "rationale": f"Colectare informații (întrebarea {user_turn_count}, prag {min_followups}).",
                 "recommended_action_ro": "",
                 "confidence": float(decision.confidence),
-                "red_flags": [_redflag_dto(f) for f in decision.red_flags],
+                "red_flags": [RedFlagPayload.from_red_flag(f).model_dump() for f in decision.red_flags],
             })
             user_history_text = [m.text for m in user_messages]
             forced_topic = (
@@ -239,10 +334,13 @@ class ConversationService:
             "rationale": decision.rationale,
             "recommended_action_ro": decision.recommended_action_ro,
             "confidence": float(decision.confidence),
-            "red_flags": [_redflag_dto(f) for f in decision.red_flags],
+            "red_flags": [RedFlagPayload.from_red_flag(f).model_dump() for f in decision.red_flags],
         })
         if strong_match:
-            medicines_payload = [_medicine_to_dto(h) for h in decision.medicine_hits]
+            medicines_payload = [
+                MedicineCardPayload.from_medicine_hit(h).model_dump()
+                for h in decision.medicine_hits
+            ]
             yield ChatStreamEvent(kind="medicines", payload={"items": medicines_payload})
             system = render_recommend(
                 hits=decision.medicine_hits,
@@ -284,59 +382,3 @@ def _forced_first_followup(hits: list[MedicineHit]) -> str | None:
             if key in cat:
                 return directive
     return None
-
-
-def _redflag_dto(rf) -> dict:
-    return {
-        "name": rf.name, "category": rf.category,
-        "description": rf.description, "severity": rf.severity,
-        "matched_pattern": rf.matched_pattern,
-    }
-
-
-def _intent_dto(intent: IntentResult) -> dict:
-    return {
-        "label": intent.label,
-        "confidence": float(intent.confidence),
-        "matched_terms": list(intent.matched_terms),
-        "rationale": intent.rationale,
-        "medicine_trade_name": intent.medicine.trade_name if intent.medicine else None,
-    }
-
-
-def _medicine_to_dto(hit: MedicineHit) -> dict:
-    med = hit.medicine
-    return {
-        "trade_name": med.trade_name,
-        "dci": med.dci,
-        "form": med.form,
-        "concentration": med.concentration,
-        "atc_code": med.atc_code,
-        "rx_status": med.rx_status,
-        "category": med.category,
-        "lay_symptoms": list(med.lay_symptoms),
-        "score": float(hit.score),
-        "best_chunk_type": hit.best_chunk.chunk_type,
-        "best_chunk_snippet": hit.best_chunk.text[:300],
-        "rcp_url": med.rcp_url,
-        "prospect_url": med.prospect_url,
-    }
-
-
-def _medicine_only_dto(med: Medicine) -> dict:
-    """Compact card shape for the explain branch (no retrieval score)."""
-    return {
-        "trade_name": med.trade_name,
-        "dci": med.dci,
-        "form": med.form,
-        "concentration": med.concentration,
-        "atc_code": med.atc_code,
-        "rx_status": med.rx_status,
-        "category": med.category,
-        "lay_symptoms": list(med.lay_symptoms),
-        "score": 1.0,
-        "best_chunk_type": "lay_summary",
-        "best_chunk_snippet": (med.lay_description or "")[:300],
-        "rcp_url": med.rcp_url,
-        "prospect_url": med.prospect_url,
-    }

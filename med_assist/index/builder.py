@@ -16,7 +16,6 @@ import logging
 import pickle
 import time
 import unicodedata
-from dataclasses import asdict
 from pathlib import Path
 
 import faiss
@@ -112,7 +111,7 @@ def save(index_dir: Path, faiss_index, chunks: list[Chunk], bm25: BM25Okapi, man
     faiss.write_index(faiss_index, str(index_dir / "faiss.index"))
     with (index_dir / "chunks.jsonl").open("w", encoding="utf-8") as f:
         for c in chunks:
-            f.write(json.dumps(asdict(c), ensure_ascii=False) + "\n")
+            f.write(json.dumps(c.model_dump(), ensure_ascii=False) + "\n")
     with (index_dir / "bm25.pkl").open("wb") as f:
         pickle.dump(bm25, f)
     (index_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
