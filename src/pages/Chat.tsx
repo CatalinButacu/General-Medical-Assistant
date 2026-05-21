@@ -42,6 +42,7 @@ export default function Chat() {
     const [isOnline, setIsOnline] = useState<boolean | null>(null);
     const [historyOpen, setHistoryOpen] = useState(false);
     const [quickOpen, setQuickOpen] = useState(false);
+    const [profileActive, setProfileActive] = useState(false);
     const [savePromptDismissed, setSavePromptDismissed] = useState(() => {
         if (typeof window === 'undefined') return false;
         try { return localStorage.getItem(SAVE_PROMPT_DISMISSED_KEY) === '1'; }
@@ -87,6 +88,7 @@ export default function Chat() {
     useEffect(() => {
         if (!user?.sub) {
             profileRef.current = undefined;
+            setProfileActive(false);
             return;
         }
         let cancelled = false;
@@ -94,7 +96,7 @@ export default function Chat() {
             try {
                 const p = await apiCall<ProfileDTO>(userPaths.profile);
                 if (cancelled) return;
-                profileRef.current = {
+                const payload: ChatProfilePayload = {
                     age: p.age ?? undefined,
                     gender: p.gender ?? undefined,
                     isPregnant: p.isPregnant ?? undefined,
@@ -102,6 +104,15 @@ export default function Chat() {
                     conditions: p.conditions ?? [],
                     medications: p.medications ?? [],
                 };
+                profileRef.current = payload;
+                // Mirror the backend's has_meaningful_data() check so the header
+                // pill is honest — pregnancy OR at least one allergy/condition/medication.
+                setProfileActive(
+                    Boolean(payload.isPregnant)
+                    || (payload.allergies?.length ?? 0) > 0
+                    || (payload.conditions?.length ?? 0) > 0
+                    || (payload.medications?.length ?? 0) > 0
+                );
             } catch (err) {
                 console.warn('profile load failed', err);
             }
@@ -277,9 +288,11 @@ export default function Chat() {
                 sessionsCount={history.sessions.length}
                 isStreaming={isStreaming}
                 canExport={canExport}
+                profileActive={profileActive}
                 onNewSession={() => { history.startNewSession(); setMessages([welcomeMessage]); }}
                 onOpenHistory={() => setHistoryOpen(true)}
                 onExport={handleExport}
+                onOpenProfile={() => navigate('/profile')}
             />
 
             {historyOpen && (

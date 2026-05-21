@@ -1,4 +1,4 @@
-import { Bot, History, Loader2, Plus, Share2, Wifi, WifiOff, X } from 'lucide-react';
+import { Bot, History, Loader2, Plus, Share2, ShieldCheck, Wifi, WifiOff, X } from 'lucide-react';
 
 interface ChatHeaderProps {
     onBack: () => void;
@@ -7,9 +7,11 @@ interface ChatHeaderProps {
     sessionsCount: number;
     isStreaming: boolean;
     canExport: boolean;
+    profileActive: boolean;
     onNewSession: () => void;
     onOpenHistory: () => void;
     onExport: () => void;
+    onOpenProfile: () => void;
 }
 
 export function ChatHeader({
@@ -19,9 +21,11 @@ export function ChatHeader({
     sessionsCount,
     isStreaming,
     canExport,
+    profileActive,
     onNewSession,
     onOpenHistory,
     onExport,
+    onOpenProfile,
 }: ChatHeaderProps) {
     return (
         <header className="bg-white border-b border-gray-100 shadow-sm flex-shrink-0">
@@ -39,7 +43,7 @@ export function ChatHeader({
                     </div>
                     <div>
                         <h1 className="text-base font-bold text-gray-800 leading-none">Asistent farmacist</h1>
-                        <div className="flex items-center mt-1.5">
+                        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                             {isOnline === null ? (
                                 <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
                                     <Loader2 className="w-2.5 h-2.5 mr-1 animate-spin" /> Mă conectez…
@@ -52,6 +56,16 @@ export function ChatHeader({
                                 <span className="text-[9px] font-bold text-red-600 uppercase tracking-widest flex items-center bg-red-50 px-1.5 py-0.5 rounded-full">
                                     <WifiOff className="w-2.5 h-2.5 mr-1" /> Indisponibil
                                 </span>
+                            )}
+                            {profileActive && (
+                                <button
+                                    onClick={onOpenProfile}
+                                    className="text-[9px] font-bold text-purple-700 uppercase tracking-widest flex items-center bg-purple-50 px-1.5 py-0.5 rounded-full hover:bg-purple-100 transition-colors"
+                                    aria-label="Profilul tău medical este aplicat la fiecare răspuns. Apasă pentru a-l edita."
+                                    title="Profilul tău medical este aplicat la fiecare răspuns"
+                                >
+                                    <ShieldCheck className="w-2.5 h-2.5 mr-1" /> Profil aplicat
+                                </button>
                             )}
                         </div>
                     </div>
