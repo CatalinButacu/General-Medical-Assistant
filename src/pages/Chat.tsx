@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
-import { Sparkles } from 'lucide-react';
+import { LogIn, Sparkles, X } from 'lucide-react';
 import { ApiError, checkHealth, isApiConfigured, streamChat } from '../services/api';
 import type { ChatProfilePayload, ChatTurn } from '../services/api';
 import { useUserApi } from '../hooks/useUserApi';
@@ -24,9 +24,11 @@ const QUICK_QUERIES = [
 
 const HISTORY_TURNS_TO_SEND = 6;
 
+const SAVE_PROMPT_DISMISSED_KEY = 'med_assist_save_prompt_dismissed';
+
 export default function Chat() {
     const navigate = useNavigate();
-    const { user } = useAuth0();
+    const { user, loginWithRedirect } = useAuth0();
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const abortRef = useRef<AbortController | null>(null);
@@ -37,6 +39,25 @@ export default function Chat() {
     const [isStreaming, setIsStreaming] = useState(false);
     const [isOnline, setIsOnline] = useState<boolean | null>(null);
     const [historyOpen, setHistoryOpen] = useState(false);
+    const [savePromptDismissed, setSavePromptDismissed] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        try { return localStorage.getItem(SAVE_PROMPT_DISMISSED_KEY) === '1'; }
+        catch { return false; }
+    });
+
+    // Show the 'log in to save this conversation' banner only when the user
+    // is anonymous AND has had 2+ real turns AND hasn't dismissed it before.
+    // Two-turns gate prevents the banner from flashing on the welcome screen.
+    const showSavePrompt = useMemo(() => {
+        if (user || savePromptDismissed) return false;
+        const realUserTurns = messages.filter(m => m.id !== 'welcome' && m.sender === 'user').length;
+        return realUserTurns >= 2;
+    }, [user, savePromptDismissed, messages]);
+
+    const dismissSavePrompt = () => {
+        setSavePromptDismissed(true);
+        try { localStorage.setItem(SAVE_PROMPT_DISMISSED_KEY, '1'); } catch { /* private mode */ }
+    };
 
     const history = useChatHistory();
     const historyRef = useRef(history);
@@ -266,6 +287,31 @@ export default function Chat() {
                         }
                     }}
                 />
+            )}
+
+            {showSavePrompt && (
+                <div className="bg-blue-50 border-b border-blue-100 flex-shrink-0">
+                    <div className="max-w-md mx-auto px-4 py-2.5 flex items-center gap-3">
+                        <p className="flex-1 text-[11px] text-blue-900 font-medium leading-snug">
+                            Conectează-te ca să salvezi această conversație și să o regăsești mai târziu.
+                        </p>
+                        <button
+                            onClick={() => loginWithRedirect()}
+                            className="flex items-center gap-1 bg-blue-600 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-sm shadow-blue-100 hover:bg-blue-700 transition-colors"
+                        >
+                            <LogIn size={12} />
+                            Conectează-mă
+                        </button>
+                        <button
+                            onClick={dismissSavePrompt}
+                            className="p-1 text-blue-400 hover:text-blue-700 rounded"
+                            aria-label="Închide acest mesaj"
+                            title="Închide acest mesaj"
+                        >
+                            <X size={14} />
+                        </button>
+                    </div>
+                </div>
             )}
 
             <div className="flex-1 overflow-y-auto">
