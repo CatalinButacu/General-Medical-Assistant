@@ -44,6 +44,16 @@ def _print_report(report, failed_only: bool) -> None:
     for k, v in r.recall_at_k.items():
         print(f"  recall@{k:<2}: {v:.1%}")
     print(f"  MRR:        {r.mrr:.3f}")
+    print("  context_precision (top-K retrieved medicines that match expected ATC/DCI):")
+    for k, v in r.context_precision_at_k.items():
+        print(f"    precision@{k}: {v:.1%}")
+
+    if report.faithfulness is not None:
+        f = report.faithfulness
+        print("\n## Faithfulness (LLM-as-judge, OTC_SAFE cases with retrieval)")
+        print(f"  graded:           {f.n_evaluated}")
+        print(f"  faithful:         {f.faithful_count}")
+        print(f"  faithfulness_rate: {f.faithfulness_rate:.1%}")
 
     print("\n## Latency")
     print(f"  p50: {lat.p50_ms:.0f} ms")
@@ -70,10 +80,15 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--failed-only", action="store_true")
     parser.add_argument("--json", type=Path, help="export full report as JSON")
+    parser.add_argument(
+        "--faithfulness",
+        action="store_true",
+        help="grade OTC_SAFE answers with an LLM-as-judge (adds ~2 Gemini calls per case)",
+    )
     args = parser.parse_args()
 
     sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[attr-defined]
-    report = run()
+    report = run(with_faithfulness=args.faithfulness)
     _print_report(report, failed_only=args.failed_only)
 
     if args.json:
@@ -90,7 +105,17 @@ def main() -> int:
                 "n_evaluated": report.retrieval.n_evaluated,
                 "recall_at_k": report.retrieval.recall_at_k,
                 "mrr": report.retrieval.mrr,
+                "context_precision_at_k": report.retrieval.context_precision_at_k,
             },
+            "faithfulness": (
+                {
+                    "n_evaluated": report.faithfulness.n_evaluated,
+                    "faithful_count": report.faithfulness.faithful_count,
+                    "faithfulness_rate": report.faithfulness.faithfulness_rate,
+                }
+                if report.faithfulness is not None
+                else None
+            ),
             "latency": asdict(report.latency),
             "cases": [asdict(c) for c in report.cases],
         }
