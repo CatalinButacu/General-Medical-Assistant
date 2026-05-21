@@ -295,6 +295,7 @@ class ConversationService:
         profile: Any = None,
         user_id: Optional[str] = None,
         request_id: Optional[str] = None,
+        skip_followups: bool = False,
     ) -> AsyncIterator[ChatStreamEvent]:
         if not history:
             yield ChatStreamEvent(kind="error", payload={"message": "empty history"})
@@ -358,6 +359,7 @@ class ConversationService:
             history=history,
             profile=typed_profile,
             audit=audit,
+            skip_followups=skip_followups,
         ):
             yield ev
         await self._emit_audit(audit)
@@ -407,6 +409,7 @@ class ConversationService:
         history: list[ChatMessageIn],
         profile: Optional[UserProfile],
         audit: AuditRecord,
+        skip_followups: bool = False,
     ) -> AsyncIterator[ChatStreamEvent]:
         user_messages = [m for m in history if m.role == "user"]
         user_turn_count = len(user_messages)
@@ -424,7 +427,17 @@ class ConversationService:
         min_followups = MIN_FOLLOWUPS_WITH_PROFILE if has_profile else MIN_FOLLOWUPS_NO_PROFILE
         strong_match = decision.label == "OTC_SAFE" and decision.confidence >= STRONG_CONFIDENCE
         hit_cap = user_turn_count >= MAX_FOLLOWUPS
-        in_followup_phase = user_turn_count < min_followups or not (strong_match or hit_cap)
+        # User can request to skip remaining followups once they've answered
+        # at least one question. The MIN_FOLLOWUPS gate stays at 1+ to ensure
+        # we never recommend on a single ambiguous opener. Red-flag scan and
+        # intent classification still run before this branch — the skip flag
+        # only short-circuits the 'keep asking until confidence is strong'
+        # loop, never the safety layers.
+        force_skip = skip_followups and user_turn_count >= max(1, min_followups)
+        in_followup_phase = (
+            (user_turn_count < min_followups or not (strong_match or hit_cap))
+            and not force_skip
+        )
 
         if in_followup_phase:
             audit.phase = "followup"

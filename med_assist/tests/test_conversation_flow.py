@@ -81,12 +81,19 @@ class _StubIntent:
         return self._result
 
 
-def _drive(history: list[ChatMessageIn], retrieval, llm, profile=None, intent=None) -> tuple[list, str]:
+def _drive(
+    history: list[ChatMessageIn],
+    retrieval,
+    llm,
+    profile=None,
+    intent=None,
+    skip_followups: bool = False,
+) -> tuple[list, str]:
     convo = ConversationService(retrieval=retrieval, llm=llm, intent=intent)  # type: ignore[arg-type]
 
     async def collect():
         out = []
-        async for ev in convo.stream_turn(history, profile=profile):
+        async for ev in convo.stream_turn(history, profile=profile, skip_followups=skip_followups):
             out.append(ev)
         return out
 
@@ -237,6 +244,51 @@ def _allergy_medicine() -> Medicine:
         has_rcp_text=True,
         has_curated_atc=True,
     )
+
+
+def test_skip_followups_short_circuits_to_recommend_phase():
+    """User who's answered at least one question can tap 'Sari direct la
+    sugestii' to bypass the remaining followup gate. The orchestrator must
+    skip the followup branch even when retrieval confidence stays weak."""
+    retrieval = _StubRetrieval(
+        [_sinupret()],
+        advise_decision=TriageDecision(
+            label="UNCERTAIN", rationale="stub", recommended_action_ro="",
+            confidence=0.1, red_flags=[], medicine_hits=[],
+        ),
+    )
+    llm = _StubLLM()
+    # Two user turns — answered one followup; now asking to skip ahead.
+    history = [
+        ChatMessageIn(role="user", text="durere de cap"),
+        ChatMessageIn(role="assistant", text="De cât timp?"),
+        ChatMessageIn(role="user", text="Vreau sugestii cu ce am spus deja."),
+    ]
+
+    events, _ = _drive(history, retrieval, llm, skip_followups=True)
+
+    done = next(ev for ev in events if ev.kind == "done")
+    assert done.payload["phase"] == "recommend"
+
+
+def test_skip_followups_ignored_on_very_first_turn():
+    """The skip flag must not let a user with zero answered questions bypass
+    the safety gate. user_turn_count must be >= MIN_FOLLOWUPS to skip."""
+    retrieval = _StubRetrieval(
+        [_sinupret()],
+        advise_decision=TriageDecision(
+            label="UNCERTAIN", rationale="stub", recommended_action_ro="",
+            confidence=0.1, red_flags=[], medicine_hits=[],
+        ),
+    )
+    llm = _StubLLM()
+    history = [ChatMessageIn(role="user", text="vreau direct sugestii")]
+
+    events, _ = _drive(history, retrieval, llm, skip_followups=True)
+
+    done = next(ev for ev in events if ev.kind == "done")
+    # First turn → still has to answer at least one question first.
+    assert done.payload["phase"] == "followup"
 
 
 def test_forced_allergy_directive_reaches_llm_system_prompt():

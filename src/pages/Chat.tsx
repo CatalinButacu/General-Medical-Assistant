@@ -124,7 +124,7 @@ export default function Chat() {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
-    const sendMessage = async (queryText?: string) => {
+    const sendMessage = async (queryText?: string, opts?: { skipFollowups?: boolean }) => {
         const text = (queryText ?? inputMessage).trim();
         if (!text || isStreaming) return;
 
@@ -232,7 +232,7 @@ export default function Chat() {
                             setIsOnline(true);
                             setIsStreaming(false);
                         }
-                    }, controller.signal, profileRef.current);
+                    }, controller.signal, profileRef.current, opts?.skipFollowups);
                 } catch (err) {
                     setIsOnline(false);
                     setIsStreaming(false);
@@ -351,14 +351,27 @@ export default function Chat() {
 
             <div className="flex-1 overflow-y-auto">
                 <div className="max-w-md mx-auto px-4 py-6 space-y-4">
-                    {messages.map(message => (
-                        <MessageBubble
-                            key={message.id}
-                            message={message}
-                            setMessages={setMessages}
-                            onSendFollowup={text => sendMessage(text)}
-                        />
-                    ))}
+                    {messages.map((message, idx) => {
+                        // Skip-to-advice only after the user has answered at
+                        // least one followup question — show on the SECOND
+                        // assistant followup bubble. Counted by user turns
+                        // up to (but not including) this assistant bubble.
+                        const userTurnsBefore = messages
+                            .slice(0, idx)
+                            .filter(m => m.id !== 'welcome' && m.sender === 'user').length;
+                        const canSkip = userTurnsBefore >= 2;
+                        return (
+                            <MessageBubble
+                                key={message.id}
+                                message={message}
+                                setMessages={setMessages}
+                                onSendFollowup={text => sendMessage(text)}
+                                onSkipFollowups={canSkip
+                                    ? () => sendMessage('Vreau sugestii cu ce am spus deja.', { skipFollowups: true })
+                                    : undefined}
+                            />
+                        );
+                    })}
 
                     {messages.length === 1 && !isStreaming && (
                         <div className="pt-6 animate-in fade-in duration-700">

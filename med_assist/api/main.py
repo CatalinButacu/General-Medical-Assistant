@@ -230,6 +230,10 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     messages: list[ChatMessage] = Field(..., min_length=1, max_length=20)
     profile: Optional[UserProfile] = None
+    # Frontend's 'Sari direct la sugestii' escape — when true, the orchestrator
+    # exits the followup loop after the first answered question and produces
+    # a low-confidence recommend reply with whatever signal it has.
+    skip_followups: bool = False
 
 
 @app.post("/chat", dependencies=[Depends(rate_limit(chat_limiter, "chat"))])
@@ -245,6 +249,7 @@ async def chat(req: ChatRequest):
                 history,
                 profile=req.profile,
                 request_id=rid if rid != "-" else None,
+                skip_followups=req.skip_followups,
             ):
                 yield f"event: {event.kind}\ndata: {json.dumps(event.payload, ensure_ascii=False)}\n\n"
         except Exception:

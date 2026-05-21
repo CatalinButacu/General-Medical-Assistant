@@ -40,10 +40,12 @@ export function MessageBubble({
     message,
     setMessages,
     onSendFollowup,
+    onSkipFollowups,
 }: {
     message: Message;
     setMessages?: SetMessages;
     onSendFollowup?: (text: string) => void;
+    onSkipFollowups?: () => void;
 }) {
     const isUser = message.sender === 'user';
     const time = new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -66,7 +68,12 @@ export function MessageBubble({
                             <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">{message.text}</p>
                         </div>
                     ) : (
-                        <AssistantMessage message={message} setMessages={setMessages} onSendFollowup={onSendFollowup} />
+                        <AssistantMessage
+                            message={message}
+                            setMessages={setMessages}
+                            onSendFollowup={onSendFollowup}
+                            onSkipFollowups={onSkipFollowups}
+                        />
                     )}
                     <div className={`text-[9px] font-bold uppercase tracking-tight text-gray-300 ${isUser ? 'text-right pr-1' : 'pl-1'}`}>
                         {time}
@@ -81,10 +88,12 @@ function AssistantMessage({
     message,
     setMessages,
     onSendFollowup,
+    onSkipFollowups,
 }: {
     message: Message;
     setMessages?: SetMessages;
     onSendFollowup?: (text: string) => void;
+    onSkipFollowups?: () => void;
 }) {
     const triage = message.triage;
 
@@ -137,6 +146,19 @@ function AssistantMessage({
                 && triage?.label === 'FOLLOWUP'
                 && message.text && (
                     <SuggestedReplies questionText={message.text} onSelect={onSendFollowup} />
+                )}
+            {/* Skip-to-advice escape — only on followup bubbles when the user
+                has already answered at least one question. Forces a low-
+                confidence recommend reply rather than another question. */}
+            {!message.isStreaming
+                && onSkipFollowups
+                && triage?.label === 'FOLLOWUP' && (
+                    <button
+                        onClick={onSkipFollowups}
+                        className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-3 py-1 hover:bg-amber-100 active:scale-95 transition-all"
+                    >
+                        Sari direct la sugestii
+                    </button>
                 )}
             {/* Feedback thumbs only on recommend/explain (citation_valid not null
                 = backend produced a grounded reply; followups & emergencies skip). */}

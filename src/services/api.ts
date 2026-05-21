@@ -141,9 +141,11 @@ export async function streamChat(
     onEvent: ChatEventHandler,
     signal?: AbortSignal,
     profile?: ChatProfilePayload,
+    skipFollowups = false,
 ): Promise<void> {
     const body: Record<string, unknown> = { messages };
     if (profile && Object.keys(profile).length > 0) body.profile = profile;
+    if (skipFollowups) body.skip_followups = true;
     const res = await fetch(endpoint('/chat'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
