@@ -47,8 +47,8 @@ export default function Chat() {
         sender: 'ai',
         timestamp: new Date(),
         text: isApiConfigured()
-            ? 'Salut. Spune-mi ce simptome ai sau ce medicament cauți. Răspund din nomenclatorul ANMDM.'
-            : 'Backend not configured. Set VITE_BACKEND_URL in .env.local.',
+            ? 'Bună. Descrie-mi simptomele sau medicamentul care te interesează — îți răspund pe baza nomenclatorului ANMDM.'
+            : 'Backendul nu este configurat. Setează VITE_BACKEND_URL în .env.local.',
     };
 
     useEffect(() => {

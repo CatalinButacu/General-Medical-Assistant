@@ -82,7 +82,7 @@ export const Composer = forwardRef<HTMLTextAreaElement, ComposerProps>(function 
                 <div className="flex items-center justify-center mt-2 space-x-1.5">
                     <AlertTriangle className="text-amber-500" size={10} />
                     <p className="text-[9px] text-gray-400 font-bold uppercase tracking-tight">
-                        Demo educativ • Verifică recomandările cu farmacistul
+                        Proiect educativ • Confirmă orice recomandare cu farmacistul
                     </p>
                 </div>
             </div>

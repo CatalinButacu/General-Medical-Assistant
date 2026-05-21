@@ -128,7 +128,7 @@ function EmergencyCard({ triage }: { triage: TriageEvent }) {
             <div className="bg-red-600 text-white px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                     <AlertTriangle size={20} />
-                    <span className="font-bold text-sm uppercase tracking-wider">URGENȚĂ</span>
+                    <span className="font-bold text-sm uppercase tracking-wider">Urgență medicală</span>
                 </div>
             </div>
             <div className="p-4 space-y-3">

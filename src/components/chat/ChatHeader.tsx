@@ -34,19 +34,19 @@ export function ChatHeader({
                         <Bot className="text-white" size={18} />
                     </div>
                     <div>
-                        <h1 className="text-base font-bold text-gray-800 leading-none">Asistent Medical</h1>
+                        <h1 className="text-base font-bold text-gray-800 leading-none">Asistent farmacist</h1>
                         <div className="flex items-center mt-1.5">
                             {isOnline === null ? (
                                 <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest flex items-center">
-                                    <Loader2 className="w-2.5 h-2.5 mr-1 animate-spin" /> Conectare…
+                                    <Loader2 className="w-2.5 h-2.5 mr-1 animate-spin" /> Mă conectez…
                                 </span>
                             ) : isOnline ? (
                                 <span className="text-[9px] font-bold text-green-600 uppercase tracking-widest flex items-center bg-green-50 px-1.5 py-0.5 rounded-full">
-                                    <Wifi className="w-2.5 h-2.5 mr-1" /> Online
+                                    <Wifi className="w-2.5 h-2.5 mr-1" /> Disponibil
                                 </span>
                             ) : (
                                 <span className="text-[9px] font-bold text-red-600 uppercase tracking-widest flex items-center bg-red-50 px-1.5 py-0.5 rounded-full">
-                                    <WifiOff className="w-2.5 h-2.5 mr-1" /> Offline
+                                    <WifiOff className="w-2.5 h-2.5 mr-1" /> Indisponibil
                                 </span>
                             )}
                         </div>
