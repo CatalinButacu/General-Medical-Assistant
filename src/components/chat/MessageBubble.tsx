@@ -18,6 +18,7 @@ import {
     Zap,
 } from 'lucide-react';
 import { fetchAlternatives, submitChatFeedback } from '../../services/api';
+import { suggestReplies } from '../../lib/suggestedReplies';
 import type { AlternativeMedicineDTO, IntentEvent, MedicineDTO, Message, RedFlagDTO, TriageEvent } from '../../types';
 
 // Setter type matches React's setMessages signature in Chat.tsx — exported
@@ -128,6 +129,15 @@ function AssistantMessage({
                 && message.citationValid !== null && (
                     <FollowupChips onSelect={onSendFollowup} />
                 )}
+            {/* Suggested-reply chips during the followup phase. Pattern-matched
+                on the LLM's question text so the user can tap a canned answer
+                rather than type. */}
+            {!message.isStreaming
+                && onSendFollowup
+                && triage?.label === 'FOLLOWUP'
+                && message.text && (
+                    <SuggestedReplies questionText={message.text} onSelect={onSendFollowup} />
+                )}
             {/* Feedback thumbs only on recommend/explain (citation_valid not null
                 = backend produced a grounded reply; followups & emergencies skip). */}
             {!message.isStreaming
@@ -149,6 +159,30 @@ function FollowupChips({ onSelect }: { onSelect: (text: string) => void }) {
                     key={chip.label}
                     onClick={() => onSelect(chip.query)}
                     className="text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-100 rounded-full px-3 py-1 hover:bg-blue-100 active:scale-95 transition-all"
+                >
+                    {chip.label}
+                </button>
+            ))}
+        </div>
+    );
+}
+
+function SuggestedReplies({
+    questionText,
+    onSelect,
+}: {
+    questionText: string;
+    onSelect: (text: string) => void;
+}) {
+    const chips = suggestReplies(questionText);
+    if (!chips || chips.length === 0) return null;
+    return (
+        <div className="flex flex-wrap gap-1.5">
+            {chips.map(chip => (
+                <button
+                    key={chip.label}
+                    onClick={() => onSelect(chip.reply)}
+                    className="text-[11px] font-semibold bg-gray-50 text-gray-700 border border-gray-200 rounded-full px-3 py-1 hover:bg-gray-100 hover:border-gray-300 active:scale-95 transition-all"
                 >
                     {chip.label}
                 </button>
