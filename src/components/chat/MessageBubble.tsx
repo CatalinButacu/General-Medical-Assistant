@@ -3,10 +3,12 @@ import {
     AlertTriangle,
     Bot,
     CheckCircle2,
+    Columns,
     ExternalLink,
     Loader2,
     Phone,
     Pill,
+    Rows,
     Shuffle,
     ShieldAlert,
     Sparkles,
@@ -305,17 +307,119 @@ function UncertainAction({ triage }: { triage: TriageEvent }) {
 }
 
 function MedicineGrid({ medicines }: { medicines: MedicineDTO[] }) {
+    // Compare view only earns its keep when there are 2-3 options to weigh.
+    // Single medicine → stack mode is the only useful view.
+    const canCompare = medicines.length >= 2 && medicines.length <= 3;
+    const [mode, setMode] = useState<'stack' | 'compare'>('stack');
+
     return (
         <div className="rounded-2xl bg-white border border-gray-100 shadow-sm overflow-hidden">
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100 px-4 py-2 flex items-center">
-                <Sparkles size={12} className="text-green-600 mr-2" />
-                <span className="font-bold text-[11px] text-green-900 uppercase tracking-wider">
-                    Medicamente · {medicines.length}
-                </span>
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-100 px-4 py-2 flex items-center justify-between">
+                <div className="flex items-center">
+                    <Sparkles size={12} className="text-green-600 mr-2" />
+                    <span className="font-bold text-[11px] text-green-900 uppercase tracking-wider">
+                        Medicamente · {medicines.length}
+                    </span>
+                </div>
+                {canCompare && (
+                    <button
+                        onClick={() => setMode(m => (m === 'stack' ? 'compare' : 'stack'))}
+                        className="inline-flex items-center gap-1 text-[10px] font-bold text-green-700 hover:text-green-900 uppercase tracking-wider"
+                        aria-label={mode === 'stack' ? 'Comutează la comparație alăturată' : 'Comutează la listă'}
+                    >
+                        {mode === 'stack'
+                            ? <><Columns size={11} /> Compară</>
+                            : <><Rows size={11} /> Listă</>}
+                    </button>
+                )}
             </div>
-            <div className="p-3 space-y-2.5">
+            {mode === 'stack' ? (
+                <div className="p-3 space-y-2.5">
+                    {medicines.map(med => (
+                        <MedicineRow key={`${med.trade_name}-${med.atc_code}`} med={med} />
+                    ))}
+                </div>
+            ) : (
+                <MedicineCompareTable medicines={medicines} />
+            )}
+        </div>
+    );
+}
+
+function MedicineCompareTable({ medicines }: { medicines: MedicineDTO[] }) {
+    // Side-by-side comparison for 2-3 OTC options. Renders as a horizontally
+    // scrollable column-per-medicine grid on mobile (no awkward 4-line wraps)
+    // and as a clean 2-3 column table on tablet+.
+    const rxBadge = (status: MedicineDTO['rx_status']) =>
+        status === 'OTC' ? 'bg-green-100 text-green-700'
+            : status === 'MIXED' ? 'bg-amber-100 text-amber-700'
+                : 'bg-red-100 text-red-700';
+    return (
+        <div className="overflow-x-auto">
+            <div
+                className="grid p-3 gap-2"
+                style={{ gridTemplateColumns: `repeat(${medicines.length}, minmax(0, 1fr))` }}
+            >
                 {medicines.map(med => (
-                    <MedicineRow key={`${med.trade_name}-${med.atc_code}`} med={med} />
+                    <div key={`${med.trade_name}-${med.atc_code}`} className="rounded-xl border border-gray-100 bg-gray-50/40 p-3 min-w-0">
+                        <div className="flex items-start justify-between gap-1 mb-1.5">
+                            <div className="font-bold text-[12px] text-gray-800 leading-tight break-words">{med.trade_name}</div>
+                            <span className={`text-[8px] font-bold px-1 py-0.5 rounded uppercase tracking-wider ${rxBadge(med.rx_status)} flex-shrink-0`}>
+                                {med.rx_status}
+                            </span>
+                        </div>
+                        <div className="text-[10px] text-gray-500 mb-2 leading-tight break-words">{med.dci}</div>
+                        <dl className="space-y-1.5 text-[10px]">
+                            <div>
+                                <dt className="text-gray-400 font-bold uppercase tracking-wider text-[8px]">ATC</dt>
+                                <dd className="font-mono text-gray-700">{med.atc_code}</dd>
+                            </div>
+                            <div>
+                                <dt className="text-gray-400 font-bold uppercase tracking-wider text-[8px]">Formă</dt>
+                                <dd className="text-gray-700 capitalize">{med.form.toLowerCase()}</dd>
+                            </div>
+                            <div>
+                                <dt className="text-gray-400 font-bold uppercase tracking-wider text-[8px]">Concentrație</dt>
+                                <dd className="text-gray-700">{med.concentration || '—'}</dd>
+                            </div>
+                            {med.category && (
+                                <div>
+                                    <dt className="text-gray-400 font-bold uppercase tracking-wider text-[8px]">Categorie</dt>
+                                    <dd className="text-blue-700 font-semibold">{med.category}</dd>
+                                </div>
+                            )}
+                            {med.lay_symptoms.length > 0 && (
+                                <div>
+                                    <dt className="text-gray-400 font-bold uppercase tracking-wider text-[8px]">Pentru</dt>
+                                    <dd className="text-gray-600">{med.lay_symptoms.slice(0, 3).join(', ')}</dd>
+                                </div>
+                            )}
+                        </dl>
+                        <div className="flex flex-col gap-1 mt-2 pt-2 border-t border-gray-100">
+                            {med.prospect_url && (
+                                <a
+                                    href={med.prospect_url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-1 text-[9px] font-semibold text-blue-600 hover:text-blue-800"
+                                >
+                                    <ExternalLink size={9} />
+                                    <span>prospect</span>
+                                </a>
+                            )}
+                            {med.rcp_url && (
+                                <a
+                                    href={med.rcp_url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center gap-1 text-[9px] font-semibold text-gray-500 hover:text-blue-700"
+                                >
+                                    <ExternalLink size={9} />
+                                    <span>RCP</span>
+                                </a>
+                            )}
+                        </div>
+                    </div>
                 ))}
             </div>
         </div>
