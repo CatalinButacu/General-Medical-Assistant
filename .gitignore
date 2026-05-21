@@ -69,3 +69,7 @@ med_assist/index/.cache/
 # Eval / CI artifacts
 eval-results.json
 eval-summary.txt
+
+# Claude Code session metadata (worktrees, transcripts, agent state).
+# Never commit — these contain machine-local paths and conversation context.
+.claude/
