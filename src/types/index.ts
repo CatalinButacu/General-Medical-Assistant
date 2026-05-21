@@ -85,6 +85,7 @@ export interface RedFlagDTO {
  * One medicine surfaced by retrieval.
  */
 export interface MedicineDTO {
+    medicine_id: string;
     trade_name: string;
     dci: string;
     form: string;
@@ -96,6 +97,24 @@ export interface MedicineDTO {
     score: number;
     best_chunk_type: string;
     best_chunk_snippet: string;
+    rcp_url: string;
+    prospect_url: string;
+}
+
+/**
+ * Item returned from GET /medicines/{id}/alternatives — same shape as
+ * MedicineDTO but without the retrieval-time fields (score, chunk).
+ */
+export interface AlternativeMedicineDTO {
+    medicine_id: string;
+    trade_name: string;
+    dci: string;
+    form: string;
+    concentration: string;
+    atc_code: string;
+    rx_status: 'OTC' | 'RX' | 'RESTRICTED' | 'MIXED' | 'UNKNOWN';
+    category: string;
+    lay_symptoms: string[];
     rcp_url: string;
     prospect_url: string;
 }

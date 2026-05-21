@@ -187,6 +187,7 @@ class IntentPayload(BaseModel):
 
 
 class MedicineCardPayload(BaseModel):
+    medicine_id: str
     trade_name: str
     dci: str
     form: str
@@ -205,6 +206,7 @@ class MedicineCardPayload(BaseModel):
     def from_medicine_hit(cls, hit: MedicineHit) -> "MedicineCardPayload":
         med = hit.medicine
         return cls(
+            medicine_id=med.id,
             trade_name=med.trade_name,
             dci=med.dci,
             form=med.form,
@@ -224,6 +226,7 @@ class MedicineCardPayload(BaseModel):
     def from_medicine(cls, med: Medicine) -> "MedicineCardPayload":
         """Compact card for the explain branch — no retrieval score."""
         return cls(
+            medicine_id=med.id,
             trade_name=med.trade_name,
             dci=med.dci,
             form=med.form,

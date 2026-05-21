@@ -137,6 +137,44 @@ class RetrievalService:
         """Read-only view of the loaded medicine catalogue."""
         return self._medicines_by_id.values()
 
+    def medicine_by_id(self, medicine_id: str) -> Optional[Medicine]:
+        return self._medicines_by_id.get(medicine_id)
+
+    def alternatives_by_atc(
+        self,
+        medicine_id: str,
+        atc_prefix_len: int = 4,
+        top_k: int = 5,
+        otc_only: bool = True,
+    ) -> list[Medicine]:
+        """Find OTHER medicines sharing the same ATC class.
+
+        ATC is hierarchical: first 1 char is anatomical group, 3rd char is
+        therapeutic, 4th is pharmacological. A 4-char prefix groups
+        therapeutically-equivalent options (e.g. R05CA10 → R05C is
+        'expectorants') which is what 'alternatives' colloquially means.
+        Excludes the source medicine and (by default) RX-only entries so a
+        chat user doesn't see prescription drugs they can't act on.
+        """
+        source = self._medicines_by_id.get(medicine_id)
+        if source is None or not source.atc_code:
+            return []
+        prefix = source.atc_code[:atc_prefix_len]
+        if not prefix:
+            return []
+        out: list[Medicine] = []
+        for med in self._medicines_by_id.values():
+            if med.id == medicine_id:
+                continue
+            if not med.atc_code.startswith(prefix):
+                continue
+            if otc_only and med.rx_status not in ("OTC", "MIXED"):
+                continue
+            out.append(med)
+            if len(out) >= top_k:
+                break
+        return out
+
     @staticmethod
     def _dedup_by_medicine(hits: list[RetrievalHit]) -> list[RetrievalHit]:
         """Keep only the single best-scoring chunk per medicine, preserving order.

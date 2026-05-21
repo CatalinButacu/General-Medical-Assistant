@@ -143,6 +143,51 @@ def manifest() -> dict:
     return get_service().manifest
 
 
+class AlternativeMedicine(BaseModel):
+    medicine_id: str
+    trade_name: str
+    dci: str
+    form: str
+    concentration: str
+    atc_code: str
+    rx_status: str
+    category: str
+    lay_symptoms: list[str]
+    rcp_url: str
+    prospect_url: str
+
+
+@app.get("/medicines/{medicine_id}/alternatives", response_model=list[AlternativeMedicine])
+def medicine_alternatives(medicine_id: str, limit: int = 5) -> list[AlternativeMedicine]:
+    """Return up to `limit` OTC alternatives sharing the same ATC class.
+
+    Used by the chat explain branch to give users a 'show me other options'
+    button without forcing them to type a new query. ATC-class grouping is
+    deterministic — no LLM, no retrieval, just a dict lookup.
+    """
+    svc = get_service()
+    if svc.medicine_by_id(medicine_id) is None:
+        raise HTTPException(status_code=404, detail="medicine not found")
+    capped_limit = max(1, min(limit, 10))
+    alts = svc.alternatives_by_atc(medicine_id, top_k=capped_limit)
+    return [
+        AlternativeMedicine(
+            medicine_id=m.id,
+            trade_name=m.trade_name,
+            dci=m.dci,
+            form=m.form,
+            concentration=m.concentration,
+            atc_code=m.atc_code,
+            rx_status=m.rx_status,
+            category=m.category,
+            lay_symptoms=list(m.lay_symptoms),
+            rcp_url=m.rcp_url,
+            prospect_url=m.prospect_url,
+        )
+        for m in alts
+    ]
+
+
 # ───────────────── /chat — streaming conversational endpoint ─────────────────
 
 

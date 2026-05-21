@@ -1,17 +1,20 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
     AlertTriangle,
     Bot,
     CheckCircle2,
     ExternalLink,
+    Loader2,
     Phone,
     Pill,
+    Shuffle,
     ShieldAlert,
     Sparkles,
     User as UserIcon,
     Zap,
 } from 'lucide-react';
-import type { IntentEvent, MedicineDTO, Message, RedFlagDTO, TriageEvent } from '../../types';
+import { fetchAlternatives } from '../../services/api';
+import type { AlternativeMedicineDTO, IntentEvent, MedicineDTO, Message, RedFlagDTO, TriageEvent } from '../../types';
 
 export function MessageBubble({ message }: { message: Message }) {
     const isUser = message.sender === 'user';
@@ -73,7 +76,81 @@ function AssistantMessage({ message }: { message: Message }) {
             {message.medicines && message.medicines.length > 0 && (
                 <MedicineGrid medicines={message.medicines} />
             )}
+            {/* Explain branch with a single resolved medicine — let users
+                surface 'other options in the same ATC class' without retyping. */}
+            {!message.isStreaming
+                && message.intent?.label === 'MEDICINE_LOOKUP'
+                && message.medicines?.length === 1
+                && message.medicines[0].medicine_id && (
+                    <AlternativesPanel medicineId={message.medicines[0].medicine_id} />
+                )}
         </>
+    );
+}
+
+function AlternativesPanel({ medicineId }: { medicineId: string }) {
+    const [items, setItems] = useState<AlternativeMedicineDTO[] | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [open, setOpen] = useState(false);
+
+    const load = async () => {
+        if (loading) return;
+        if (items !== null) {
+            setOpen(o => !o);
+            return;
+        }
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await fetchAlternatives(medicineId, 5);
+            setItems(data);
+            setOpen(true);
+        } catch {
+            setError('Nu am putut încărca alternativele acum.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="mt-2">
+            <button
+                onClick={load}
+                disabled={loading}
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-blue-700 hover:text-blue-900 disabled:opacity-50"
+            >
+                {loading
+                    ? <><Loader2 size={12} className="animate-spin" /> Caut alternative…</>
+                    : <><Shuffle size={12} /> {open && items?.length ? 'Ascunde alternative' : 'Vezi alternative (aceeași clasă ATC)'}</>}
+            </button>
+            {error && (
+                <p className="mt-1 text-[10px] text-red-600 font-medium">{error}</p>
+            )}
+            {open && items && items.length === 0 && (
+                <p className="mt-1 text-[10px] text-gray-400 italic">
+                    Niciun alt medicament OTC în aceeași clasă terapeutică.
+                </p>
+            )}
+            {open && items && items.length > 0 && (
+                <ul className="mt-2 space-y-1.5">
+                    {items.map(alt => (
+                        <li
+                            key={alt.medicine_id}
+                            className="text-[11px] text-gray-700 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2"
+                        >
+                            <span className="font-bold text-gray-800">{alt.trade_name}</span>
+                            <span className="text-gray-400"> · </span>
+                            <span>{alt.dci}</span>
+                            <span className="text-gray-400"> · </span>
+                            <span className="font-mono text-[10px]">{alt.atc_code}</span>
+                            <span className="text-gray-400"> · </span>
+                            <span className="capitalize">{alt.form.toLowerCase()} {alt.concentration}</span>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
     );
 }
 

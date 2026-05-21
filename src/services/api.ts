@@ -1,6 +1,6 @@
 // Public API client (chat SSE, scan, manifest, health). Auth-required routes live in userApi.ts.
 
-import type { ManifestResponse, ScanResponse } from '../types';
+import type { AlternativeMedicineDTO, ManifestResponse, ScanResponse } from '../types';
 
 export type ChatRole = 'user' | 'assistant' | 'system';
 export interface ChatTurn { role: ChatRole; text: string; }
@@ -105,6 +105,13 @@ export async function checkHealth(): Promise<boolean> {
 export async function getManifest(): Promise<ManifestResponse> {
     const res = await fetch(endpoint('/manifest'), { method: 'GET' });
     return jsonOrThrow<ManifestResponse>(res);
+}
+
+export async function fetchAlternatives(medicineId: string, limit = 5): Promise<AlternativeMedicineDTO[]> {
+    const res = await fetch(endpoint(`/medicines/${encodeURIComponent(medicineId)}/alternatives?limit=${limit}`), {
+        method: 'GET',
+    });
+    return jsonOrThrow<AlternativeMedicineDTO[]>(res);
 }
 
 export async function scanMedicine(imageDataUrl: string): Promise<ScanResponse> {
