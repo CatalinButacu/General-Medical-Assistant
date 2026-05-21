@@ -302,6 +302,7 @@ The active demo runs against **Neon** (serverless Postgres free tier, Frankfurt)
 | `cabinet_items` | medicines the user owns — name, expiration_date, quantity | `id (UUID)` |
 | `chat_sessions` | one row per saved conversation | `id (UUID)` |
 | `chat_messages` | role + text, ordered by `created_at`, FK to session | `id (UUID)` |
+| `triage_audit_log` | one row per `/chat` turn — input + retrieved context + rule fired + output + citation_valid. Forensic / EU AI Act compliance store; see [docs/REGULATORY.md](docs/REGULATORY.md). | `id (UUID)` |
 
 `infra/oci/` is a complete Terraform recipe for the same schema on **OCI Always-Free Ampere VM** — switching is a one-line `DATABASE_URL` change. The network layer applied cleanly in production; the compute half hit Always-Free capacity exhaustion in Frankfurt and was deferred. Kept in repo as IaC capability proof.
 
@@ -311,9 +312,15 @@ The active demo runs against **Neon** (serverless Postgres free tier, Frankfurt)
 
 Plus 6 pure-Python pytest cases for the red-flag scanner — must-fire (chest pain, anaphylaxis, suicidal ideation), must-not-fire (mild cold, routine headache), and Romanian diacritic robustness.
 
+## Regulatory posture
+
+Symptom-triage chatbots recommending OTC drugs are the borderline case Notified Bodies inspect under MDR 2017/745, and MDR-classified software is automatically high-risk under the EU AI Act (full obligations August 2027). The disclaimer below is *not* a defence — function over labelling. Get a written regulatory opinion before marketing this as anything other than an educational artefact. Concrete checklist + the prompt to send a consultant: [docs/REGULATORY.md](docs/REGULATORY.md).
+
+The audit-log half (Article 12 record-keeping) is implemented in the `triage_audit_log` table — every `/chat` turn writes its input, retrieved context, rule fired, and assistant output for forensic replay.
+
 ## Disclaimer
 
-Educational project, not medical advice. Dial **112** for Romanian emergencies.
+Educational reference implementation, not for clinical use. Dial **112** for Romanian emergencies.
 
 ## License
 
