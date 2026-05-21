@@ -339,7 +339,12 @@ export default function Chat() {
             <div className="flex-1 overflow-y-auto">
                 <div className="max-w-md mx-auto px-4 py-6 space-y-4">
                     {messages.map(message => (
-                        <MessageBubble key={message.id} message={message} setMessages={setMessages} />
+                        <MessageBubble
+                            key={message.id}
+                            message={message}
+                            setMessages={setMessages}
+                            onSendFollowup={text => sendMessage(text)}
+                        />
                     ))}
 
                     {messages.length === 1 && !isStreaming && (

@@ -25,7 +25,25 @@ import type { AlternativeMedicineDTO, IntentEvent, MedicineDTO, Message, RedFlag
 // without re-wiring through more props.
 type SetMessages = (updater: (prev: Message[]) => Message[]) => void;
 
-export function MessageBubble({ message, setMessages }: { message: Message; setMessages?: SetMessages }) {
+// Fixed list of post-recommend follow-up chips. Deliberately short and generic
+// so they apply to most OTC recommendations / medicine explanations without
+// needing per-medicine logic.
+const FOLLOWUP_CHIPS: { label: string; query: string }[] = [
+    { label: 'Cât timp?', query: 'Cât timp ar trebui să iau acest medicament?' },
+    { label: 'Cu altceva?', query: 'Pot să-l combin cu alte medicamente?' },
+    { label: 'Efecte adverse?', query: 'Care sunt efectele adverse posibile?' },
+    { label: 'Alternative?', query: 'Există alternative dacă acesta nu funcționează?' },
+];
+
+export function MessageBubble({
+    message,
+    setMessages,
+    onSendFollowup,
+}: {
+    message: Message;
+    setMessages?: SetMessages;
+    onSendFollowup?: (text: string) => void;
+}) {
     const isUser = message.sender === 'user';
     const time = new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -47,7 +65,7 @@ export function MessageBubble({ message, setMessages }: { message: Message; setM
                             <p className="text-sm font-medium leading-relaxed whitespace-pre-wrap">{message.text}</p>
                         </div>
                     ) : (
-                        <AssistantMessage message={message} setMessages={setMessages} />
+                        <AssistantMessage message={message} setMessages={setMessages} onSendFollowup={onSendFollowup} />
                     )}
                     <div className={`text-[9px] font-bold uppercase tracking-tight text-gray-300 ${isUser ? 'text-right pr-1' : 'pl-1'}`}>
                         {time}
@@ -58,7 +76,15 @@ export function MessageBubble({ message, setMessages }: { message: Message; setM
     );
 }
 
-function AssistantMessage({ message, setMessages }: { message: Message; setMessages?: SetMessages }) {
+function AssistantMessage({
+    message,
+    setMessages,
+    onSendFollowup,
+}: {
+    message: Message;
+    setMessages?: SetMessages;
+    onSendFollowup?: (text: string) => void;
+}) {
     const triage = message.triage;
 
     if (triage?.label === 'EMERGENCY') {
@@ -93,6 +119,15 @@ function AssistantMessage({ message, setMessages }: { message: Message; setMessa
                 && message.medicines[0].medicine_id && (
                     <AlternativesPanel medicineId={message.medicines[0].medicine_id} />
                 )}
+            {/* Follow-up question chips — only on recommend/explain phases
+                (same gating as the feedback thumbs / citation badge), and only
+                when the parent provides a send callback. */}
+            {!message.isStreaming
+                && onSendFollowup
+                && message.citationValid !== undefined
+                && message.citationValid !== null && (
+                    <FollowupChips onSelect={onSendFollowup} />
+                )}
             {/* Feedback thumbs only on recommend/explain (citation_valid not null
                 = backend produced a grounded reply; followups & emergencies skip). */}
             {!message.isStreaming
@@ -103,6 +138,22 @@ function AssistantMessage({ message, setMessages }: { message: Message; setMessa
                     <FeedbackButtons message={message} setMessages={setMessages} />
                 )}
         </>
+    );
+}
+
+function FollowupChips({ onSelect }: { onSelect: (text: string) => void }) {
+    return (
+        <div className="flex flex-wrap gap-1.5">
+            {FOLLOWUP_CHIPS.map(chip => (
+                <button
+                    key={chip.label}
+                    onClick={() => onSelect(chip.query)}
+                    className="text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-100 rounded-full px-3 py-1 hover:bg-blue-100 active:scale-95 transition-all"
+                >
+                    {chip.label}
+                </button>
+            ))}
+        </div>
     );
 }
 
