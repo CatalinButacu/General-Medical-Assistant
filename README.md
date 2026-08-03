@@ -26,6 +26,22 @@ rules the LLM cannot override.
 | MRR | 0.71 |
 | p95 retrieval latency | 88 ms |
 
+## 🏆 LLM Zoomcamp Peer Review Checklist
+
+> 🎓 **DataTalksClub LLM Zoomcamp Capstone Project Submission**  
+> Below is the explicit mapping of this project to the 8 official evaluation rubric criteria to simplify peer reviewing:
+
+| # | Evaluation Criteria | Implementation Details & Code Links |
+| :-: | :--- | :--- |
+| **1** | **Problem Description** | Romanian pharmacy-triage chatbot grounded on official ANMDM nomenclator (7,555 drugs). See [Architecture](#architecture). |
+| **2** | **Ingestion Pipeline** | Automated acquisition & enrichment in [`data_acquisition/scripts/06_enrich.py`](data_acquisition/scripts/06_enrich.py) and index builder in [`med_assist/index/builder.py`](med_assist/index/builder.py). |
+| **3** | **Retrieval Flow** | Hybrid search (FAISS dense vector + BM25 keyword search) with Reciprocal Rank Fusion (RRF) and confidence thresholding. See [`med_assist/retrieval/hybrid.py`](med_assist/retrieval/hybrid.py). |
+| **4** | **Retrieval Evaluation** | Automated evaluation CLI (`python -m med_assist.cli.eval`). Results: **Recall@5 = 89.7%**, **MRR = 0.71**. Includes Reranker A/B comparison. See [`med_assist/cli/eval.py`](med_assist/cli/eval.py). |
+| **5** | **LLM Evaluation** | 49-case Romanian golden set evaluation with LLM-as-a-Judge faithfulness scoring (`--faithfulness`). **Triage accuracy = 93.9%**, **0% false-negative emergency rate**. |
+| **6** | **Interface** | Interactive React 19 + Vite SPA frontend ([`src/`](src/)) with FastAPI SSE streaming backend ([`med_assist/api/`](med_assist/api/)). |
+| **7** | **Monitoring & Logging** | PostgreSQL persistence for `chat_sessions`, `chat_messages`, and user health profiles ([`med_assist/db/`](med_assist/db/)) + optional Langfuse tracing ([`med_assist/observability.py`](med_assist/observability.py)). |
+| **8** | **Reproducibility & Docker** | Containerized via [`Dockerfile`](Dockerfile), pinned dependencies in [`requirements.txt`](requirements.txt), and `.env.example` setup. See [Local Development](#local-development). |
+
 ## Architecture
 
 ```
